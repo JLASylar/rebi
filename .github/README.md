@@ -24,7 +24,8 @@ Re:Bi collects no data, has no server and contains no analytics or advertising c
 ## Install
 
 - **Userscript** (Tampermonkey / Violentmonkey): [install `rebi.user.js`](https://raw.githubusercontent.com/JLASylar/rebi/main/dist/rebi.user.js)
-- **Browser extensions** (Chrome, Edge, Firefox, Safari): see the [website](https://rebi.appleking.net/#install).
+- **Microsoft Edge**: [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/gnnfaglbmagigkagbpgpnmagmcmnlich)
+- **Chrome, Firefox, Safari**: coming soon, see the [website](https://rebi.appleking.net/#install).
 
 ## Build
 
