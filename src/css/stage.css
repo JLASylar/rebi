@@ -1,0 +1,367 @@
+/* ══ 播放页舞台 ══
+ *
+ * 播放器铺满视窗宽度、放在页面最上面，页面其余内容排在它下面。适用于影片、番剧、播放列表、课程。
+ *
+ * 做法：
+ *   1. 播放器外框脱离文档流，绝对定位在页面顶部（所以它的各层祖先都不能是定位元素）；
+ *   2. 顶栏用外边距让出舞台的高度——导航栏在下面时是上外边距，在上面时是下外边距；
+ *   3. 播放器容器一直保持 B站自己的「网页全屏」样式（data-screen="web"，脚本维持），
+ *      控制栏于是按全宽排版；但不带 B站网页全屏时的 fixed 定位，页面照常滚动。
+ *
+ * 变量：
+ *   --bga-keep       播放器下方要露出多少页面（脚本按「預留高度」和导航栏位置算好写入）
+ *   --bga-stage-cap  舞台高度上限 = 视窗高度 − 预留（预留最多占视窗高度的四分之一）
+ *   --bga-stage      播放器的实际高度（脚本量出来写入；量到之前等于上限）
+ *   --bga-stage-top  舞台顶边的位置：导航栏在上面时等于导航栏高度
+ */
+
+:root[data-bga~="page-player"] {
+  --bga-stage-cap: calc(100vh - min(var(--bga-keep, 0px), 25vh));
+  --bga-stage: var(--bga-stage-cap);
+  --bga-stage-top: 0px;
+
+  /* ── 顶栏：回到文档流，给舞台让位 ── */
+  #biliMainHeader {
+    position: static;
+    height: auto !important;
+    min-height: var(--bga-nav);
+    margin-block: var(--bga-stage) 0;
+    visibility: visible !important;
+  }
+
+  .bili-header,
+  .bili-header__bar {
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .bili-header {
+    min-height: 0 !important;
+  }
+
+  .bili-header__bar {
+    position: relative !important;
+    height: var(--bga-nav);
+  }
+
+  .center-search-container {
+    min-width: 0;
+  }
+
+  /* ── 播放器外框：铺在页面最上面 ── */
+  :is(#playerWrap, #bilibili-player-wrap) {
+    position: absolute;
+    inset: var(--bga-stage-top) 0 auto;
+    height: auto;
+    min-height: var(--bga-stage);
+    /* 番剧页用上下内边距撑出 16:9 的高度 */
+    padding: 0 !important;
+    background: #000;
+  }
+
+  /* 外框相对整个页面定位：祖先里不能有定位元素 */
+  :is(.video-container-v1, .left-container, .playlist-container--left, .main-container, .plp-player) {
+    position: static !important;
+  }
+
+  /* 番剧页的播放器套在一层绝对定位的容器里 */
+  #bilibili-player-wrap > div {
+    position: static !important;
+  }
+
+  #bilibili-player {
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+  }
+
+  /* 播放器加载出来之前 B站放的骨架图：舞台本身是黑的，不需要 */
+  #bilibili-player-placeholder {
+    display: none;
+  }
+
+  .bpx-player-container {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* B站「网页全屏」时把播放器提到 100000 层盖住整页；这里播放器就在页面里，不需要盖任何东西。
+     降下来以后，顶栏的下拉菜单、投币弹窗、笔记浮窗这些自然在它上面，不用逐个去抬。 */
+  .bpx-player-container[data-screen="web"] {
+    z-index: 1 !important;
+  }
+
+  /* ── 画面高度：宽度占满，高度跟着比例走，但不超过舞台上限 ── */
+  .bpx-player-container:not([data-screen="mini"]):not(:fullscreen) .bpx-player-video-wrap > video {
+    max-height: var(--bga-stage-cap);
+  }
+
+  /* 还没有画面时不知道比例：先按上限占位，免得加载出来页面跳一下 */
+  .bpx-player-container:not([data-screen="mini"]) .bpx-player-video-wrap > video:not([src]) {
+    height: var(--bga-stage-cap);
+  }
+
+  /* ── 控制栏 ── */
+  /* 一直是全宽布局，「宽屏」「网页全屏」两个按钮没有意义 */
+  .bpx-player-ctrl-wide,
+  .bpx-player-ctrl-web {
+    display: none;
+  }
+
+  /* 播放器顶部的标题：B站只在真正的网页全屏 / 全屏时才显示 */
+  .bpx-player-top-left-title,
+  .bpx-player-top-left-music,
+  .bpx-player-top-mask {
+    display: block !important;
+  }
+
+  /* 「N 人正在看」原本在播放器下方的白底栏里，是深色字、右边留 24px；并进控制栏后改成浅色、收紧 */
+  #bilibili-player .bpx-player-video-info {
+    width: auto !important;
+    margin-inline-end: 10px;
+    color: rgb(255 255 255 / 0.9) !important;
+  }
+
+  /* ── 舞台下方的内容区：两侧按边距留白，不限宽 ── */
+  :is(.video-container-v1, .playlist-container, .main-container) {
+    box-sizing: border-box;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding-inline: var(--bga-gutter) !important;
+  }
+
+  :is(.left-container, .playlist-container--left) {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* 左栏里的东西原本按播放器的宽度排，现在跟着左栏走 */
+  .video-info-container,
+  #viewbox_report {
+    height: auto;
+  }
+
+  /* 标题有地方了：完整显示，不截断 */
+  .video-title {
+    white-space: normal !important;
+  }
+
+  /* ── 番剧页 ── */
+  /* 播放器和左栏占同一个格子，左栏原本用上内边距给播放器让位 */
+  .plp-left-wrap,
+  .plp-r {
+    padding-block-start: 0 !important;
+  }
+
+  /* 右栏的吸顶是 B站脚本滚动后才打开的；一开始就打开，免得加载时跳一下 */
+  .plp-r {
+    position: sticky !important;
+  }
+}
+
+/* 弹幕输入栏并进控制栏之后（脚本挂 dm-docked），播放器下面那条空栏收起 */
+:root[data-bga~="page-player"][data-bga~="dm-docked"] .bpx-player-sending-area {
+  display: none;
+}
+
+/* ── 导航栏放在播放器上面 ── */
+:root[data-bga~="page-player"][data-bga~="nav-top"] {
+  --bga-stage-top: var(--bga-nav);
+
+  /* 顶栏在播放器上面时，它的下拉面板会盖到播放器上：让顶栏所在的层在播放器之上 */
+  #biliMainHeader {
+    position: relative;
+    z-index: 100;
+    margin-block: 0 var(--bga-stage);
+  }
+}
+
+/* ── 导航栏吸顶 ── */
+:root[data-bga~="page-player"][data-bga~="nav-sticky"] #biliMainHeader {
+  position: sticky;
+  top: 0;
+  /* 页面里其他元素的层级基本都在 100 以内 */
+  z-index: 100;
+}
+
+/* ── 关闭「自動高度」：播放器始终占满舞台，画面比例不合时留黑边 ── */
+:root[data-bga~="page-player"][data-bga~="fill-stage"]
+  .bpx-player-container:not([data-screen="mini"]):not(:fullscreen)
+  .bpx-player-video-wrap
+  > video {
+  height: var(--bga-stage-cap);
+}
+
+/* ── 显示「N 人正在看 / 弹幕数」 ── */
+:root[data-bga~="page-player"][data-bga~="viewers"] .bpx-player-video-info {
+  display: flex !important;
+}
+
+/* ══ 紧凑控制栏 ══
+ * B站全宽布局下每个图标按钮宽 54px，左右两组各有最小宽度，中间的弹幕栏两侧各留 60px。
+ * 这里把按钮收到图标大小、两组不设最小宽度，省下的地方都给弹幕栏。 */
+:root[data-bga~="page-player"][data-bga~="compact"] {
+  .bpx-player-control-bottom {
+    padding-inline: 20px !important;
+  }
+
+  .bpx-player-control-bottom-left,
+  .bpx-player-control-bottom-right {
+    flex: none !important;
+    min-width: 0 !important;
+    gap: 8px;
+  }
+
+  .bpx-player-control-bottom-left > *,
+  .bpx-player-control-bottom-right > * {
+    flex-shrink: 0 !important;
+  }
+
+  .bpx-player-control-bottom-center {
+    display: flex;
+    flex: 1 1 0 !important;
+    justify-content: center;
+    min-width: 0 !important;
+    padding-inline: 20px !important;
+    overflow: hidden;
+  }
+
+  .bpx-player-ctrl-btn {
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  /* 图标按钮固定 36px。B站的图标是 width:100% 的 SVG，Safari 里按钮宽度自适应时会被它撑到上百像素 */
+  :is(
+    .bpx-player-ctrl-prev,
+    .bpx-player-ctrl-play,
+    .bpx-player-ctrl-next,
+    .bpx-player-ctrl-volume,
+    .bpx-player-ctrl-setting,
+    .bpx-player-ctrl-pip,
+    .bpx-player-ctrl-full
+  ) {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+  }
+
+  /* 悬停时 B站给文字按钮加内边距，会把旁边的按钮挤走 */
+  .bpx-player-control-bottom-right > .bpx-player-ctrl-btn:hover {
+    padding: 0;
+  }
+
+  /* 时间：原本固定 120px 宽、文字左缩进 16px、右边再空 10px。
+     改成跟着内容走（一小时以上的影片不会被截断），数字等宽所以播放中不抖 */
+  .bpx-player-ctrl-time {
+    width: auto !important;
+    min-width: 0 !important;
+    margin-inline: 4px !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bpx-player-ctrl-time-label {
+    position: static !important;
+    width: auto !important;
+    text-indent: 0 !important;
+    white-space: nowrap;
+  }
+
+  /* 点时间后出现的输入框：盖满整个按钮 */
+  .bpx-player-ctrl-time-seek {
+    inset-inline: 0 !important;
+    width: auto !important;
+    padding-inline: 0 !important;
+  }
+
+  /* 弹幕栏：占满中间，但留一点呼吸的空间 */
+  .bpx-player-sending-bar {
+    flex: 1 1 auto;
+    max-width: 90% !important;
+    background: none !important;
+  }
+
+  .bpx-player-video-inputbar {
+    max-width: none !important;
+  }
+}
+
+/* ══ 平时隐藏控制栏：鼠标移到播放器底部才显示，其余时候只留一条细进度线 ══ */
+:root[data-bga~="page-player"][data-bga~="quiet"] .bpx-player-container:not([data-screen="mini"]) {
+  .bpx-player-control-wrap:not(:hover) {
+    :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom, .bpx-player-pbp) {
+      opacity: 0 !important;
+    }
+
+    .bpx-player-shadow-progress-area {
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+  }
+
+  .bpx-player-control-wrap:hover {
+    :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom, .bpx-player-pbp) {
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+  }
+
+  .bpx-player-top-wrap:hover {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ══ 暂停时一直显示控制栏 ══ */
+:root[data-bga~="page-player"][data-bga~="pause-controls"]
+  .bpx-player-container.bpx-state-paused:not([data-screen="mini"]) {
+  :is(.bpx-player-top-wrap, .bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom) {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .bpx-player-shadow-progress-area {
+    visibility: hidden !important;
+  }
+
+  /* 高能进度条：贴在进度条上方 */
+  .bpx-player-pbp {
+    inset: auto 0 100% !important;
+    width: auto !important;
+    margin-block-end: 5px;
+    opacity: 1 !important;
+
+    .bpx-player-pbp-pin {
+      opacity: 1 !important;
+    }
+  }
+}
+
+/* ══ 小窗：宽度和位置由脚本记住（--bga-mini-*） ══ */
+:root[data-bga~="page-player"][data-bga~="mini"] {
+  .bpx-player-container {
+    /* 再窄就看不见了 */
+    min-width: 180px;
+  }
+
+  .bpx-player-container[data-screen="mini"] {
+    inset: auto var(--bga-mini-right, 52px) var(--bga-mini-bottom, 8px) auto !important;
+    width: var(--bga-mini-width, 320px) !important;
+    height: auto !important;
+
+    /* 竖屏影片的小窗别高出视窗：上面留出导航栏和一点间距 */
+    .bpx-player-video-wrap > video {
+      max-height: calc(100vh - var(--bga-nav) - 16px);
+    }
+  }
+
+  /* 小窗左边缘的拖动条，拖它改宽度 */
+  .bga-mini-grip {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 10px;
+    cursor: ew-resize;
+    touch-action: none;
+  }
+}

@@ -1,0 +1,399 @@
+/* ══ 首页主题「大寶鑑」══
+ *
+ * 首页最上面是一整幅海报：B站官方榜单里的影片轮流登场，左下是标题和操作，右下是关注的 UP 主的更新。
+ * 往下卷才是原来的影片列表。
+ *
+ * 做法：不往 B站的页面结构里插东西。把原来的头图（.bili-header__banner）撑到一个视窗高、清空，
+ * 脚本自己的海报层（#bga-hero，挂在 <body> 上）绝对定位盖在它上面；B站的菜单栏固定在最上面。
+ */
+
+:root[data-bga~="home-hero"] {
+  .bili-header__banner {
+    height: max(100vh, 560px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    background: #0b0b0d !important;
+  }
+
+  .bili-header__banner > * {
+    display: none !important;
+  }
+
+  /* 菜单栏：一直固定在顶上，往下卷时收起、往上卷时出现 */
+  .bili-header__bar,
+  .header-channel {
+    transition: transform 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+  }
+
+  .bili-header__bar {
+    position: fixed !important;
+  }
+}
+
+:root[data-bga~="home-hero"][data-bga~="home-nav-hidden"] :is(.bili-header__bar, .header-channel) {
+  transform: translateY(-130px);
+}
+
+/* 还停在海报上时：B站那条固定的分区栏、右边的浮动按钮先不出现，免得盖住海报 */
+:root[data-bga~="home-hero"][data-bga~="home-nav-over-hero"] :is(.header-channel, .palette-button-outer) {
+  display: none !important;
+}
+
+#bga-hero {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  overflow: hidden;
+  height: max(100vh, 560px);
+  background: #0b0b0d;
+  color: #fff;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* ── 海报：两层叠着，换片时交叉淡入 ── */
+  .bga-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.04);
+    transition:
+      opacity 0.9s ease,
+      transform 9s linear;
+  }
+
+  .bga-hero-bg[data-on] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* 上面一层阴影托住菜单栏的白字，下面一层托住标题和卡片 */
+  .bga-hero-shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgb(0 0 0 / 0.62), rgb(0 0 0 / 0.18) 16%, transparent 30%),
+      linear-gradient(to top, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.62) 28%, rgb(0 0 0 / 0.2) 52%, transparent 66%),
+      linear-gradient(to right, rgb(0 0 0 / 0.62), rgb(0 0 0 / 0.24) 36%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── 左下：这一部影片 ── */
+  .bga-hero-left {
+    position: absolute;
+    bottom: 56px;
+    left: max(var(--bga-gutter), 48px);
+    width: min(46vw, 640px);
+  }
+
+  .bga-hero-info {
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
+    animation: bga-hero-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .bga-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    color: rgb(255 255 255 / 0.82);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .bga-hero-meta b {
+    color: var(--bga-accent);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .bga-hero-title {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 10px 0 14px;
+    font-size: clamp(28px, 3.3vw, 52px);
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -0.01em;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .bga-hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12.5px;
+  }
+
+  .bga-hero-tags > * {
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.16);
+    text-shadow: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .bga-hero-tags > a:hover {
+    background: rgb(255 255 255 / 0.3);
+  }
+
+  .bga-hero-desc {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 14px 0 0;
+    color: rgb(255 255 255 / 0.8);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .bga-hero-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 22px;
+    text-shadow: none;
+  }
+
+  .bga-hero-play {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    height: 46px;
+    padding: 0 30px 0 24px;
+    border-radius: 999px;
+    background: #fff;
+    color: #111;
+    font-size: 16px;
+    font-weight: 650;
+    transition:
+      transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2),
+      background 0.15s;
+  }
+
+  .bga-hero-play:hover {
+    background: var(--bga-accent);
+    color: #fff;
+    transform: scale(1.04);
+  }
+
+  .bga-hero-round {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.16);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .bga-hero-round:hover {
+    background: rgb(255 255 255 / 0.32);
+    transform: scale(1.06);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bga-hero-play svg {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  /* 进度点：当前这一颗慢慢填满，填满就换下一部 */
+  .bga-hero-dots {
+    display: flex;
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .bga-hero-dots button {
+    position: relative;
+    overflow: hidden;
+    width: 34px;
+    height: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 0.28);
+    cursor: pointer;
+  }
+
+  .bga-hero-dots button::after {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .bga-hero-dots button[data-on]::after {
+    animation: bga-hero-fill var(--bga-hero-interval, 8s) linear forwards;
+  }
+
+  &[data-paused] .bga-hero-dots button[data-on]::after {
+    animation-play-state: paused;
+  }
+
+  /* ── 右下：关注的更新 ── */
+  .bga-hero-side {
+    position: absolute;
+    right: max(var(--bga-gutter), 48px);
+    bottom: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: min(44vw, 780px);
+  }
+
+  .bga-hero-side-head {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    font-size: 19px;
+    font-weight: 700;
+    text-shadow: 0 1px 10px rgb(0 0 0 / 0.5);
+  }
+
+  .bga-hero-side-head span {
+    flex: 1;
+  }
+
+  .bga-hero-side-head button {
+    width: 34px;
+    height: 34px;
+    margin-left: 8px;
+  }
+
+  /* 卡片一律贴着底边排：图片还没载完时高度会变，不能让整排往下掉 */
+  .bga-hero-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .bga-hero-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bga-hero-card {
+    flex: 0 0 calc((100% - 28px) / 3);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .bga-hero-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.12);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+    object-fit: cover;
+    transition:
+      transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.1),
+      box-shadow 0.22s;
+  }
+
+  .bga-hero-card:hover img {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 12px 30px rgb(0 0 0 / 0.45);
+    transform: translateY(-3px);
+  }
+
+  .bga-hero-card b {
+    display: block;
+    overflow: hidden;
+    margin-top: 9px;
+    font-size: 14px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.6);
+    white-space: nowrap;
+  }
+
+  .bga-hero-card small {
+    display: block;
+    overflow: hidden;
+    margin-top: 2px;
+    color: rgb(255 255 255 / 0.68);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@keyframes bga-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes bga-hero-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* 窄窗口：右边那排卡片收起，只留海报和标题 */
+@media (max-width: 1000px) {
+  #bga-hero .bga-hero-side {
+    display: none;
+  }
+
+  #bga-hero .bga-hero-left {
+    width: calc(100vw - 96px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bga-hero .bga-hero-bg {
+    transform: none;
+    transition: opacity 0.01s;
+  }
+
+  #bga-hero .bga-hero-info {
+    animation: none;
+  }
+}
+
+/* ══ 首页：不要那块大的轮播推荐 ══ */
+:root[data-bga~="home-no-swipe"] .recommended-swipe {
+  display: none !important;
+}

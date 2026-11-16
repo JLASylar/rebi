@@ -1,0 +1,29 @@
+{
+  "name": "Re:Bi",
+  "version": "1.0.0",
+  "author": "蘋果大王",
+  "homepage": "https://space.bilibili.com/5094278",
+  "defaultLocale": "zh_TW",
+  "locales": {
+    "zh_TW": {
+      "name": "Re:Bi 比利重啟",
+      "description": "B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞",
+      "title": "Re:Bi 設定"
+    },
+    "zh_CN": {
+      "name": "Re:Bi 比利重启",
+      "description": "B站宽屏、大宝鉴首页、净化、评论区 IP 属地与性别、用户备注、直播净化、弹幕查询、自定义快捷键、标题屏蔽词",
+      "title": "Re:Bi 设置"
+    },
+    "en": {
+      "name": "Re:Bi",
+      "description": "Bilibili, rebooted: widescreen layout, showcase home, cleanup, comment IP location, user notes, danmaku lookup, custom shortcuts",
+      "title": "Re:Bi settings"
+    },
+    "ja": {
+      "name": "Re:Bi",
+      "description": "ビリビリをもう一度：ワイドレイアウト、ショーケースホーム、クリーンアップ、コメントの IP 所在地と性別、ユーザーメモ、ライブのクリーンアップ、弾幕検索、ショートカット、タイトルの NG ワード",
+      "title": "Re:Bi 設定"
+    }
+  }
+}

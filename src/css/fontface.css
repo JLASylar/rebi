@@ -1,0 +1,20 @@
+/* B站组件自带的字体栈里苹方本来就排第一，鸿蒙字体只是备用。
+   这里把鸿蒙字体的 @font-face 指回系统里的苹方，浏览器就不会再去下载那几个字体文件。
+   @font-face 没法用记号控制，这份样式由脚本整份开关（见 26-typography.js）。 */
+@font-face {
+  font-family: HarmonyOS_Regular;
+  font-weight: 400;
+  src: local("PingFangSC-Regular"), local("PingFang SC");
+}
+
+@font-face {
+  font-family: HarmonyOS_Medium;
+  font-weight: 500;
+  src: local("PingFangSC-Medium"), local("PingFang SC");
+}
+
+@font-face {
+  font-family: HarmonyOS_Bold;
+  font-weight: 600;
+  src: local("PingFangSC-Semibold"), local("PingFang SC");
+}

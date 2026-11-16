@@ -1,0 +1,27 @@
+/* ══ 字体 ══ */
+
+/* 使用系统字体：Mac 上是苹方 / San Francisco，Windows 上是微软雅黑 */
+:root[data-bga~="font"],
+:root[data-bga~="font"] body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "PingFang TC", "Hiragino Sans GB",
+    "Helvetica Neue", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 等宽数字：播放时间、播放量这些数字跳动时不抖 */
+:root[data-bga~="tabular"]
+  :is(
+    .bpx-player-ctrl-time-label,
+    .bpx-player-video-info,
+    .bpx-player-ctrl-playbackrate,
+    .bili-video-card__stats,
+    .bili-video-card__stats--text,
+    .video-info-detail,
+    .view-text,
+    .dm-text,
+    .pubdate-ip,
+    .bili-dyn-time
+  ) {
+  font-variant-numeric: tabular-nums;
+}

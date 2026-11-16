@@ -1,0 +1,12 @@
+/* ══ 通用变量 ══
+ *
+ * 所有规则都以 :root[data-bga~="记号"] 开头：记号由脚本按页面类型和选项挂到 <html> 上，
+ * 记号在规则才生效（见 src/js/12-settings.js 的 flag / reflect）。
+ */
+
+:root {
+  /* B站顶栏的高度 */
+  --bga-nav: 64px;
+  /* 内容区两侧的留白：--bga-gutter-size 是「左右邊距」选项的值，但不超过视窗宽度的 15% */
+  --bga-gutter: min(var(--bga-gutter-size, 30px), 15vw);
+}

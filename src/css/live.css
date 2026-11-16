@@ -1,0 +1,107 @@
+/* ══ 直播间 ══
+ *
+ * 直播间的主体是「播放器卡片（顶部信息条 + 画面 + 礼物栏）」和右边的「聊天卡片（榜单 + 聊天记录 + 输入区）」，
+ * 两张卡片等高。B站自己已经按视窗大小缩放它们，所以这里不改大小，只收起不要的部分，
+ * 并让收起之后的卡片仍然是完整的形状（圆角、等高、间距）。
+ */
+
+/* ── 进场欢迎条、播放器角标 ── */
+:root[data-bga~="live-clean"] :is(#welcome-area-bottom-vm, .web-player-icon-roomStatus) {
+  display: none !important;
+}
+
+/* ── 榜单 ── */
+:root[data-bga~="live-no-rank"] {
+  /* 聊天卡片顶部的高能榜 / 大航海 */
+  #rank-list-vm,
+  #rank-list-ctnr-box {
+    display: none !important;
+  }
+
+  /* 顶部信息条里的人气榜、礼物星球等入口（连同它们占位的外框） */
+  #head-info-vm .right-module-measure:has(.rank-entries),
+  #head-info-vm
+    :is(
+      .rank-entries,
+      .popular-and-hot-rank,
+      .hot-rank-wrap,
+      .gift-planet-entry,
+      .pk-act-rank-entry,
+      .area-rank-entry
+    ) {
+    display: none !important;
+  }
+
+  /* 榜单让出的高度给聊天记录。
+     网页全屏 / 全屏下收起聊天时，B站给 body 加 hide-aside-area 来藏整张聊天卡片，这里不能盖过它 */
+  body:not(.hide-aside-area) #aside-area-vm .chat-history-panel {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0;
+  }
+
+  /* 聊天记录现在顶到卡片上沿了：留一点空 */
+  #chat-history-list {
+    padding-block-start: 10px !important;
+  }
+}
+
+/* ── 礼物栏：网页全屏 / 全屏时 ── */
+:root[data-bga~="live-no-gift-full"] {
+  #full-screen-interactive-wrap,
+  body:is(.player-full-win, .fullscreen-fix) #gift-control-vm,
+  body.player-full-win #web-player__bottom-bar__container .gift-control-section,
+  :fullscreen #web-player__bottom-bar__container .gift-control-section {
+    display: none !important;
+  }
+
+  /* 礼物栏没了以后，全屏弹幕输入条贴到底边 */
+  #fullscreen-danmaku-vm .fullscreen-danmaku {
+    bottom: 6px !important;
+  }
+}
+
+/* ── 礼物栏：平时也收起 ── */
+:root[data-bga~="live-no-gift"] {
+  #gift-control-vm,
+  .gift-control-section {
+    display: none !important;
+  }
+
+  /* 播放器卡片的高度 = 画面（上内边距 56.25%）+ 礼物栏（固定的 84px）。
+     礼物栏收起后把那 84px 也去掉，否则画面下面会留一条空带，右边的聊天卡片也比播放器长出一截 */
+  body:not(.player-full-win, .fullscreen-fix) .fullscreen-container-paddingbox {
+    height: 0 !important;
+  }
+
+  /* 里面是两行的网格（画面 + 礼物栏）：礼物栏那一行收成 0，画面占满；
+     画面成了卡片的底边，补上和卡片顶部一样的圆角 */
+  body:not(.player-full-win, .fullscreen-fix) #fullscreen-container {
+    grid-template-rows: minmax(0, 1fr) 0 !important;
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+/* ── 广告与活动 ── */
+:root[data-bga~="live-no-ads"] {
+  /* 播放器下方的活动轮播、分区页横幅 */
+  .flip-view,
+  .banner-ctn,
+  #bili-live-banner,
+  /* 顶部信息条里的活动入口（连同占位的外框） */
+  #head-info-vm .right-module-measure:has(.activity-entry),
+  #head-info-vm :is(.activity-gather-entry, .activity-entry, .task-box),
+  /* 小橙车、带货卡片 */
+  #shop-popover-vm,
+  .shop-popover,
+  .ecommerce-entry,
+  #hyperlink-card,
+  #link-feed-card-popup,
+  /* 进场活动条、播放器里的活动浮层、侧边栏弹出的推荐 */
+  #activity-welcome-area-vm,
+  .activity-welcome-section,
+  .web-player-inject-wrap .announcement-wrapper,
+  #sidebar-vm .side-bar-popup-cntr {
+    display: none !important;
+  }
+}

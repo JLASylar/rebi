@@ -1,0 +1,107 @@
+/* ══ 用户标记：备注标签、性别、属地胶囊 ══
+ * 这份样式除了挂在页面上，还会注入评论组件的每个 shadow root（页面样式进不去），
+ * 所以这里的规则不带 :root[data-bga] 前缀。 */
+
+.bga-memo {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 9px;
+  background: rgb(251 114 153 / 0.13);
+  color: #fb7299;
+  font:
+    500 12px/18px -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    sans-serif;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.bga-memo:hover {
+  background: rgb(251 114 153 / 0.24);
+}
+
+/* 鼠标移到这条评论的用户栏上才出现的文字按钮：「備註」「拉黑」 */
+.bga-memo-add,
+.bga-cmt-block {
+  margin-left: 6px;
+  color: var(--text3, #9499a0);
+  font:
+    400 12px/18px -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
+}
+
+#info:hover :is(.bga-memo-add, .bga-cmt-block) {
+  opacity: 1;
+}
+
+.bga-memo-add:hover {
+  color: #fb7299;
+}
+
+.bga-cmt-block:hover {
+  color: #ff453a;
+}
+
+.bga-gender {
+  margin-left: 5px;
+  font:
+    600 13px/1 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  cursor: default;
+}
+
+.bga-gender[data-s="m"] {
+  color: #0a84ff;
+}
+
+.bga-gender[data-s="f"] {
+  color: #ff375f;
+}
+
+/* 空间页头图上的胶囊：属地、备注按钮 */
+.bga-pill {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  margin-left: 8px;
+  padding: 0 10px;
+  border-radius: 11px;
+  background: rgb(0 0 0 / 0.32);
+  color: #fff;
+  font:
+    500 12px/22px -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    sans-serif;
+  white-space: nowrap;
+  vertical-align: middle;
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+}
+
+button.bga-pill {
+  border: 0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button.bga-pill:hover {
+  background: rgb(0 0 0 / 0.48);
+}

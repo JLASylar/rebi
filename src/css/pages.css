@@ -1,0 +1,128 @@
+/* ══ 播放页以外的页面：内容区拉宽，两侧按「左右邊距」留白 ══ */
+
+/* ── 首页 ──
+ * B站首页自己用 --layout-padding 这个变量留两侧的白（各分辨率 60～140px 不等），换成我们的边距就行。 */
+:root[data-bga~="page-home"] {
+  --layout-padding: var(--bga-gutter);
+
+  /* 「换一换」原本挂在推荐区右边线外 10px 处；边距收窄后那里放不下，
+     改成只留图标，往边距里挪，离页面右边至少留 10px */
+  .feed-roll-btn {
+    inset-inline: auto 0 !important;
+    transform: translateX(min(var(--bga-gutter) - 10px, 100% + 10px)) !important;
+
+    .roll-btn {
+      aspect-ratio: 1;
+    }
+
+    .roll-btn > span {
+      display: none;
+    }
+
+    .roll-btn > svg {
+      margin-block-end: 0 !important;
+    }
+  }
+
+  /* 第二行起的卡片原本另有上外边距，加上网格间距显得太疏 */
+  :is(.feed-card, .floor-single-card, .bili-video-card) {
+    margin-block-start: 0 !important;
+  }
+}
+
+/* ── 搜索 ── */
+:root[data-bga~="page-search"] .i_wrapper {
+  padding-inline: var(--bga-gutter) !important;
+}
+
+/* ── 动态 ──
+ * 原本是「左栏 228 + 动态 724 + 右栏 318」居中。右栏由脚本并到左栏下面，省下的宽度都给动态。 */
+:root[data-bga~="page-dynamic"] {
+  [class^="bili-dyn-home"] {
+    justify-content: flex-start;
+    margin-inline: var(--bga-gutter);
+
+    main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    aside.right {
+      width: auto;
+    }
+
+    /* 「正在直播」和「话题」两块原本各自吸顶（脚本算好位移写在 transform 里）；
+       右栏并进左栏后它们上下叠在一起，位移不再适用 */
+    :is(.bili-dyn-live-users, .bili-dyn-topic-box) {
+      transform: none !important;
+    }
+
+    .bili-dyn-live-users {
+      position: static !important;
+      margin-block-end: 10px;
+    }
+
+    /* 右栏顶上的活动横幅：栏变窄后放不下 */
+    .bili-dyn-banner {
+      display: none;
+    }
+
+    /* 右下角的浮动按钮：贴着内容区的右边 */
+    .bili-dyn-sidebar {
+      right: var(--bga-gutter);
+      transform: none;
+    }
+  }
+}
+
+/* 侧栏吸顶 */
+:root[data-bga~="page-dynamic"][data-bga~="aside-sticky"] #app aside.left {
+  position: sticky;
+  top: 72px;
+  height: fit-content;
+}
+
+/* 带货动态 */
+:root[data-bga~="no-goods"] .bili-dyn-list__item:has(.bili-dyn-card-goods, .bili-rich-text-module.goods) {
+  display: none !important;
+}
+
+/* ── 个人空间 ──
+ * 新版空间页用 --side-padding 留两侧的白，并限制了最大宽度。 */
+:root[data-bga~="page-space"] :is(.space-main, .nav-bar__main, .header-upinfo) {
+  --side-padding: var(--bga-gutter) !important;
+  max-width: none !important;
+}
+
+/* ── 图文 / 专栏 ──
+ * 原本正文栏固定 708px。拉宽，但封顶在读起来还舒服的宽度：一行太长反而难读。 */
+:root[data-bga~="page-opus"] {
+  --bga-article: min(100vw - 2 * var(--bga-gutter), 1080px);
+
+  .opus-detail {
+    width: var(--bga-article);
+    margin-inline: auto;
+  }
+
+  /* 右侧的点赞 / 收藏按钮：跟着正文栏的右边走，窗口太窄时贴着页面右边 */
+  .right-sidebar-wrap {
+    inset-inline: auto max(8px, (100vw - var(--bga-article)) / 2 - 70px);
+    margin-inline-start: 0;
+  }
+}
+
+/* ── 消息中心 ── */
+:root[data-bga~="page-message"] {
+  #message-navbar {
+    display: none;
+  }
+
+  .container {
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .space-right-top {
+    padding-block-start: 0 !important;
+  }
+}

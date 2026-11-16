@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_name__",
+  "version": "",
+  "description": "__MSG_description__",
+  "homepage_url": "https://rebi.appleking.net/",
+  "permissions": ["storage"],
+  "host_permissions": ["*://*.bilibili.com/*", "*://*.hdslb.com/*"],
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
+  "action": {
+    "default_title": "__MSG_title__",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png" }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.bilibili.com/*"],
+      "exclude_matches": [
+        "*://passport.bilibili.com/*",
+        "*://pay.bilibili.com/*",
+        "*://account.bilibili.com/*",
+        "*://api.bilibili.com/*",
+        "*://app.bilibili.com/*",
+        "*://show.bilibili.com/*",
+        "*://mall.bilibili.com/*",
+        "*://link.bilibili.com/*",
+        "*://member.bilibili.com/*",
+        "*://cm.bilibili.com/*",
+        "*://data.bilibili.com/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": ["*://*.bilibili.com/*"],
+      "exclude_matches": [
+        "*://passport.bilibili.com/*",
+        "*://pay.bilibili.com/*",
+        "*://account.bilibili.com/*",
+        "*://api.bilibili.com/*",
+        "*://app.bilibili.com/*",
+        "*://show.bilibili.com/*",
+        "*://mall.bilibili.com/*",
+        "*://link.bilibili.com/*",
+        "*://member.bilibili.com/*",
+        "*://cm.bilibili.com/*",
+        "*://data.bilibili.com/*"
+      ],
+      "js": ["page.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ],
+  "web_accessible_resources": [{ "resources": ["page.js"], "matches": ["*://*.bilibili.com/*"] }]
+}

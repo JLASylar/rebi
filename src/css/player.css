@@ -1,0 +1,21 @@
+/* ══ 播放器里的小改动 ══ */
+
+/* ── 裁切模式：画面裁掉上下或左右，填满播放器（C 键 / 播放器齿轮菜单）── */
+:root[data-bga~="video-fit"] #bilibili-player .bpx-player-video-wrap > video {
+  object-fit: cover;
+}
+
+/* 齿轮菜单里多了「裁切模式」一行，面板原本写死的高度不够：加上一行的高度（脚本量好写进变量） */
+:root[data-bga~="fit-switch"] .bpx-player-ctrl-setting-box :is(.bui-panel-wrap, .bui-panel-item) {
+  min-height: var(--bga-setting-height) !important;
+}
+
+/* ── 旋转 / 镜像（⇧R / ⇧M）：变换的具体数值由脚本算好写进 --bga-turn ── */
+:root[data-bga~="turned"] #bilibili-player .bpx-player-video-wrap > video {
+  transform: var(--bga-turn) !important;
+}
+
+/* ── 片尾：不显示「相关推荐」那一排影片 ── */
+:root[data-bga~="end-no-related"] .bpx-player-ending-related {
+  display: none !important;
+}

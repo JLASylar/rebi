@@ -1,0 +1,231 @@
+/* ══ 脚本自己的界面：设计变量、提示条、备注弹窗 ══
+ *
+ * 面板、提示条、备注弹窗都带 .bga-ui 这个类，共用下面的变量。
+ *   data-theme  = auto（跟随系统）| light | dark
+ *   data-accent = pink | blue | graphite
+ * 深浅两套颜色用 light-dark() 写在同一处，由 color-scheme 决定取哪个。
+ */
+
+.bga-ui {
+  color-scheme: light dark;
+
+  --bga-accent: #fb7299;
+  --bga-accent-soft: color-mix(in srgb, var(--bga-accent) 14%, transparent);
+  --bga-danger: #ff453a;
+
+  /* 底色：面板、侧栏、卡片（都半透明，后面有毛玻璃） */
+  --bga-bg: light-dark(rgb(255 255 255 / 0.82), rgb(30 31 34 / 0.82));
+  --bga-side: light-dark(rgb(244 245 247 / 0.72), rgb(22 23 26 / 0.72));
+  --bga-card: light-dark(rgb(255 255 255 / 0.9), rgb(44 45 49 / 0.9));
+  /* 文字：正文、次要、说明 */
+  --bga-fg: light-dark(#18191c, #f1f2f3);
+  --bga-fg2: light-dark(#61666d, #b4b8bf);
+  --bga-fg3: light-dark(#9499a0, #7d828a);
+  /* 分隔线、控件底色 */
+  --bga-line: light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.1));
+  --bga-ctl: light-dark(rgb(120 120 128 / 0.16), rgb(120 120 128 / 0.32));
+  --bga-shadow:
+    0 24px 80px light-dark(rgb(0 0 0 / 0.28), rgb(0 0 0 / 0.6)),
+    0 0 0 0.5px light-dark(rgb(0 0 0 / 0.12), rgb(255 255 255 / 0.14));
+
+  --bga-font:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "PingFang SC", "Helvetica Neue", "Segoe UI",
+    "Microsoft JhengHei UI", "Microsoft JhengHei", "Microsoft YaHei UI", sans-serif;
+  --bga-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* 带一点回弹的缓动：出现、开关、滑块都用它 */
+  --bga-spring: cubic-bezier(0.2, 0.9, 0.3, 1.15);
+
+  font-family: var(--bga-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.bga-ui[data-theme="light"] {
+  color-scheme: light;
+}
+
+.bga-ui[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+.bga-ui[data-accent="blue"] {
+  --bga-accent: #00aeec;
+}
+
+.bga-ui[data-accent="graphite"] {
+  --bga-accent: #6e6e73;
+}
+
+/* ── 提示条：右上角的深色毛玻璃胶囊（叠在影片上也看得清，所以不分深浅） ── */
+.bga-toasts {
+  position: fixed;
+  z-index: 2147483647;
+  top: 76px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.bga-toast {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  max-width: 360px;
+  padding: 9px 15px 9px 13px;
+  border-radius: 13px;
+  background: rgb(28 28 30 / 0.84);
+  box-shadow:
+    0 8px 28px rgb(0 0 0 / 0.28),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateX(24px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.35s var(--bga-spring);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* 提示条前面的小圆点：普通 = 强调色，成功 = 绿，警告 = 橙 */
+.bga-toast::before {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bga-accent);
+  content: "";
+  transform: translateY(-1px);
+}
+
+.bga-toast-ok::before {
+  background: #34c759;
+}
+
+.bga-toast-warn::before {
+  background: #ff9f0a;
+}
+
+.bga-toast.bga-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── 备注弹窗 ── */
+#bga-memo-pop {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  width: 264px;
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  border-radius: 14px;
+  background: light-dark(rgb(255 255 255 / 0.86), rgb(40 41 45 / 0.88));
+  box-shadow:
+    0 12px 40px rgb(0 0 0 / 0.28),
+    0 0 0 0.5px rgb(128 128 128 / 0.3);
+  color: var(--bga-fg);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+
+  &:popover-open {
+    animation: bga-memo-in 0.18s var(--bga-spring);
+  }
+
+  .bga-mp-title {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    margin: 0 2px 8px;
+    font-weight: 600;
+  }
+
+  /* 标题右边是这位用户的昵称 */
+  .bga-mp-title span {
+    flex: 1;
+    overflow: hidden;
+    min-width: 0;
+    color: var(--bga-fg3);
+    font-size: 12px;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 32px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    outline: none;
+    background: var(--bga-ctl);
+    color: inherit;
+    font: inherit;
+  }
+
+  input:focus {
+    box-shadow: 0 0 0 2px var(--bga-accent);
+  }
+
+  .bga-mp-btns {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  button {
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 7px;
+    background: var(--bga-ctl);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  button:hover {
+    filter: brightness(0.94);
+  }
+
+  .bga-mp-ok {
+    background: var(--bga-accent);
+    color: #fff;
+    font-weight: 550;
+  }
+
+  .bga-mp-del {
+    margin-right: auto;
+    padding: 0 6px;
+    background: none;
+    color: var(--bga-danger);
+  }
+}
+
+@keyframes bga-memo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bga-toast {
+    transition-duration: 0.01s !important;
+  }
+
+  #bga-memo-pop:popover-open {
+    animation: none;
+  }
+}

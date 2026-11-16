@@ -1,0 +1,41 @@
+// ==UserScript==
+// @name         {{name}}
+// @namespace    https://space.bilibili.com/5094278
+// @version      {{version}}
+// @author       {{author}}
+// @description  {{description}}
+{{localized}}
+// @license      MIT
+// @homepageURL  https://rebi.appleking.net/
+// @supportURL   https://github.com/JLASylar/rebi/issues
+// @downloadURL  https://raw.githubusercontent.com/JLASylar/rebi/main/dist/rebi.user.js
+// @updateURL    https://raw.githubusercontent.com/JLASylar/rebi/main/dist/rebi.user.js
+// @icon         https://www.bilibili.com/favicon.ico
+// @match        http*://*.bilibili.com/*
+// @exclude      https://*.hdslb.com/*
+// @exclude      *://passport.bilibili.com/*
+// @exclude      *://pay.bilibili.com/*
+// @exclude      *://account.bilibili.com/*
+// @exclude      *://api.bilibili.com/*
+// @exclude      *://app.bilibili.com/*
+// @exclude      *://show.bilibili.com/*
+// @exclude      *://mall.bilibili.com/*
+// @exclude      *://link.bilibili.com/*
+// @exclude      *://member.bilibili.com/*
+// @exclude      *://cm.bilibili.com/*
+// @exclude      *://data.bilibili.com/*
+// @connect      api.bilibili.com
+// @connect      hdslb.com
+// @grant        GM_addValueChangeListener
+// @grant        GM_deleteValue
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
+// @grant        GM_setClipboard
+// @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
+// @run-at       document-start
+// @compatible   safari 17.4+
+// @compatible   chrome 120+
+// @compatible   firefox 117+
+// ==/UserScript==

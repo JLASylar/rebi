@@ -1,0 +1,16 @@
+# 这个仓库是对外公开的：默认什么都不收，只收下面点名的。
+# 内部的文档、日志、参考脚本、测试工具、商店素材都不进仓库。
+/*
+!/.gitignore
+!/.github/
+!/LICENSE
+!/src/
+!/tools/
+/tools/*
+!/tools/build.py
+!/tools/make-icons.py
+!/tools/i18n-scan.py
+!/dist/
+/dist/*
+!/dist/rebi.user.js
+.DS_Store

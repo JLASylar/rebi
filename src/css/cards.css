@@ -1,0 +1,135 @@
+/* ══ 影片卡片 ══
+ * 封面工具列（保存、放大、拉黑）、封面大图，以及各种「把卡片藏起来 / 变灰」的标记。
+ * 工具列和大图是脚本自己放在 <body> 末尾的两个浮层，全页共用一份。 */
+
+/* ── 工具列：一颗毛玻璃胶囊，浮在封面左上角 ── */
+#bga-card-tools {
+  position: fixed;
+  z-index: 100000;
+  display: none;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border-radius: 11px;
+  background: rgb(22 22 24 / 0.6);
+  box-shadow:
+    0 6px 20px rgb(0 0 0 / 0.28),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.18);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+}
+
+#bga-card-tools[data-on] {
+  display: flex;
+  animation: bga-tools-in 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes bga-tools-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+}
+
+#bga-card-tools button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+
+#bga-card-tools button[hidden] {
+  display: none;
+}
+
+#bga-card-tools button:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+
+#bga-card-tools button:active {
+  transform: scale(0.92);
+}
+
+#bga-card-tools button[data-busy] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 这位 UP 主已经被拉黑 */
+#bga-card-tools button[data-active] {
+  background: #ff453a;
+}
+
+#bga-card-tools svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* ── 封面大图 ── */
+#bga-card-zoom {
+  position: fixed;
+  z-index: 100001;
+  display: none;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 14px;
+  background: #111;
+  box-shadow:
+    0 24px 80px rgb(0 0 0 / 0.5),
+    0 0 0 0.5px rgb(255 255 255 / 0.2);
+  pointer-events: none;
+}
+
+#bga-card-zoom[data-on] {
+  display: block;
+  animation: bga-zoom-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+@keyframes bga-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+#bga-card-zoom img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bga-card-tools[data-on],
+  #bga-card-zoom[data-on] {
+    animation: none;
+  }
+}
+
+/* ── 标记 ── */
+/* 标题屏蔽词、首页过滤藏掉的卡片 */
+[data-bga-title-hidden],
+[data-bga-feed-hidden] {
+  display: none !important;
+}
+
+/* 刚拉黑的 UP 主的卡片：变灰，但留着，方便点一下撤销 */
+[data-bga-up-blocked] {
+  opacity: 0.22 !important;
+  filter: grayscale(1);
+  transition: opacity 0.2s;
+}

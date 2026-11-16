@@ -1,0 +1,125 @@
+/* ══ 选集浮层 ══
+ *
+ * 宽屏布局下合集 / 分 P 列表在播放器下面，要往下滑才看得到。
+ * 点控制栏的「选集」时，不搬动列表（那是 B站 Vue 管的节点），只用样式把它钉在播放器右侧。
+ * 全屏时页面上的元素进不了全屏层，脚本在播放器里放一份副本（.bga-pod-fs）。
+ *
+ * 记号：pod = 功能开着；pod-open = 浮层正在显示。
+ */
+
+/* 两处浮层共用的玻璃面板 */
+:root[data-bga~="pod-open"] .video-pod,
+.bga-pod-fs {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg1, #fff) 84%, transparent);
+  box-shadow:
+    0 16px 48px rgb(0 0 0 / 0.38),
+    0 0 0 0.5px rgb(128 128 128 / 0.35);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  animation: bga-pod-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+@keyframes bga-pod-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-bga~="pod-open"] .video-pod,
+  .bga-pod-fs {
+    animation: none;
+  }
+}
+
+/* 列表本体：标题栏固定，条目区滚动 */
+:root[data-bga~="pod-open"] .video-pod,
+.bga-pod-fs {
+  .video-pod__header {
+    flex: none;
+  }
+
+  .video-pod__body {
+    flex: 1;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .video-pod__body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .video-pod__body::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgb(128 128 128 / 0.4);
+  }
+}
+
+/* ── 页面上：钉在播放器右上角 ── */
+:root[data-bga~="pod-open"] {
+  .right-container-inner {
+    z-index: 100002 !important;
+  }
+
+  .video-pod {
+    position: fixed !important;
+    z-index: 100002;
+    top: calc(var(--bga-stage-top, 0px) + 12px);
+    right: 12px;
+    width: min(var(--bga-pod-width, 380px), 100vw - 24px);
+    max-height: calc(var(--bga-stage, 100vh) - 84px);
+    margin: 0 !important;
+  }
+}
+
+/* ── 全屏时：播放器里的副本 ── */
+.bga-pod-fs {
+  position: absolute;
+  z-index: 100;
+  top: 12px;
+  right: 12px;
+  width: min(var(--bga-pod-width, 380px), 100% - 24px);
+  max-height: calc(100% - 96px);
+  text-align: left;
+
+  > .video-pod {
+    position: static !important;
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    margin: 0 !important;
+    background: none !important;
+  }
+}
+
+/* 有浮层可用时，不再弹播放器自带的小选集菜单 */
+:root[data-bga~="pod"]:has(.video-pod) .bpx-player-ctrl-eplist-menu-wrap {
+  display: none !important;
+}
+
+/* 播放器没有自带「选集」按钮时（合集影片），脚本补一个 */
+.bga-pod-btn {
+  width: auto !important;
+  padding: 0 6px;
+  color: rgb(255 255 255 / 0.9);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bga-pod-btn:hover {
+  color: #fff;
+}

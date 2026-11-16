@@ -1,0 +1,39 @@
+/* ══ 净化 ══ */
+
+/* ── 全站黑白滤镜（公祭日等）── */
+:root[data-bga~="no-gray"],
+:root[data-bga~="no-gray"] body {
+  filter: none !important;
+}
+
+/* ── 广告 ── */
+:root[data-bga~="no-ads"] {
+  /* 首页推荐里的广告卡片：里面有指向广告跳转域名的链接 */
+  :is(.feed-card, .bili-video-card):has(a[href*="cm.bilibili.com"]) {
+    display: none !important;
+  }
+
+  /* 广告拦截器把广告内容删掉以后，卡片的壳还占着一格：壳是空的、或者壳里只剩一个空 div，就把这一格收起 */
+  .feed-card:has(> .bili-video-card:is(:empty, :has(> div:empty))) {
+    display: none !important;
+  }
+
+  /* 播放页右栏的广告位和推广卡片 */
+  :is(
+    #slide_ad,
+    .ad-report,
+    .ad-floor-exp,
+    .right-bottom-banner,
+    .video-card-ad-small,
+    .video-page-game-card-small,
+    .video-page-special-card-small
+  ) {
+    display: none !important;
+  }
+
+  /* 其他指向广告跳转域名的链接、「检测到广告拦截」提示条 */
+  a[href*="cm.bilibili.com"],
+  .adblock-tips {
+    display: none !important;
+  }
+}

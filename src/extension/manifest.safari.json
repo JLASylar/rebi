@@ -1,0 +1,36 @@
+{
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.bilibili.com/*"
+      ],
+      "exclude_matches": [
+        "*://passport.bilibili.com/*",
+        "*://pay.bilibili.com/*",
+        "*://account.bilibili.com/*",
+        "*://api.bilibili.com/*",
+        "*://app.bilibili.com/*",
+        "*://show.bilibili.com/*",
+        "*://mall.bilibili.com/*",
+        "*://link.bilibili.com/*",
+        "*://member.bilibili.com/*",
+        "*://cm.bilibili.com/*",
+        "*://data.bilibili.com/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}
