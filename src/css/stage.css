@@ -105,6 +105,9 @@
   .bpx-player-video-area > .bpx-player-render-dm-wrap {
     position: absolute;
     inset: 0;
+    /* 这一层现在盖在画面上：自己不接点击，不然点画面就不能播放 / 暂停了。
+       里面真正的弹幕层 B站 自己设了 pointer-events，不受影响 */
+    pointer-events: none;
   }
 
   /* ── 控制栏 ── */

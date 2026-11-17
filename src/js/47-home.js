@@ -43,8 +43,27 @@ defOpt('x.home.interval', 8, {
   tab: 'home',
   group: t('大寶鑑'),
   label: t('海報多久換一張'),
-  hint: t('滑鼠停在海報上時暫停；系統開了「減少動態效果」就不自動換'),
+  hint: t('滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換'),
   unit: t('秒'),
+  step: 1,
+});
+defOpt('x.home.quality', 'original', {
+  tab: 'home',
+  group: t('大寶鑑'),
+  type: 'select',
+  label: t('海報畫質'),
+  hint: t('原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面'),
+  choices: [
+    ['original', t('原圖')],
+    ['compact', t('壓縮')],
+  ],
+});
+defOpt('x.home.count', 16, {
+  tab: 'home',
+  group: t('大寶鑑'),
+  label: t('海報輪流放幾部影片'),
+  hint: t('最少 4 部，最多 30 部'),
+  unit: t('部'),
   step: 1,
 });
 defOpt('x.home.noSwipe', false, {
@@ -53,7 +72,8 @@ defOpt('x.home.noSwipe', false, {
   label: t('不顯示左上角那塊大的輪播推薦'),
 });
 
-const HERO_SIZE = 8;
+/** 海报轮流放几部：按选项，限制在 4–30 */
+const heroSize = () => Math.min(30, Math.max(4, Math.round(Number(val('x.home.count')) || 16)));
 const HERO_ICONS = {
   play: '<path d="M5 2.6v12.8a.6.6 0 00.92.5l10-6.4a.6.6 0 000-1L5.92 2.1A.6.6 0 005 2.6z"/>',
   later: '<circle cx="9" cy="9" r="6.6"/><path d="M9 5.2V9l2.6 1.7"/>',
@@ -77,7 +97,7 @@ const fetchSourceVideos = async (source) => {
   }
   if (source === 'ranking') return (await apiData('/x/web-interface/ranking/v2?rid=0&type=all')).list;
   if (source === 'precious') return (await apiData('/x/web-interface/popular/precious')).list;
-  return (await apiData('/x/web-interface/popular?ps=30&pn=1')).list;
+  return (await apiData('/x/web-interface/popular?ps=50&pn=1')).list;
 };
 
 const secureUrl = (url) => String(url || '').replace(/^(?:https?:)?\/\//, 'https://');
@@ -137,7 +157,7 @@ const fetchFollowCards = async (onlyVideo) => {
 // ── 海报层 ──
 /** 建海报层；返回 { element, destroy } */
 const buildHero = (videos, side) => {
-  const slides = videos.slice(0, HERO_SIZE);
+  const slides = videos.slice(0, heroSize());
   const sourceName = SOURCE_NAMES[val('x.home.source')] || SOURCE_NAMES.popular;
   let current = -1;
 
@@ -207,7 +227,9 @@ const buildHero = (videos, side) => {
       incoming.toggleAttribute('data-on', true);
       outgoing.toggleAttribute('data-on', false);
     };
-    incoming.src = `${secureUrl(video.pic)}@1920w_1080h_1c.webp`;
+    // 压缩档是图床转的 WebP，尺寸不变但压得很狠（实测有的从 879 KB 压到 44 KB），铺满整屏时发糊；默认取原图
+    const cover = secureUrl(video.pic);
+    incoming.src = val('x.home.quality') === 'compact' ? `${cover}@1920w_1080h_1c.webp` : cover;
     renderInfo(video);
     [...dots.children].forEach((dot, at) => dot.toggleAttribute('data-on', at === current));
   }
@@ -227,13 +249,17 @@ const buildHero = (videos, side) => {
     if (event.animationName === 'bga-hero-fill') show(current + 1);
   });
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  // 只有停在「播放」那一排按钮上才暂停：免得正要点的时候换了下一部。停在海报别处照常轮播
   let hovering = false;
   const updatePaused = () =>
     element.toggleAttribute(
       'data-paused',
       hovering || reducedMotion.matches || document.hidden || scrollY > innerHeight * 0.6,
     );
-  element.addEventListener('mouseenter', () => ((hovering = true), updatePaused()));
+  element.addEventListener('mouseover', (event) => {
+    hovering = !!event.target.closest?.('.bga-hero-actions');
+    updatePaused();
+  });
   element.addEventListener('mouseleave', () => ((hovering = false), updatePaused()));
   const abort = new AbortController();
   document.addEventListener('visibilitychange', updatePaused, { signal: abort.signal });
@@ -344,7 +370,7 @@ function setupHome() {
       if (!videos?.length) throw new Error(t('來源是空的'));
       let side = null;
       if (follow) side = { title: t('關注更新'), link: 'https://t.bilibili.com/', cards: follow };
-      else if (sideMode !== 'off') side = { title: t('更多推薦'), cards: videos.slice(HERO_SIZE).map(cardOfVideo) };
+      else if (sideMode !== 'off') side = { title: t('更多推薦'), cards: videos.slice(heroSize()).map(cardOfVideo) };
       hero = buildHero(videos, side?.cards.length ? side : null);
       document.body.append(hero.element);
     } catch (error) {
@@ -360,7 +386,7 @@ function setupHome() {
     }
   };
 
-  for (const key of ['x.home.theme', 'x.home.source', 'x.home.side', 'x.home.interval']) store.on(key, () => mount());
+  for (const key of ['x.home.theme', 'x.home.source', 'x.home.side', 'x.home.interval', 'x.home.count', 'x.home.quality']) store.on(key, () => mount());
   mount();
 
   // Safari 刚打开时，管理器的设置可能晚一点才读得到，而且不一定会发变更通知：

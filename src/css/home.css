@@ -231,16 +231,19 @@
   }
 
   /* 进度点：当前这一颗慢慢填满，填满就换下一部 */
+  /* 影片多的时候每一格变窄，整排不超出左栏 */
   .bga-hero-dots {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     margin-top: 22px;
   }
 
   .bga-hero-dots button {
     position: relative;
     overflow: hidden;
-    width: 34px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 34px;
     height: 4px;
     padding: 0;
     border: 0;
