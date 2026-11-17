@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Re:Bi 比利重啟
 // @namespace    https://space.bilibili.com/5094278
-// @version      1.0.0
+// @version      1.0.1
 // @author       蘋果大王
 // @description  B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞
 // @name:zh-CN   Re:Bi 比利重启
@@ -48,7 +48,7 @@
 (function () {
   'use strict';
 
-  const BUILD = {"name": "Re:Bi", "version": "1.0.0", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
+  const BUILD = {"name": "Re:Bi", "version": "1.0.1", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
 
   const STYLES = {
     base: `:root {
@@ -1570,6 +1570,10 @@
     .bpx-player-container:not([data-screen="mini"]) .bpx-player-video-wrap > video:not([src]) {
       height: var(--bga-stage-cap);
     }
+    .bpx-player-video-area > .bpx-player-render-dm-wrap {
+      position: absolute;
+      inset: 0;
+    }
     .bpx-player-ctrl-wide,
     .bpx-player-ctrl-web {
       display: none;
@@ -1610,6 +1614,12 @@
     .plp-r {
       position: sticky !important;
     }
+  }
+  :root[data-bga~="page-player"][data-bga~="stage-pending"]
+    .bpx-player-container:not([data-screen="mini"]):not(:fullscreen)
+    .bpx-player-video-wrap
+    > video {
+    height: var(--bga-stage-cap);
   }
   :root[data-bga~="page-player"][data-bga~="dm-docked"] .bpx-player-sending-area {
     display: none;
@@ -2737,6 +2747,7 @@
     try {
       await waitFor(locate, '弹幕输入栏', 30000, 200);
     } catch {
+      flag('dm-docked', false);
       return void warn('没找到弹幕输入栏，控制栏保持原样');
     }
 
@@ -2856,8 +2867,31 @@
     );
   };
 
+  const holdStageUntilSized = () => {
+    flag('stage-pending', true);
+    const abort = new AbortController();
+    const release = () => {
+      abort.abort();
+      flag('stage-pending', false);
+    };
+    const check = (event) => {
+      const video = event.target;
+      if (video instanceof HTMLVideoElement && video.videoWidth > 0 && video.closest('#bilibili-player')) release();
+    };
+
+    for (const type of ['loadedmetadata', 'resize', 'playing']) {
+      document.addEventListener(type, check, { capture: true, signal: abort.signal });
+    }
+    setTimeout(release, 10000);
+  };
+
   async function setupStage() {
-    flag('page-player', PLAYER_PATH.test(PATH));
+    const certain = PLAYER_PATH.test(PATH);
+    flag('page-player', certain);
+    if (certain) {
+      flag('dm-docked', true);
+      holdStageUntilSized();
+    }
     reflect('导航栏下置', 'nav-top', true);
     reflect('粘性导航栏', 'nav-sticky');
     reflect('自动高度', 'fill-stage', true);
@@ -2870,7 +2904,10 @@
     store.on('导航栏下置', updateKeep);
 
     await ready();
-    if (!document.getElementById('bilibili-player') || isFestivalPage()) return void flag('page-player', false);
+    if (!document.getElementById('bilibili-player') || isFestivalPage()) {
+      flag('stage-pending', false);
+      return void flag('page-player', false);
+    }
     flag('page-player', true);
 
     const container = await waitFor(
@@ -4666,7 +4703,9 @@
       for (const token of ['home-hero', 'home-nav-hidden', 'home-nav-over-hero']) flag(token, false);
     };
 
-    const mount = async () => {
+    const RETRY_DELAYS = [1200, 4000];
+
+    const mount = async (attempt = 0) => {
       unmount();
       if (val('x.home.theme') !== 'hero') return;
       const mine = generation;
@@ -4689,13 +4728,24 @@
       } catch (error) {
         if (mine !== generation) return;
         warn('大寶鑑载入失败', error);
+        if (attempt < RETRY_DELAYS.length) {
+          setTimeout(() => mine === generation && mount(attempt + 1), RETRY_DELAYS[attempt]);
+          return;
+        }
         unmount();
         toast(t`大寶鑑載入失敗：${error.message || error}`, 'warn');
       }
     };
 
-    for (const key of ['x.home.theme', 'x.home.source', 'x.home.side', 'x.home.interval']) store.on(key, mount);
+    for (const key of ['x.home.theme', 'x.home.source', 'x.home.side', 'x.home.interval']) store.on(key, () => mount());
     mount();
+
+    const ensure = () => {
+      if (val('x.home.theme') === 'hero' && !hasFlag('home-hero')) mount();
+    };
+    for (const delay of [300, 1000, 3000]) setTimeout(ensure, delay);
+    addEventListener('pageshow', ensure);
+    document.addEventListener('visibilitychange', () => document.hidden || ensure());
   }
 
   defOpt('x.dyn.noForward', false, { tab: 'feed', group: t('動態過濾'), label: t('隱藏轉發') });

@@ -324,7 +324,10 @@ function setupHome() {
     for (const token of ['home-hero', 'home-nav-hidden', 'home-nav-over-hero']) flag(token, false);
   };
 
-  const mount = async () => {
+  // 取榜单失败时隔一会儿再试（刚打开浏览器时偶尔第一次拿不到），试完还不行才提示
+  const RETRY_DELAYS = [1200, 4000];
+
+  const mount = async (attempt = 0) => {
     unmount();
     if (val('x.home.theme') !== 'hero') return;
     const mine = generation;
@@ -347,11 +350,25 @@ function setupHome() {
     } catch (error) {
       if (mine !== generation) return;
       warn('大寶鑑载入失败', error);
+      if (attempt < RETRY_DELAYS.length) {
+        // 记号先留着（头图位置保持撑开），到点再试；这期间设置变了会换代，这次重试就作废
+        setTimeout(() => mine === generation && mount(attempt + 1), RETRY_DELAYS[attempt]);
+        return;
+      }
       unmount();
       toast(t`大寶鑑載入失敗：${error.message || error}`, 'warn');
     }
   };
 
-  for (const key of ['x.home.theme', 'x.home.source', 'x.home.side', 'x.home.interval']) store.on(key, mount);
+  for (const key of ['x.home.theme', 'x.home.source', 'x.home.side', 'x.home.interval']) store.on(key, () => mount());
   mount();
+
+  // Safari 刚打开时，管理器的设置可能晚一点才读得到，而且不一定会发变更通知：
+  // 启动后再对几次，设置是大寶鑑而海报没挂上（也没在载入）就补挂
+  const ensure = () => {
+    if (val('x.home.theme') === 'hero' && !hasFlag('home-hero')) mount();
+  };
+  for (const delay of [300, 1000, 3000]) setTimeout(ensure, delay);
+  addEventListener('pageshow', ensure);
+  document.addEventListener('visibilitychange', () => document.hidden || ensure());
 }

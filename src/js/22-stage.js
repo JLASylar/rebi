@@ -108,6 +108,8 @@ const dockDanmakuBar = async (container) => {
   try {
     await waitFor(locate, '弹幕输入栏', 30000, 200);
   } catch {
+    // 一开始就按「会并进去」收起了播放器下面那条栏；并不成就把它放回来
+    flag('dm-docked', false);
     return void warn('没找到弹幕输入栏，控制栏保持原样');
   }
 
@@ -234,9 +236,37 @@ const fixFullscreenButton = (container) => {
   );
 };
 
+/**
+ * 影片有了地址、但画面比例还没读到的那一小段：<video> 会缩回浏览器预设的 150px 高，播放器跟着塌一下再弹回来。
+ * 这段时间挂着 stage-pending，样式表让画面继续按舞台上限占位；读到比例（或等太久）就摘掉。
+ */
+const holdStageUntilSized = () => {
+  flag('stage-pending', true);
+  const abort = new AbortController();
+  const release = () => {
+    abort.abort();
+    flag('stage-pending', false);
+  };
+  const check = (event) => {
+    const video = event.target;
+    if (video instanceof HTMLVideoElement && video.videoWidth > 0 && video.closest('#bilibili-player')) release();
+  };
+  // 媒体事件不冒泡，用捕获在文档上听
+  for (const type of ['loadedmetadata', 'resize', 'playing']) {
+    document.addEventListener(type, check, { capture: true, signal: abort.signal });
+  }
+  setTimeout(release, 10000);
+};
+
 async function setupStage() {
   // 确定是播放页的路径，一开始就挂上记号，样式从第一帧起生效，不闪一下原版面
-  flag('page-player', PLAYER_PATH.test(PATH));
+  const certain = PLAYER_PATH.test(PATH);
+  flag('page-player', certain);
+  if (certain) {
+    // 弹幕输入栏稍后会并进控制栏：播放器下面那条栏从一开始就收起，免得播放器先高一截、并完又矮回去
+    flag('dm-docked', true);
+    holdStageUntilSized();
+  }
   reflect('导航栏下置', 'nav-top', true);
   reflect('粘性导航栏', 'nav-sticky');
   reflect('自动高度', 'fill-stage', true);
@@ -249,7 +279,10 @@ async function setupStage() {
   store.on('导航栏下置', updateKeep);
 
   await ready();
-  if (!document.getElementById('bilibili-player') || isFestivalPage()) return void flag('page-player', false);
+  if (!document.getElementById('bilibili-player') || isFestivalPage()) {
+    flag('stage-pending', false);
+    return void flag('page-player', false);
+  }
   flag('page-player', true);
 
   // 每次都从文档里找：B站重新渲染时会把 #bilibili-player 整个换掉，抓着旧节点会永远等不到

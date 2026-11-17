@@ -101,6 +101,12 @@
     height: var(--bga-stage-cap);
   }
 
+  /* 弹幕层：B站的样式表到位之前它排在画面下面，会把播放器撑高一整屏再缩回来。从一开始就叠在画面上 */
+  .bpx-player-video-area > .bpx-player-render-dm-wrap {
+    position: absolute;
+    inset: 0;
+  }
+
   /* ── 控制栏 ── */
   /* 一直是全宽布局，「宽屏」「网页全屏」两个按钮没有意义 */
   .bpx-player-ctrl-wide,
@@ -161,7 +167,15 @@
   }
 }
 
-/* 弹幕输入栏并进控制栏之后（脚本挂 dm-docked），播放器下面那条空栏收起 */
+/* 影片有了地址、比例还没读到（脚本挂 stage-pending）：继续按上限占位，不缩回 150px */
+:root[data-bga~="page-player"][data-bga~="stage-pending"]
+  .bpx-player-container:not([data-screen="mini"]):not(:fullscreen)
+  .bpx-player-video-wrap
+  > video {
+  height: var(--bga-stage-cap);
+}
+
+/* 弹幕输入栏并进控制栏（脚本挂 dm-docked，播放页一开始就挂，并不成才摘），播放器下面那条空栏收起 */
 :root[data-bga~="page-player"][data-bga~="dm-docked"] .bpx-player-sending-area {
   display: none;
 }
