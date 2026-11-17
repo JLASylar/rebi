@@ -107,3 +107,77 @@ ACTIONS.push({
     });
   },
 });
+
+// ── 诊断信息 ──
+// 版面出问题而开发者看不到现场时用：把当时的页面状态整理成一段文字复制出来。
+// 只有版面信息（记号、尺寸、样式、叠在一起的元素），不含 cookie、账号、设置里的屏蔽词和备注。
+const describeElement = (element) => {
+  const style = getComputedStyle(element);
+  const box = element.getBoundingClientRect();
+  return {
+    el: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}.${String(element.className?.baseVal ?? element.className).slice(0, 60)}`,
+    box: [box.x, box.y, box.width, box.height].map(Math.round).join(','),
+    position: style.position,
+    overflow: style.overflow,
+    display: style.display,
+    opacity: style.opacity,
+    transform: style.transform,
+    font: `${style.fontSize}/${style.lineHeight} ${style.fontFamily.slice(0, 40)}`,
+    pointerEvents: style.pointerEvents,
+    zIndex: style.zIndex,
+  };
+};
+
+const collectDiagnostics = () => {
+  const report = {
+    version: VERSION,
+    target: BUILD.target,
+    agent: navigator.userAgent,
+    page: location.host + location.pathname,
+    viewport: [innerWidth, innerHeight, devicePixelRatio, Math.round(scrollY)].join(','),
+    tokens: document.documentElement.getAttribute(TOKEN_ATTR),
+    htmlClass: document.documentElement.className,
+    visibility: document.visibilityState,
+    styles: ownStyles.map((style) => `${style.dataset.bgaStyle}:${style.isConnected ? 1 : 0}`).join(' '),
+    otherStyles: [...document.querySelectorAll('style:not([data-bga-style])')].length,
+  };
+  const search = document.querySelector('.nav-search-input');
+  if (search) {
+    const box = search.getBoundingClientRect();
+    const chain = [];
+    for (let element = search; element && chain.length < 7; element = element.parentElement) chain.push(describeElement(element));
+    report.search = {
+      placeholder: search.placeholder.length,
+      value: search.value.length,
+      chain,
+      // 输入框中间偏上那一点从上到下叠着哪些元素（截断时多半是有东西盖在这里）
+      stackUpper: document.elementsFromPoint(box.x + 40, box.y + 5).slice(0, 8).map(describeElement),
+      stackLower: document.elementsFromPoint(box.x + 40, box.y + box.height - 4).slice(0, 4).map((element) => describeElement(element).el),
+      children: [...(search.parentElement?.children || [])].map(describeElement),
+    };
+  }
+  const player = document.querySelector('#bilibili-player .bpx-player-container');
+  if (player) {
+    const box = player.getBoundingClientRect();
+    report.player = {
+      container: describeElement(player),
+      screen: player.dataset.screen,
+      stackCenter: document.elementsFromPoint(box.x + box.width / 2, box.y + box.height * 0.4).slice(0, 6).map((element) => describeElement(element).el),
+    };
+  }
+  const hero = document.getElementById('bga-hero');
+  if (hero) report.hero = { ...describeElement(hero), paused: hero.hasAttribute('data-paused'), slides: hero.querySelectorAll('.bga-hero-dots button').length };
+  return JSON.stringify(report);
+};
+
+ACTIONS.push({
+  tab: 'general',
+  group: t('設定面板'),
+  label: t('複製診斷資訊'),
+  hint: t('版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容'),
+  button: t('複製'),
+  run() {
+    toast(copyNow(collectDiagnostics()) ? t('診斷資訊已複製') : t('複製失敗'), 'ok');
+  },
+});
+
