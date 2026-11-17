@@ -6,6 +6,7 @@
 function boot() {
   const BOOT_STYLES = ['base', 'stage', 'pod', 'pages', 'typography', 'clean', 'player', 'live', 'cards', 'home', 'ui'];
   for (const name of BOOT_STYLES) addStyle(STYLES[name], name);
+  guardStyles();
 
   safe(setupNetwork, '网络');
   safe(setupTypography, '字体');

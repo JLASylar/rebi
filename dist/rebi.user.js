@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Re:Bi 比利重啟
 // @namespace    https://space.bilibili.com/5094278
-// @version      1.0.1
+// @version      1.0.3
 // @author       蘋果大王
 // @description  B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞
 // @name:zh-CN   Re:Bi 比利重启
@@ -48,7 +48,7 @@
 (function () {
   'use strict';
 
-  const BUILD = {"name": "Re:Bi", "version": "1.0.1", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
+  const BUILD = {"name": "Re:Bi", "version": "1.0.3", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
 
   const STYLES = {
     base: `:root {
@@ -2044,7 +2044,8 @@
 
   const LOCALE_PREFIX = /^\/(?:zh-Hans|zh-Hant|en|ja|th|ar|pt|es|id|ms|ru|tr|vi)(?=\/|$)/;
   const HOST = location.host;
-  const PATH = location.pathname.replace(LOCALE_PREFIX, '') || '/';
+
+  const PATH = location.pathname.replace(LOCALE_PREFIX, '').replace(/^\/index\.html?$/, '/') || '/';
 
   const ON_WWW = HOST === 'www.bilibili.com';
   const PAGE = {
@@ -2285,12 +2286,31 @@
     return document.importNode(new DOMParser().parseFromString(source, 'image/svg+xml').documentElement, true);
   };
 
+  const ownStyles = [];
   const addStyle = (css, name = '') => {
     const style = document.createElement('style');
     style.dataset.bgaStyle = name;
     style.textContent = css;
+    ownStyles.push(style);
     onRoot((root) => (document.head || root).appendChild(style));
     return style;
+  };
+
+  const restoreStyles = () => {
+    const root = document.documentElement;
+    if (!root) return;
+    for (const style of ownStyles) {
+      if (!style.isConnected) (document.head || root).appendChild(style);
+    }
+    const wanted = [...tokens].join(' ');
+    if (root.getAttribute(TOKEN_ATTR) !== wanted) root.setAttribute(TOKEN_ATTR, wanted);
+  };
+  const guardStyles = () => {
+    new MutationObserver(restoreStyles).observe(document, { childList: true });
+    document.addEventListener('DOMContentLoaded', restoreStyles);
+    addEventListener('load', restoreStyles);
+    addEventListener('pageshow', restoreStyles);
+    for (const delay of [0, 100, 400, 1500, 4000]) setTimeout(restoreStyles, delay);
   };
 
   const toggleStyle = (css, name = '') => {
@@ -7434,6 +7454,7 @@
   function boot() {
     const BOOT_STYLES = ['base', 'stage', 'pod', 'pages', 'typography', 'clean', 'player', 'live', 'cards', 'home', 'ui'];
     for (const name of BOOT_STYLES) addStyle(STYLES[name], name);
+    guardStyles();
 
     safe(setupNetwork, '网络');
     safe(setupTypography, '字体');

@@ -27,12 +27,35 @@ const svgIcon = (inner, size = 16) => {
 
 // ── 样式 ──
 /** 挂一个 <style>。document-start 时连 <html> 都可能还没有，等它出现再挂 */
+const ownStyles = [];
 const addStyle = (css, name = '') => {
   const style = document.createElement('style');
   style.dataset.bgaStyle = name;
   style.textContent = css;
+  ownStyles.push(style);
   onRoot((root) => (document.head || root).appendChild(style));
   return style;
+};
+/**
+ * 样式表和 <html> 上的记号被页面弄丢了就补回去。
+ * Safari 的脚本管理器在页面刚打开时注入得特别早，那时挂上去的东西有时会随着文档重建一起消失：
+ * 脚本还在跑、面板也打得开，但版面完全是原样。载入的几个节点上各查一次，另外盯着 <html> 有没有被换掉。
+ */
+const restoreStyles = () => {
+  const root = document.documentElement;
+  if (!root) return;
+  for (const style of ownStyles) {
+    if (!style.isConnected) (document.head || root).appendChild(style);
+  }
+  const wanted = [...tokens].join(' ');
+  if (root.getAttribute(TOKEN_ATTR) !== wanted) root.setAttribute(TOKEN_ATTR, wanted);
+};
+const guardStyles = () => {
+  new MutationObserver(restoreStyles).observe(document, { childList: true });
+  document.addEventListener('DOMContentLoaded', restoreStyles);
+  addEventListener('load', restoreStyles);
+  addEventListener('pageshow', restoreStyles);
+  for (const delay of [0, 100, 400, 1500, 4000]) setTimeout(restoreStyles, delay);
 };
 /**
  * 可开关的样式表，给没法用记号控制的规则用（@font-face 等）。

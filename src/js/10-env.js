@@ -17,7 +17,8 @@ const VERSION = BUILD.version;
 // 国际版的路径带语言前缀（/zh-Hant/video/…），判断页面类型前先去掉
 const LOCALE_PREFIX = /^\/(?:zh-Hans|zh-Hant|en|ja|th|ar|pt|es|id|ms|ru|tr|vi)(?=\/|$)/;
 const HOST = location.host;
-const PATH = location.pathname.replace(LOCALE_PREFIX, '') || '/';
+// 首页还有一个旧网址 /index.html（旧书签、浏览器的常用网站里常见），B站不会把它转到 /，当成同一页
+const PATH = location.pathname.replace(LOCALE_PREFIX, '').replace(/^\/index\.html?$/, '/') || '/';
 
 const ON_WWW = HOST === 'www.bilibili.com';
 const PAGE = {
