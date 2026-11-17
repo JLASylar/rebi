@@ -24,8 +24,16 @@
     }
   }
 
-  /* 第二行起的卡片原本另有上外边距，加上网格间距显得太疏 */
-  :is(.feed-card, .floor-single-card, .bili-video-card) {
+  /* 右下角那一列浮动按钮（刷新内容、回到顶部…）原本也挂在内容区右边线外 10px 处，
+     边距收窄后有一半在视窗外面。改成整个露出来、离视窗右边留 8px
+     （B站另外把它往右推了 10px，所以这里写 18px；实测 1440 宽时落在 1392–1432） */
+  .palette-button-wrap {
+    inset-inline: auto 18px !important;
+  }
+
+  /* 第二行起的卡片原本另有上外边距，加上网格间距显得太疏。
+     B站陆续换了几种卡片类名（bili-feed-card 是后来才有的），漏掉哪一种，那一种就会比同一排的矮一截 */
+  :is(.feed-card, .bili-feed-card, .floor-single-card, .bili-video-card, .load-more-anchor) {
     margin-block-start: 0 !important;
   }
 }

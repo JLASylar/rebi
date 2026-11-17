@@ -71,6 +71,12 @@ defOpt('x.home.noSwipe', false, {
   group: t('影片列表'),
   label: t('不顯示左上角那塊大的輪播推薦'),
 });
+defOpt('x.home.noFloor', false, {
+  tab: 'home',
+  group: t('影片列表'),
+  label: t('不顯示直播、番劇等推薦卡'),
+  hint: t('影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片'),
+});
 
 /** 海报轮流放几部：按选项，限制在 4–30 */
 const heroSize = () => Math.min(30, Math.max(4, Math.round(Number(val('x.home.count')) || 16)));
@@ -336,6 +342,7 @@ const watchNavScroll = (signal) => {
 
 function setupHome() {
   reflect('x.home.noSwipe', 'home-no-swipe');
+  reflect('x.home.noFloor', 'home-no-floor');
   if (!PAGE.home || !IS_TOP) return;
 
   let hero = null;

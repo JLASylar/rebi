@@ -152,6 +152,8 @@
   "診斷資訊已複製": "Diagnostics copied",
   "影片列表": "Video list",
   "不顯示左上角那塊大的輪播推薦": "Hide the large carousel at the top left",
+  "不顯示直播、番劇等推薦卡": "Hide live and series recommendation cards",
+  "影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片": "The cards in the video list that carry a badge such as Live, Anime or Variety",
   "{0} 次播放": "{0} views",
   "{0} 讚": "{0} likes",
   "稍後再看": "Watch later",

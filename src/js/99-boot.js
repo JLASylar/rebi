@@ -11,6 +11,7 @@ function boot() {
   safe(setupNetwork, '网络');
   safe(setupTypography, '字体');
   safe(setupLiveTextGuard, '全屏点击');
+  if (IS_TOP) safe(setupSearchRelayout, '搜索框重排');
   if (IS_TOP) safe(setupWide, '宽屏');
   safe(setupClean, '净化');
   safe(setupComments, '评论区');

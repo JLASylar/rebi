@@ -400,3 +400,9 @@
 :root[data-bga~="home-no-swipe"] .recommended-swipe {
   display: none !important;
 }
+
+/* ══ 首页：不要影片列表里夹着的分区推荐卡（直播、番剧、综艺…）和直播中的卡 ══ */
+:root[data-bga~="home-no-floor"] :is(.floor-single-card, .feed-card:has(.bili-live-card), .bili-video-card:has(.bili-live-card)) {
+  display: none !important;
+}
+
