@@ -22,8 +22,9 @@ Re:Bi 不收集任何資料，沒有伺服器，也不含統計或廣告程式�
 
 ## 安裝
 
+- **Chrome**：[Chrome 線上應用程式商店](https://chromewebstore.google.com/detail/pbgbghbolgmdjbmahdnfnpdijoenpfaj)
 - **Microsoft Edge**：[Edge 擴充功能商店](https://microsoftedge.microsoft.com/addons/detail/gnnfaglbmagigkagbpgpnmagmcmnlich)
-- **Chrome、Firefox、Safari**：即將上架，見[網站的安裝區](https://rebi.appleking.net/#install)。
+- **Firefox、Safari**：即將上架，見[網站的安裝區](https://rebi.appleking.net/#install)。
 - **油猴腳本**（Tampermonkey／Violentmonkey）：[安裝 `rebi.user.js`](https://raw.githubusercontent.com/JLASylar/rebi/main/dist/rebi.user.js)，或到 [Greasy Fork](https://greasyfork.org/scripts/605751)。
 
 ## 建置
