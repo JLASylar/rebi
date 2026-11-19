@@ -1,6 +1,6 @@
 {
   "name": "Re:Bi",
-  "version": "1.0.13",
+  "version": "1.1.0",
   "author": "蘋果大王",
   "homepage": "https://space.bilibili.com/5094278",
   "defaultLocale": "zh_TW",
@@ -17,7 +17,7 @@
     },
     "en": {
       "name": "Re:Bi",
-      "description": "Bilibili, rebooted: widescreen layout, showcase home, cleanup, comment IP location, user notes, danmaku lookup, custom shortcuts",
+      "description": "Bilibili, rebooted: widescreen layout, showcase home, cleanup, comment IP location, user notes, custom shortcuts",
       "title": "Re:Bi settings"
     },
     "ja": {

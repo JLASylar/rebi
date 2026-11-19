@@ -1,0 +1,1131 @@
+/* ══ Re:Bi 导航栏：双点方砖 ══
+ *
+ * 整条导航栏是脚本自己的节点（.bga-nav，见 23-nav.js），B站原来那条在这里藏起来。
+ * 造型取自 Re:Bi 的图示——黑色圆角方块，上面一粉一白两个圆点：
+ *   · 每组入口是一块圆角方砖（13px），里面的按钮是小一号的方块（9px），全站同一个规格；
+ *   · 粉色圆点是记号：滑鼠移到哪个按钮、哪个是当前页面、哪里有新东西，就点在它的右上角。
+ *
+ * 结构：.bga-nav > .bga-nav-tile ×3（左 / 搜索 / 右）+ 两个浮层 .bga-nav-pop（更多、个人卡片）。
+ *
+ * 记号：
+ *   nav-own    功能开着（document-start 就挂上，原导航栏从第一帧起不显示）
+ *   nav-clear  首页最上面：导航栏叠在头图上，不要底色，方砖改成深色半透明
+ * 类：.bga-closed 方砖收起；.bga-up 导航栏在视窗下半，浮层朝上开；.bga-on 当前页面；.bga-in 已登录
+ */
+
+/* ── 藏起 B站原来的导航栏（留着它占的位置，首页的头图也留着）── */
+:root[data-bga~="nav-own"] :is(.bili-header__bar, .link-navbar, #internationalHeader .mini-header) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 播放页（舞台版面）：原导航栏在文档流里，由我们的那条接替它的位置 */
+:root[data-bga~="nav-own"][data-bga~="page-player"] #biliMainHeader {
+  display: none !important;
+}
+
+/* 搜索页：页面自己的大搜索框不要了，用导航栏里的；下面的内容跟着上提 */
+:root[data-bga~="nav-own"][data-bga~="page-search"] .search-input {
+  display: none !important;
+}
+
+.bga-nav {
+  --bga-pink: var(--brand_pink, #fb7299);
+  --bga-ink: var(--text1, #18191c);
+  --bga-dim: var(--text3, #9499a0);
+  --bga-page: var(--bg1, #fff);
+  --bga-tile: color-mix(in srgb, var(--bga-ink) 6%, var(--bga-page));
+  --bga-tile-hover: color-mix(in srgb, var(--bga-ink) 13%, var(--bga-page));
+  --bga-line: color-mix(in srgb, var(--bga-ink) 11%, transparent);
+  --bga-ring: inset 0 0 0 1px var(--bga-line), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --bga-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --bga-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
+
+  position: fixed;
+  z-index: 1002;
+  inset: 0 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--bga-nav, 64px);
+  padding: 0 16px;
+  background: var(--bga-page);
+  color: var(--bga-ink);
+  font-size: 14px;
+  line-height: 1.4;
+  transition: background 0.3s;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ── 播放页：留在文档流里，接替 #biliMainHeader（规则对应 stage.css 里顶栏那几条）── */
+:root[data-bga~="page-player"] .bga-nav {
+  position: relative;
+  inset: auto;
+  z-index: 100;
+  margin-block: var(--bga-stage) 0;
+}
+
+:root[data-bga~="page-player"][data-bga~="nav-top"] .bga-nav {
+  margin-block: 0 var(--bga-stage);
+}
+
+:root[data-bga~="page-player"][data-bga~="nav-sticky"] .bga-nav {
+  position: sticky;
+  top: 0;
+}
+
+/* ── 首页最上面：叠在头图上 ── */
+:root[data-bga~="nav-clear"] .bga-nav {
+  --bga-ink: #fff;
+  --bga-dim: rgb(255 255 255 / 0.7);
+  --bga-tile: rgb(0 0 0 / 0.36);
+  --bga-tile-hover: rgb(0 0 0 / 0.56);
+  --bga-line: rgb(255 255 255 / 0.16);
+  background: transparent;
+
+  .bga-nav-tile {
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+  }
+}
+
+/* ── 方砖 ── */
+.bga-nav-tile {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  margin: 0;
+  padding: 0 5px;
+  border-radius: 13px;
+  background: var(--bga-tile);
+  box-shadow: var(--bga-ring);
+  transition:
+    background 0.2s,
+    box-shadow 0.3s var(--bga-ease);
+}
+
+/* ── 方砖里的小方块：所有按钮、链接都是它 ── */
+.bga-nav-t {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 9px;
+  white-space: nowrap;
+  transition:
+    background 0.18s,
+    transform 0.3s var(--bga-spring);
+}
+
+.bga-nav-i {
+  width: 34px;
+  padding: 0;
+}
+
+.bga-nav-t:hover,
+.bga-nav-t.bga-on,
+.bga-nav-t[aria-expanded="true"] {
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-t:active {
+  transform: scale(0.94);
+}
+
+/* 粉点：悬停、当前页面 */
+.bga-nav-t::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bga-pink);
+  opacity: 0;
+  transform: scale(0);
+  transition:
+    transform 0.32s var(--bga-spring),
+    opacity 0.12s;
+  pointer-events: none;
+}
+
+.bga-nav-t:is(:hover, .bga-on, [aria-expanded="true"])::after {
+  opacity: 1;
+  transform: none;
+}
+
+/* 未读数、新内容的点：占着粉点的位置，有它的时候不再画悬停的粉点 */
+.bga-nav-badge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--bga-pink);
+  color: #1a0d12;
+  font: 700 10px/15px ui-monospace, "SF Mono", Menlo, monospace;
+  text-align: center;
+  animation: bga-pop-dot 0.4s var(--bga-spring) backwards;
+}
+
+.bga-nav-badge.bga-nav-dot {
+  top: 4px;
+  right: 4px;
+  min-width: 0;
+  width: 6px;
+  height: 6px;
+  padding: 0;
+}
+
+.bga-nav-t:has(.bga-nav-badge:not([hidden]))::after {
+  display: none;
+}
+
+/* ── 收起 / 展开 ── */
+.bga-nav-fold {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 520px;
+  transition:
+    max-width 0.5s var(--bga-ease),
+    opacity 0.28s,
+    transform 0.5s var(--bga-ease);
+}
+
+.bga-closed .bga-nav-fold {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bga-nav-left.bga-closed .bga-nav-fold {
+  transform: translateX(-8px);
+}
+
+.bga-nav-right.bga-closed .bga-nav-fold {
+  transform: translateX(8px);
+}
+
+.bga-nav-arrow {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 34px;
+  padding: 0;
+  border-radius: 6px;
+  color: var(--bga-dim);
+  opacity: 0.7;
+  transition:
+    opacity 0.18s,
+    background 0.18s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.5s var(--bga-spring);
+  }
+}
+
+.bga-nav-arrow:hover {
+  background: var(--bga-tile-hover);
+  opacity: 1;
+}
+
+/* 箭头永远指向「按了以后入口往哪边走」：左砖收向左，右砖收向右 */
+.bga-nav-left.bga-closed .bga-nav-arrow svg,
+.bga-nav-right:not(.bga-closed) .bga-nav-arrow svg {
+  transform: scaleX(-1);
+}
+
+/* ── 搜索 ── */
+.bga-nav-search {
+  flex: 1 1 0;
+  min-width: 120px;
+  padding-left: 14px;
+  cursor: text;
+}
+
+.bga-nav-search:hover {
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-search:focus-within {
+  background: var(--bga-page);
+  box-shadow:
+    inset 0 0 0 1.5px var(--bga-pink),
+    0 0 0 4px color-mix(in srgb, var(--bga-pink) 16%, transparent);
+}
+
+:root[data-bga~="nav-clear"] .bga-nav-search:focus-within {
+  background: rgb(0 0 0 / 0.62);
+}
+
+.bga-nav-input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bga-nav-input::placeholder {
+  color: var(--bga-dim);
+}
+
+.bga-nav-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* ── 头像 ── */
+.bga-nav-face {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-me {
+  width: auto;
+  padding: 0 2px;
+}
+
+.bga-nav-me.bga-in .bga-nav-login,
+.bga-nav-me:not(.bga-known) .bga-nav-login {
+  display: none;
+}
+
+/* 还没问到登录状态、也没有上次存下的头像：先放一个空的圆 */
+.bga-nav-me:not(.bga-known):not(.bga-in)::before {
+  content: "";
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-login {
+  padding: 0 8px;
+  color: var(--bga-pink);
+  font-weight: 600;
+}
+
+.bga-nav-me .bga-nav-face {
+  transition: transform 0.4s var(--bga-spring);
+}
+
+.bga-nav-me:is(:hover, [aria-expanded="true"]) .bga-nav-face {
+  transform: scale(1.08);
+}
+
+/* ── 浮层：更多、个人卡片 ── */
+.bga-nav-pop {
+  --bga-ink: var(--text1, #18191c);
+  --bga-dim: var(--text3, #9499a0);
+  --bga-tile: color-mix(in srgb, var(--bga-ink) 6%, var(--bga-page));
+  --bga-tile-hover: color-mix(in srgb, var(--bga-ink) 13%, var(--bga-page));
+  --bga-line: color-mix(in srgb, var(--bga-ink) 11%, transparent);
+
+  position: absolute;
+  z-index: 2;
+  top: calc(100% - 4px);
+  padding: 10px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bga-page) 90%, transparent);
+  box-shadow:
+    inset 0 0 0 1px var(--bga-line),
+    0 24px 60px rgb(0 0 0 / 0.34),
+    0 2px 8px rgb(0 0 0 / 0.14);
+  color: var(--bga-ink);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  /* 从打开它的那个按钮的位置长出来 */
+  animation: bga-pop-in 0.34s var(--bga-ease) backwards;
+}
+
+.bga-up .bga-nav-pop {
+  top: auto;
+  bottom: calc(100% - 4px);
+  animation-name: bga-pop-in-up;
+}
+
+.bga-nav-menu {
+  left: 16px;
+  display: grid;
+  gap: 2px;
+  min-width: 156px;
+  padding: 6px;
+  border-radius: 13px;
+  transform-origin: 60px 0;
+}
+
+.bga-up .bga-nav-menu {
+  transform-origin: 60px 100%;
+}
+
+.bga-nav-card {
+  right: 16px;
+  width: 320px;
+  transform-origin: calc(100% - 22px) 0;
+}
+
+.bga-up .bga-nav-card {
+  transform-origin: calc(100% - 22px) 100%;
+}
+
+/* 一行：图示 + 名字 + 右边的说明 */
+.bga-nav-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
+  white-space: nowrap;
+  transition: background 0.18s;
+  animation: bga-row-in 0.4s var(--bga-ease) backwards;
+}
+
+.bga-nav-row:hover {
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--bga-dim);
+  transition:
+    color 0.18s,
+    transform 0.35s var(--bga-spring);
+}
+
+.bga-nav-row:hover svg {
+  color: var(--bga-pink);
+  transform: scale(1.12);
+}
+
+.bga-nav-note {
+  margin-left: auto;
+  color: var(--bga-dim);
+  font: 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.bga-nav-note.bga-hot {
+  color: var(--bga-pink);
+  font-weight: 700;
+}
+
+/* 行一条一条地跟着浮层出来 */
+.bga-nav-row:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.bga-nav-row:nth-child(2) {
+  animation-delay: 0.075s;
+}
+
+.bga-nav-row:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.bga-nav-row:nth-child(4) {
+  animation-delay: 0.125s;
+}
+
+.bga-nav-row:nth-child(5) {
+  animation-delay: 0.15s;
+}
+
+.bga-nav-row:nth-child(6) {
+  animation-delay: 0.175s;
+}
+
+.bga-nav-row:nth-child(n + 7) {
+  animation-delay: 0.2s;
+}
+
+/* ── 个人卡片的内容 ── */
+.bga-nav-id {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bga-nav button.bga-nav-duo {
+  cursor: pointer;
+  transition: transform 0.35s var(--bga-spring);
+}
+
+.bga-nav button.bga-nav-duo:hover {
+  transform: scale(1.1) rotate(-8deg);
+}
+
+.bga-nav button.bga-nav-duo:active {
+  transform: scale(0.94);
+}
+
+.bga-nav-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 10px;
+
+  .bga-nav-face {
+    flex: none;
+    width: 56px;
+    height: 56px;
+  }
+}
+
+.bga-nav-who {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  b {
+    overflow: hidden;
+    font-size: 17px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    overflow: hidden;
+    color: var(--bga-dim);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Re:Bi 图示上的两个圆点 */
+.bga-nav-duo {
+  flex: none;
+  width: 22px;
+  height: 31px;
+  border-radius: 9px;
+  background:
+    radial-gradient(circle 3.5px at 11px 10.5px, var(--bga-pink) 94%, transparent),
+    radial-gradient(circle 3.5px at 11px 20.5px, #fff 94%, transparent),
+    #0b0b0c;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+
+.bga-nav-level {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 12px;
+  color: var(--bga-dim);
+  font: 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  white-space: nowrap;
+}
+
+.bga-nav-track {
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bga-tile-hover);
+
+  i {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--bga-pink);
+    transform-origin: 0 50%;
+    animation: bga-track-in 0.7s 0.12s var(--bga-ease) backwards;
+  }
+}
+
+.bga-nav-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.bga-nav-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 9px 0 8px;
+  border-radius: 12px;
+  background: var(--bga-tile);
+  box-shadow: inset 0 0 0 1px var(--bga-line);
+  transition: background 0.18s;
+  animation: bga-row-in 0.4s var(--bga-ease) backwards;
+
+  b {
+    font: 600 18px/1.25 ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  span {
+    color: var(--bga-dim);
+    font-size: 11px;
+  }
+}
+
+.bga-nav-stat:hover {
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-stat:nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.bga-nav-stat:nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+/* 清单：一列一列，行间不画线 */
+.bga-nav-list {
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--bga-tile);
+  box-shadow: inset 0 0 0 1px var(--bga-line);
+
+  .bga-nav-row {
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 0;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .bga-nav-row svg {
+    width: 20px;
+    height: 20px;
+    color: var(--bga-ink);
+  }
+
+  .bga-nav-note a {
+    color: inherit;
+  }
+
+  .bga-nav-note a:hover {
+    color: var(--bga-pink);
+  }
+}
+
+/* 卡片最下面的两个按钮：深浅色、登出 */
+.bga-nav-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.bga-nav button.bga-nav-act {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--bga-tile);
+  box-shadow: inset 0 0 0 1px var(--bga-line);
+  color: var(--bga-dim);
+  font-size: 13px;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    transform 0.3s var(--bga-spring);
+  animation: bga-row-in 0.4s 0.2s var(--bga-ease) backwards;
+
+  svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+.bga-nav button.bga-nav-act:hover {
+  background: var(--bga-tile-hover);
+  color: var(--bga-ink);
+}
+
+.bga-nav button.bga-nav-act:active {
+  transform: scale(0.96);
+}
+
+.bga-nav button.bga-nav-act.bga-hot {
+  background: color-mix(in srgb, var(--bga-pink) 18%, var(--bga-tile));
+  color: var(--bga-pink);
+  font-weight: 600;
+}
+
+@keyframes bga-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+}
+
+@keyframes bga-pop-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+}
+
+@keyframes bga-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes bga-track-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes bga-pop-dot {
+  from {
+    transform: scale(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bga-nav,
+  .bga-nav *,
+  .bga-nav *::before,
+  .bga-nav *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ══ 进场、光斑和其他小动效 ══ */
+
+/* 页面打开时三块方砖依次落下 */
+.bga-nav-tile {
+  position: relative;
+  animation: bga-tile-drop 0.55s var(--bga-ease) backwards;
+}
+
+.bga-nav-search {
+  animation-delay: 0.06s;
+}
+
+.bga-nav-right {
+  animation-delay: 0.12s;
+}
+
+/* 光斑：跟着滑鼠的一团淡光（位置由脚本写进 --bga-mx / --bga-my） */
+.bga-nav-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    120px circle at var(--bga-mx, 50%) var(--bga-my, 50%),
+    color-mix(in srgb, var(--bga-pink) 22%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+
+.bga-nav-tile:hover::before {
+  opacity: 1;
+}
+
+/* 方砖里的东西盖在光斑上面（浮层本来就是绝对定位，不动它） */
+.bga-nav-tile > :not(.bga-nav-pop) {
+  position: relative;
+}
+
+/* 搜索框聚焦：一道光从左扫到右 */
+.bga-nav-search::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--bga-pink) 26%, transparent) 50%, transparent 70%);
+  background-size: 250% 100%;
+  background-position: 120% 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bga-nav-search:focus-within::after {
+  animation: bga-sweep 0.9s var(--bga-ease);
+}
+
+/* 头像：悬停或卡片开着时外面一圈转动的彩环 */
+.bga-nav-me.bga-in::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--bga-pink), #fff 30%, var(--bga-pink) 60%, transparent 85%, var(--bga-pink));
+  mask: radial-gradient(circle, transparent 15px, #000 15.5px);
+  -webkit-mask: radial-gradient(circle, transparent 15px, #000 15.5px);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.bga-nav-me.bga-in {
+  width: 34px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.bga-nav-me.bga-in:is(:hover, [aria-expanded="true"]) {
+  background: none;
+}
+
+.bga-nav-me.bga-in:is(:hover, [aria-expanded="true"])::before {
+  opacity: 1;
+  animation: bga-spin 2.4s linear infinite;
+}
+
+/* 未读数刚出现时向外荡一圈 */
+.bga-nav-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 var(--bga-pink);
+  animation: bga-ping 1.4s 0.3s ease-out 2;
+}
+
+/* 个人卡片的双点：打开时两颗互换位置再回来 */
+.bga-nav button.bga-nav-duo {
+  position: relative;
+  background: #0b0b0c;
+}
+
+.bga-nav-duo::before,
+.bga-nav-duo::after {
+  content: "";
+  position: absolute;
+  left: 7.5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.bga-nav-duo::before {
+  top: 7px;
+  background: var(--bga-pink);
+  animation: bga-duo-a 0.9s 0.15s var(--bga-spring) backwards;
+}
+
+.bga-nav-duo::after {
+  top: 17px;
+  background: #fff;
+  animation: bga-duo-b 0.9s 0.15s var(--bga-spring) backwards;
+}
+
+/* 行：悬停时右边滑出一颗粉点 */
+.bga-nav-row::after {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--bga-pink);
+  transform: scale(0);
+  transition: transform 0.32s var(--bga-spring);
+}
+
+.bga-nav-row:has(.bga-nav-note)::after {
+  margin-left: 8px;
+}
+
+.bga-nav-row:is(:hover, .bga-on)::after {
+  transform: none;
+}
+
+.bga-nav-row.bga-on {
+  background: var(--bga-tile-hover);
+}
+
+button.bga-nav-row {
+  width: 100%;
+  text-align: left;
+}
+
+/* ══ 搜索建议 / 热搜 ══ */
+.bga-nav-suggest {
+  right: 0;
+  left: 0;
+  top: calc(100% + 8px);
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 13px;
+  transform-origin: 50% 0;
+  cursor: default;
+}
+
+.bga-up .bga-nav-suggest {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform-origin: 50% 100%;
+}
+
+.bga-nav-suggest.bga-two {
+  grid-template-columns: 1fr 1fr;
+  column-gap: 6px;
+}
+
+.bga-nav-suggest .bga-nav-peek-head {
+  grid-column: 1 / -1;
+}
+
+.bga-nav-rank {
+  flex: none;
+  width: 18px;
+  color: var(--bga-dim);
+  font: 700 12px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  font-style: normal;
+  text-align: center;
+}
+
+.bga-nav-rank.bga-hot {
+  color: var(--bga-pink);
+}
+
+.bga-nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ══ 入口预览 ══ */
+.bga-nav-peek {
+  right: 16px;
+  width: 340px;
+  padding: 8px;
+  transform-origin: calc(100% - 60px) 0;
+}
+
+.bga-up .bga-nav-peek {
+  transform-origin: calc(100% - 60px) 100%;
+}
+
+.bga-nav-peek-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 8px 8px;
+  font-size: 13px;
+
+  b {
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--bga-dim);
+    font-size: 12px;
+    transition: color 0.18s;
+  }
+
+  a:hover {
+    color: var(--bga-pink);
+  }
+}
+
+.bga-nav-peek-body {
+  display: grid;
+  gap: 2px;
+  max-height: min(60vh, 470px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.bga-nav-media {
+  display: flex;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 10px;
+  transition: background 0.18s;
+  animation: bga-row-in 0.4s var(--bga-ease) backwards;
+}
+
+.bga-nav-media:hover {
+  background: var(--bga-tile-hover);
+}
+
+.bga-nav-media:nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.bga-nav-media:nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.bga-nav-media:nth-child(4) {
+  animation-delay: 0.09s;
+}
+
+.bga-nav-media:nth-child(n + 5) {
+  animation-delay: 0.12s;
+}
+
+.bga-nav-cover {
+  flex: none;
+  width: 96px;
+  height: 60px;
+  border-radius: 7px;
+  object-fit: cover;
+  background: var(--bga-tile-hover);
+  transition: transform 0.4s var(--bga-ease);
+}
+
+.bga-nav-media:hover .bga-nav-cover {
+  transform: scale(1.04);
+}
+
+.bga-nav-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+
+  b {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  span {
+    overflow: hidden;
+    color: var(--bga-dim);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* 载入中：三条会闪的占位 */
+.bga-nav-ghost {
+  height: 60px;
+  margin: 6px;
+  border-radius: 8px;
+  background: linear-gradient(100deg, var(--bga-tile) 30%, var(--bga-tile-hover) 50%, var(--bga-tile) 70%);
+  background-size: 250% 100%;
+  animation: bga-shimmer 1.2s linear infinite;
+}
+
+.bga-nav-empty {
+  margin: 0;
+  padding: 22px 0;
+  color: var(--bga-dim);
+  font-size: 13px;
+  text-align: center;
+}
+
+@keyframes bga-tile-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+}
+
+@keyframes bga-sweep {
+  from {
+    background-position: 120% 0;
+    opacity: 1;
+  }
+
+  to {
+    background-position: -40% 0;
+    opacity: 0;
+  }
+}
+
+@keyframes bga-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes bga-ping {
+  to {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+
+@keyframes bga-duo-a {
+  from {
+    transform: translateY(10px);
+  }
+}
+
+@keyframes bga-duo-b {
+  from {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bga-shimmer {
+  to {
+    background-position: -150% 0;
+  }
+}

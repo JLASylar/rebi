@@ -31,6 +31,11 @@
     display: none !important;
   }
 
+  /* 播放页标签下面的活动横幅（「投稿解锁…」这类征稿推广）。类名凭对 B站页面的了解写的，未登录的测试机上不出现，没量到实物 */
+  :is(#activity_vote, .activity-m-v1) {
+    display: none !important;
+  }
+
   /* 其他指向广告跳转域名的链接、「检测到广告拦截」提示条 */
   a[href*="cm.bilibili.com"],
   .adblock-tips {

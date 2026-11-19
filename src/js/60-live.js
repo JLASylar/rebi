@@ -39,6 +39,18 @@ defOpt('x.live.cleanUI', true, {
   label: t('隱藏直播間雜項'),
   hint: t('進場歡迎條、播放器角標'),
 });
+defOpt('x.live.noSidebar', true, {
+  tab: 'live',
+  group: t('介面'),
+  label: t('隱藏直播間右側的浮動按鈕'),
+  hint: t('貼在視窗右邊的「實驗室」「關注」那一條'),
+});
+defOpt('x.live.fill', true, {
+  tab: 'live',
+  group: t('版面'),
+  label: t('直播畫面鋪滿頁面'),
+  hint: t('去掉左右留白：畫面佔滿聊天欄以外的寬度和導航欄以下的高度，主播資訊浮在畫面上（滑鼠移到畫面才顯示），禮物欄往下捲才看得到。不是網頁全螢幕，頁面照常捲動'),
+});
 defOpt('x.live.sendCheck', true, {
   tab: 'live',
   group: t('彈幕'),
@@ -150,6 +162,8 @@ function checkDanmakuSend() {
 function setupLive() {
   if (!PAGE.live) return;
   reflect('x.live.cleanUI', 'live-clean');
+  reflect('x.live.noSidebar', 'live-no-sidebar');
+  reflect('x.live.fill', 'live-fill');
   reflect('x.live.noRank', 'live-no-rank');
   reflect('x.live.noAds', 'live-no-ads');
   reflect('x.live.noGift', 'live-no-gift');

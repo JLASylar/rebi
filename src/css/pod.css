@@ -123,3 +123,40 @@
 .bga-pod-btn:hover {
   color: #fff;
 }
+
+/* ── 条目缩图（记号 pod-thumb）──
+ * 图片地址由脚本按 data-key 写成 --bga-thumb（见 24-pod.js），这里只管版面：缩图在左，标题最多两行。
+ * 合集的 data-key 在条目外层、分 P 的在条目本身，变量会继承下去，所以都画在 .simple-base-item 上。
+ */
+:root[data-bga~="pod-thumb"] .video-pod .video-pod__body .simple-base-item {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  height: auto !important;
+  min-height: 62px;
+  padding-block: 5px !important;
+
+  &::before {
+    content: "";
+    flex: none;
+    width: 86px;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+    background: var(--bga-thumb, none) center / cover no-repeat rgb(128 128 128 / 0.18);
+  }
+
+  .title {
+    flex: 1;
+    min-width: 0;
+    height: auto !important;
+  }
+
+  .title-txt {
+    display: -webkit-box;
+    overflow: hidden;
+    line-height: 1.4;
+    white-space: normal !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}

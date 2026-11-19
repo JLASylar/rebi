@@ -105,3 +105,85 @@
     display: none !important;
   }
 }
+
+/* ── 直播间右侧的浮动按钮（实验室、关注）── */
+:root[data-bga~="live-no-sidebar"] #sidebar-vm .side-bar-cntr {
+  display: none !important;
+}
+
+/* ══ 直播画面铺满页面（记号 live-fill）══
+ *
+ * 原版面：内容区（.app-body）居中、宽度按视窗高度算，窗口宽的时候两边留白。
+ * 这里把内容区拉到整个视窗宽，画面占满聊天栏（300px）以外的宽度；
+ * 高度 = 视窗高 − 导航栏（64），所以礼物栏被推到第一屏以下，往下卷才看到。
+ * 主播信息条（头像、关注、更多）不再占一行，浮在画面顶上：滑鼠在播放器上时显示，移开约一秒后淡出。
+ * 画面比例和这一块不合时，黑边留在播放器里面。聊天栏贴右、和第一屏等高。
+ * 只对普通直播间（.live-room-app）生效；全是样式，量过的结构见 ACTION-LOG 2026-11-19。
+ */
+:root[data-bga~="live-fill"] .live-room-app {
+  --bga-live-nav: 64px;
+  --bga-live-aside: 300px;
+
+  .app-content {
+    padding-top: var(--bga-live-nav) !important;
+  }
+
+  .app-body {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .player-and-aside-area {
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  #player-ctnr {
+    width: calc(100% - var(--bga-live-aside)) !important;
+  }
+
+  /* 播放器的高度是这一层的上内边距撑出来的 */
+  .fullscreen-container-paddingbox {
+    padding-top: calc(100vh - var(--bga-live-nav)) !important;
+  }
+
+  /* 主播信息条：叠在画面顶上，底下衬一段由深到透明的渐变，字一律用浅色 */
+  #head-info-vm {
+    position: absolute !important;
+    z-index: 20 !important;
+    inset: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+    padding-block: 10px 26px !important;
+    /* 右边让出一格：播放器自己在右上角有按钮，不让「更多」和它叠在一起 */
+    padding-right: 64px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: linear-gradient(rgb(0 0 0 / 0.62), rgb(0 0 0 / 0.3) 55%, transparent) !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s 0.9s;
+  }
+
+  #player-ctnr:hover #head-info-vm,
+  #head-info-vm:focus-within {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+
+  #head-info-vm :is(.heat-index-scroll, .live-skin-main-text, .live-skin-normal-text, .icon-font, .action-text, span) {
+    color: rgb(255 255 255 / 0.86) !important;
+  }
+
+  #aside-area-vm {
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    height: calc(100vh - var(--bga-live-nav)) !important;
+  }
+}

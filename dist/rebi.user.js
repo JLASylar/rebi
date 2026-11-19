@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Re:Bi 比利重啟
 // @namespace    https://space.bilibili.com/5094278
-// @version      1.0.13
+// @version      1.1.0
 // @author       蘋果大王
 // @description  B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞
 // @name:zh-CN   Re:Bi 比利重启
 // @name:en      Re:Bi
 // @name:ja      Re:Bi
 // @description:zh-CN B站宽屏、大宝鉴首页、净化、评论区 IP 属地与性别、用户备注、直播净化、弹幕查询、自定义快捷键、标题屏蔽词
-// @description:en Bilibili, rebooted: widescreen layout, showcase home, cleanup, comment IP location, user notes, danmaku lookup, custom shortcuts
+// @description:en Bilibili, rebooted: widescreen layout, showcase home, cleanup, comment IP location, user notes, custom shortcuts
 // @description:ja ビリビリをもう一度：ワイドレイアウト、ショーケースホーム、クリーンアップ、コメントの IP 所在地と性別、ユーザーメモ、ライブのクリーンアップ、弾幕検索、ショートカット、タイトルの NG ワード
 // @license      MIT
 // @homepageURL  https://rebi.appleking.net/
@@ -48,7 +48,7 @@
 (function () {
   'use strict';
 
-  const BUILD = {"name": "Re:Bi", "version": "1.0.13", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
+  const BUILD = {"name": "Re:Bi", "version": "1.1.0", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
 
   const STYLES = {
     base: `:root {
@@ -184,6 +184,9 @@
       .video-page-game-card-small,
       .video-page-special-card-small
     ) {
+      display: none !important;
+    }
+    :is(#activity_vote, .activity-m-v1) {
       display: none !important;
     }
     a[href*="cm.bilibili.com"],
@@ -611,6 +614,64 @@
     #sidebar-vm .side-bar-popup-cntr {
       display: none !important;
     }
+  }
+  :root[data-bga~="live-no-sidebar"] #sidebar-vm .side-bar-cntr {
+    display: none !important;
+  }
+  :root[data-bga~="live-fill"] .live-room-app {
+    --bga-live-nav: 64px;
+    --bga-live-aside: 300px;
+    .app-content {
+      padding-top: var(--bga-live-nav) !important;
+    }
+    .app-body {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      margin: 0 !important;
+    }
+    .player-and-aside-area {
+      width: auto !important;
+      margin: 0 !important;
+    }
+    #player-ctnr {
+      width: calc(100% - var(--bga-live-aside)) !important;
+    }
+    .fullscreen-container-paddingbox {
+      padding-top: calc(100vh - var(--bga-live-nav)) !important;
+    }
+    #head-info-vm {
+      position: absolute !important;
+      z-index: 20 !important;
+      inset: 0 0 auto !important;
+      width: auto !important;
+      height: auto !important;
+      padding-block: 10px 26px !important;
+      padding-right: 64px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: linear-gradient(rgb(0 0 0 / 0.62), rgb(0 0 0 / 0.3) 55%, transparent) !important;
+      box-shadow: none !important;
+      color: #fff !important;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s 0.9s;
+    }
+    #player-ctnr:hover #head-info-vm,
+    #head-info-vm:focus-within {
+      opacity: 1;
+      pointer-events: auto;
+      transition-delay: 0s;
+    }
+    #head-info-vm :is(.heat-index-scroll, .live-skin-main-text, .live-skin-normal-text, .icon-font, .action-text, span) {
+      color: rgb(255 255 255 / 0.86) !important;
+    }
+    #aside-area-vm {
+      top: 0 !important;
+      right: 0 !important;
+      left: auto !important;
+      height: calc(100vh - var(--bga-live-nav)) !important;
+    }
   }`,
     marks: `.bga-memo {
     box-sizing: border-box;
@@ -701,6 +762,927 @@
   }
   button.bga-pill:hover {
     background: rgb(0 0 0 / 0.48);
+  }`,
+    nav: `:root[data-bga~="nav-own"] :is(.bili-header__bar, .link-navbar, #internationalHeader .mini-header) {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  :root[data-bga~="nav-own"][data-bga~="page-player"] #biliMainHeader {
+    display: none !important;
+  }
+  :root[data-bga~="nav-own"][data-bga~="page-search"] .search-input {
+    display: none !important;
+  }
+  .bga-nav {
+    --bga-pink: var(--brand_pink, #fb7299);
+    --bga-ink: var(--text1, #18191c);
+    --bga-dim: var(--text3, #9499a0);
+    --bga-page: var(--bg1, #fff);
+    --bga-tile: color-mix(in srgb, var(--bga-ink) 6%, var(--bga-page));
+    --bga-tile-hover: color-mix(in srgb, var(--bga-ink) 13%, var(--bga-page));
+    --bga-line: color-mix(in srgb, var(--bga-ink) 11%, transparent);
+    --bga-ring: inset 0 0 0 1px var(--bga-line), inset 0 1px 0 rgb(255 255 255 / 0.06);
+    --bga-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+    --bga-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
+    position: fixed;
+    z-index: 1002;
+    inset: 0 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: var(--bga-nav, 64px);
+    padding: 0 16px;
+    background: var(--bga-page);
+    color: var(--bga-ink);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: background 0.3s;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    button {
+      margin: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    svg {
+      flex: none;
+      width: 20px;
+      height: 20px;
+    }
+  }
+  :root[data-bga~="page-player"] .bga-nav {
+    position: relative;
+    inset: auto;
+    z-index: 100;
+    margin-block: var(--bga-stage) 0;
+  }
+  :root[data-bga~="page-player"][data-bga~="nav-top"] .bga-nav {
+    margin-block: 0 var(--bga-stage);
+  }
+  :root[data-bga~="page-player"][data-bga~="nav-sticky"] .bga-nav {
+    position: sticky;
+    top: 0;
+  }
+  :root[data-bga~="nav-clear"] .bga-nav {
+    --bga-ink: #fff;
+    --bga-dim: rgb(255 255 255 / 0.7);
+    --bga-tile: rgb(0 0 0 / 0.36);
+    --bga-tile-hover: rgb(0 0 0 / 0.56);
+    --bga-line: rgb(255 255 255 / 0.16);
+    background: transparent;
+    .bga-nav-tile {
+      backdrop-filter: saturate(160%) blur(18px);
+      -webkit-backdrop-filter: saturate(160%) blur(18px);
+    }
+  }
+  .bga-nav-tile {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 2px;
+    height: 44px;
+    margin: 0;
+    padding: 0 5px;
+    border-radius: 13px;
+    background: var(--bga-tile);
+    box-shadow: var(--bga-ring);
+    transition:
+      background 0.2s,
+      box-shadow 0.3s var(--bga-ease);
+  }
+  .bga-nav-t {
+    position: relative;
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 9px;
+    white-space: nowrap;
+    transition:
+      background 0.18s,
+      transform 0.3s var(--bga-spring);
+  }
+  .bga-nav-i {
+    width: 34px;
+    padding: 0;
+  }
+  .bga-nav-t:hover,
+  .bga-nav-t.bga-on,
+  .bga-nav-t[aria-expanded="true"] {
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-t:active {
+    transform: scale(0.94);
+  }
+  .bga-nav-t::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--bga-pink);
+    opacity: 0;
+    transform: scale(0);
+    transition:
+      transform 0.32s var(--bga-spring),
+      opacity 0.12s;
+    pointer-events: none;
+  }
+  .bga-nav-t:is(:hover, .bga-on, [aria-expanded="true"])::after {
+    opacity: 1;
+    transform: none;
+  }
+  .bga-nav-badge {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--bga-pink);
+    color: #1a0d12;
+    font: 700 10px/15px ui-monospace, "SF Mono", Menlo, monospace;
+    text-align: center;
+    animation: bga-pop-dot 0.4s var(--bga-spring) backwards;
+  }
+  .bga-nav-badge.bga-nav-dot {
+    top: 4px;
+    right: 4px;
+    min-width: 0;
+    width: 6px;
+    height: 6px;
+    padding: 0;
+  }
+  .bga-nav-t:has(.bga-nav-badge:not([hidden]))::after {
+    display: none;
+  }
+  .bga-nav-fold {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 520px;
+    transition:
+      max-width 0.5s var(--bga-ease),
+      opacity 0.28s,
+      transform 0.5s var(--bga-ease);
+  }
+  .bga-closed .bga-nav-fold {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bga-nav-left.bga-closed .bga-nav-fold {
+    transform: translateX(-8px);
+  }
+  .bga-nav-right.bga-closed .bga-nav-fold {
+    transform: translateX(8px);
+  }
+  .bga-nav-arrow {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 34px;
+    padding: 0;
+    border-radius: 6px;
+    color: var(--bga-dim);
+    opacity: 0.7;
+    transition:
+      opacity 0.18s,
+      background 0.18s;
+    svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.5s var(--bga-spring);
+    }
+  }
+  .bga-nav-arrow:hover {
+    background: var(--bga-tile-hover);
+    opacity: 1;
+  }
+  .bga-nav-left.bga-closed .bga-nav-arrow svg,
+  .bga-nav-right:not(.bga-closed) .bga-nav-arrow svg {
+    transform: scaleX(-1);
+  }
+  .bga-nav-search {
+    flex: 1 1 0;
+    min-width: 120px;
+    padding-left: 14px;
+    cursor: text;
+  }
+  .bga-nav-search:hover {
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-search:focus-within {
+    background: var(--bga-page);
+    box-shadow:
+      inset 0 0 0 1.5px var(--bga-pink),
+      0 0 0 4px color-mix(in srgb, var(--bga-pink) 16%, transparent);
+  }
+  :root[data-bga~="nav-clear"] .bga-nav-search:focus-within {
+    background: rgb(0 0 0 / 0.62);
+  }
+  .bga-nav-input {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .bga-nav-input::placeholder {
+    color: var(--bga-dim);
+  }
+  .bga-nav-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  .bga-nav-face {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-me {
+    width: auto;
+    padding: 0 2px;
+  }
+  .bga-nav-me.bga-in .bga-nav-login,
+  .bga-nav-me:not(.bga-known) .bga-nav-login {
+    display: none;
+  }
+  .bga-nav-me:not(.bga-known):not(.bga-in)::before {
+    content: "";
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-login {
+    padding: 0 8px;
+    color: var(--bga-pink);
+    font-weight: 600;
+  }
+  .bga-nav-me .bga-nav-face {
+    transition: transform 0.4s var(--bga-spring);
+  }
+  .bga-nav-me:is(:hover, [aria-expanded="true"]) .bga-nav-face {
+    transform: scale(1.08);
+  }
+  .bga-nav-pop {
+    --bga-ink: var(--text1, #18191c);
+    --bga-dim: var(--text3, #9499a0);
+    --bga-tile: color-mix(in srgb, var(--bga-ink) 6%, var(--bga-page));
+    --bga-tile-hover: color-mix(in srgb, var(--bga-ink) 13%, var(--bga-page));
+    --bga-line: color-mix(in srgb, var(--bga-ink) 11%, transparent);
+    position: absolute;
+    z-index: 2;
+    top: calc(100% - 4px);
+    padding: 10px;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--bga-page) 90%, transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--bga-line),
+      0 24px 60px rgb(0 0 0 / 0.34),
+      0 2px 8px rgb(0 0 0 / 0.14);
+    color: var(--bga-ink);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    animation: bga-pop-in 0.34s var(--bga-ease) backwards;
+  }
+  .bga-up .bga-nav-pop {
+    top: auto;
+    bottom: calc(100% - 4px);
+    animation-name: bga-pop-in-up;
+  }
+  .bga-nav-menu {
+    left: 16px;
+    display: grid;
+    gap: 2px;
+    min-width: 156px;
+    padding: 6px;
+    border-radius: 13px;
+    transform-origin: 60px 0;
+  }
+  .bga-up .bga-nav-menu {
+    transform-origin: 60px 100%;
+  }
+  .bga-nav-card {
+    right: 16px;
+    width: 320px;
+    transform-origin: calc(100% - 22px) 0;
+  }
+  .bga-up .bga-nav-card {
+    transform-origin: calc(100% - 22px) 100%;
+  }
+  .bga-nav-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 9px;
+    white-space: nowrap;
+    transition: background 0.18s;
+    animation: bga-row-in 0.4s var(--bga-ease) backwards;
+  }
+  .bga-nav-row:hover {
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-row svg {
+    width: 18px;
+    height: 18px;
+    color: var(--bga-dim);
+    transition:
+      color 0.18s,
+      transform 0.35s var(--bga-spring);
+  }
+  .bga-nav-row:hover svg {
+    color: var(--bga-pink);
+    transform: scale(1.12);
+  }
+  .bga-nav-note {
+    margin-left: auto;
+    color: var(--bga-dim);
+    font: 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .bga-nav-note.bga-hot {
+    color: var(--bga-pink);
+    font-weight: 700;
+  }
+  .bga-nav-row:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  .bga-nav-row:nth-child(2) {
+    animation-delay: 0.075s;
+  }
+  .bga-nav-row:nth-child(3) {
+    animation-delay: 0.1s;
+  }
+  .bga-nav-row:nth-child(4) {
+    animation-delay: 0.125s;
+  }
+  .bga-nav-row:nth-child(5) {
+    animation-delay: 0.15s;
+  }
+  .bga-nav-row:nth-child(6) {
+    animation-delay: 0.175s;
+  }
+  .bga-nav-row:nth-child(n + 7) {
+    animation-delay: 0.2s;
+  }
+  .bga-nav-id {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .bga-nav button.bga-nav-duo {
+    cursor: pointer;
+    transition: transform 0.35s var(--bga-spring);
+  }
+  .bga-nav button.bga-nav-duo:hover {
+    transform: scale(1.1) rotate(-8deg);
+  }
+  .bga-nav button.bga-nav-duo:active {
+    transform: scale(0.94);
+  }
+  .bga-nav-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 4px 10px;
+    .bga-nav-face {
+      flex: none;
+      width: 56px;
+      height: 56px;
+    }
+  }
+  .bga-nav-who {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    b {
+      overflow: hidden;
+      font-size: 17px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    span {
+      overflow: hidden;
+      color: var(--bga-dim);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .bga-nav-duo {
+    flex: none;
+    width: 22px;
+    height: 31px;
+    border-radius: 9px;
+    background:
+      radial-gradient(circle 3.5px at 11px 10.5px, var(--bga-pink) 94%, transparent),
+      radial-gradient(circle 3.5px at 11px 20.5px, #fff 94%, transparent),
+      #0b0b0c;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  }
+  .bga-nav-level {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 4px 12px;
+    color: var(--bga-dim);
+    font: 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    white-space: nowrap;
+  }
+  .bga-nav-track {
+    flex: 1;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--bga-tile-hover);
+    i {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+      background: var(--bga-pink);
+      transform-origin: 0 50%;
+      animation: bga-track-in 0.7s 0.12s var(--bga-ease) backwards;
+    }
+  }
+  .bga-nav-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .bga-nav-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 9px 0 8px;
+    border-radius: 12px;
+    background: var(--bga-tile);
+    box-shadow: inset 0 0 0 1px var(--bga-line);
+    transition: background 0.18s;
+    animation: bga-row-in 0.4s var(--bga-ease) backwards;
+    b {
+      font: 600 18px/1.25 ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    span {
+      color: var(--bga-dim);
+      font-size: 11px;
+    }
+  }
+  .bga-nav-stat:hover {
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-stat:nth-child(2) {
+    animation-delay: 0.03s;
+  }
+  .bga-nav-stat:nth-child(3) {
+    animation-delay: 0.06s;
+  }
+  .bga-nav-list {
+    margin-top: 6px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--bga-tile);
+    box-shadow: inset 0 0 0 1px var(--bga-line);
+    .bga-nav-row {
+      height: 42px;
+      padding: 0 14px;
+      border-radius: 0;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .bga-nav-row svg {
+      width: 20px;
+      height: 20px;
+      color: var(--bga-ink);
+    }
+    .bga-nav-note a {
+      color: inherit;
+    }
+    .bga-nav-note a:hover {
+      color: var(--bga-pink);
+    }
+  }
+  .bga-nav-foot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .bga-nav button.bga-nav-act {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--bga-tile);
+    box-shadow: inset 0 0 0 1px var(--bga-line);
+    color: var(--bga-dim);
+    font-size: 13px;
+    transition:
+      background 0.18s,
+      color 0.18s,
+      transform 0.3s var(--bga-spring);
+    animation: bga-row-in 0.4s 0.2s var(--bga-ease) backwards;
+    svg {
+      width: 17px;
+      height: 17px;
+    }
+  }
+  .bga-nav button.bga-nav-act:hover {
+    background: var(--bga-tile-hover);
+    color: var(--bga-ink);
+  }
+  .bga-nav button.bga-nav-act:active {
+    transform: scale(0.96);
+  }
+  .bga-nav button.bga-nav-act.bga-hot {
+    background: color-mix(in srgb, var(--bga-pink) 18%, var(--bga-tile));
+    color: var(--bga-pink);
+    font-weight: 600;
+  }
+  @keyframes bga-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.9);
+    }
+  }
+  @keyframes bga-pop-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.9);
+    }
+  }
+  @keyframes bga-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+  @keyframes bga-track-in {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes bga-pop-dot {
+    from {
+      transform: scale(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bga-nav,
+    .bga-nav *,
+    .bga-nav *::before,
+    .bga-nav *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  .bga-nav-tile {
+    position: relative;
+    animation: bga-tile-drop 0.55s var(--bga-ease) backwards;
+  }
+  .bga-nav-search {
+    animation-delay: 0.06s;
+  }
+  .bga-nav-right {
+    animation-delay: 0.12s;
+  }
+  .bga-nav-tile::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      120px circle at var(--bga-mx, 50%) var(--bga-my, 50%),
+      color-mix(in srgb, var(--bga-pink) 22%, transparent),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+  .bga-nav-tile:hover::before {
+    opacity: 1;
+  }
+  .bga-nav-tile > :not(.bga-nav-pop) {
+    position: relative;
+  }
+  .bga-nav-search::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--bga-pink) 26%, transparent) 50%, transparent 70%);
+    background-size: 250% 100%;
+    background-position: 120% 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bga-nav-search:focus-within::after {
+    animation: bga-sweep 0.9s var(--bga-ease);
+  }
+  .bga-nav-me.bga-in::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(var(--bga-pink), #fff 30%, var(--bga-pink) 60%, transparent 85%, var(--bga-pink));
+    mask: radial-gradient(circle, transparent 15px, #000 15.5px);
+    -webkit-mask: radial-gradient(circle, transparent 15px, #000 15.5px);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .bga-nav-me.bga-in {
+    width: 34px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .bga-nav-me.bga-in:is(:hover, [aria-expanded="true"]) {
+    background: none;
+  }
+  .bga-nav-me.bga-in:is(:hover, [aria-expanded="true"])::before {
+    opacity: 1;
+    animation: bga-spin 2.4s linear infinite;
+  }
+  .bga-nav-badge::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 0 var(--bga-pink);
+    animation: bga-ping 1.4s 0.3s ease-out 2;
+  }
+  .bga-nav button.bga-nav-duo {
+    position: relative;
+    background: #0b0b0c;
+  }
+  .bga-nav-duo::before,
+  .bga-nav-duo::after {
+    content: "";
+    position: absolute;
+    left: 7.5px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .bga-nav-duo::before {
+    top: 7px;
+    background: var(--bga-pink);
+    animation: bga-duo-a 0.9s 0.15s var(--bga-spring) backwards;
+  }
+  .bga-nav-duo::after {
+    top: 17px;
+    background: #fff;
+    animation: bga-duo-b 0.9s 0.15s var(--bga-spring) backwards;
+  }
+  .bga-nav-row::after {
+    content: "";
+    flex: none;
+    width: 5px;
+    height: 5px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--bga-pink);
+    transform: scale(0);
+    transition: transform 0.32s var(--bga-spring);
+  }
+  .bga-nav-row:has(.bga-nav-note)::after {
+    margin-left: 8px;
+  }
+  .bga-nav-row:is(:hover, .bga-on)::after {
+    transform: none;
+  }
+  .bga-nav-row.bga-on {
+    background: var(--bga-tile-hover);
+  }
+  button.bga-nav-row {
+    width: 100%;
+    text-align: left;
+  }
+  .bga-nav-suggest {
+    right: 0;
+    left: 0;
+    top: calc(100% + 8px);
+    display: grid;
+    gap: 2px;
+    padding: 6px;
+    border-radius: 13px;
+    transform-origin: 50% 0;
+    cursor: default;
+  }
+  .bga-up .bga-nav-suggest {
+    top: auto;
+    bottom: calc(100% + 8px);
+    transform-origin: 50% 100%;
+  }
+  .bga-nav-suggest.bga-two {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 6px;
+  }
+  .bga-nav-suggest .bga-nav-peek-head {
+    grid-column: 1 / -1;
+  }
+  .bga-nav-rank {
+    flex: none;
+    width: 18px;
+    color: var(--bga-dim);
+    font: 700 12px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    font-style: normal;
+    text-align: center;
+  }
+  .bga-nav-rank.bga-hot {
+    color: var(--bga-pink);
+  }
+  .bga-nav-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bga-nav-peek {
+    right: 16px;
+    width: 340px;
+    padding: 8px;
+    transform-origin: calc(100% - 60px) 0;
+  }
+  .bga-up .bga-nav-peek {
+    transform-origin: calc(100% - 60px) 100%;
+  }
+  .bga-nav-peek-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 6px 8px 8px;
+    font-size: 13px;
+    b {
+      font-weight: 600;
+    }
+    a {
+      color: var(--bga-dim);
+      font-size: 12px;
+      transition: color 0.18s;
+    }
+    a:hover {
+      color: var(--bga-pink);
+    }
+  }
+  .bga-nav-peek-body {
+    display: grid;
+    gap: 2px;
+    max-height: min(60vh, 470px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .bga-nav-media {
+    display: flex;
+    gap: 10px;
+    padding: 6px;
+    border-radius: 10px;
+    transition: background 0.18s;
+    animation: bga-row-in 0.4s var(--bga-ease) backwards;
+  }
+  .bga-nav-media:hover {
+    background: var(--bga-tile-hover);
+  }
+  .bga-nav-media:nth-child(2) {
+    animation-delay: 0.03s;
+  }
+  .bga-nav-media:nth-child(3) {
+    animation-delay: 0.06s;
+  }
+  .bga-nav-media:nth-child(4) {
+    animation-delay: 0.09s;
+  }
+  .bga-nav-media:nth-child(n + 5) {
+    animation-delay: 0.12s;
+  }
+  .bga-nav-cover {
+    flex: none;
+    width: 96px;
+    height: 60px;
+    border-radius: 7px;
+    object-fit: cover;
+    background: var(--bga-tile-hover);
+    transition: transform 0.4s var(--bga-ease);
+  }
+  .bga-nav-media:hover .bga-nav-cover {
+    transform: scale(1.04);
+  }
+  .bga-nav-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    b {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    span {
+      overflow: hidden;
+      color: var(--bga-dim);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .bga-nav-ghost {
+    height: 60px;
+    margin: 6px;
+    border-radius: 8px;
+    background: linear-gradient(100deg, var(--bga-tile) 30%, var(--bga-tile-hover) 50%, var(--bga-tile) 70%);
+    background-size: 250% 100%;
+    animation: bga-shimmer 1.2s linear infinite;
+  }
+  .bga-nav-empty {
+    margin: 0;
+    padding: 22px 0;
+    color: var(--bga-dim);
+    font-size: 13px;
+    text-align: center;
+  }
+  @keyframes bga-tile-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.97);
+    }
+  }
+  @keyframes bga-sweep {
+    from {
+      background-position: 120% 0;
+      opacity: 1;
+    }
+    to {
+      background-position: -40% 0;
+      opacity: 0;
+    }
+  }
+  @keyframes bga-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+  @keyframes bga-ping {
+    to {
+      box-shadow: 0 0 0 7px transparent;
+    }
+  }
+  @keyframes bga-duo-a {
+    from {
+      transform: translateY(10px);
+    }
+  }
+  @keyframes bga-duo-b {
+    from {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes bga-shimmer {
+    to {
+      background-position: -150% 0;
+    }
   }`,
     pages: `:root[data-bga~="page-home"] {
     --layout-padding: var(--bga-gutter);
@@ -1516,6 +2498,35 @@
   }
   .bga-pod-btn:hover {
     color: #fff;
+  }
+  :root[data-bga~="pod-thumb"] .video-pod .video-pod__body .simple-base-item {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    height: auto !important;
+    min-height: 62px;
+    padding-block: 5px !important;
+    &::before {
+      content: "";
+      flex: none;
+      width: 86px;
+      aspect-ratio: 16 / 10;
+      border-radius: 6px;
+      background: var(--bga-thumb, none) center / cover no-repeat rgb(128 128 128 / 0.18);
+    }
+    .title {
+      flex: 1;
+      min-width: 0;
+      height: auto !important;
+    }
+    .title-txt {
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.4;
+      white-space: normal !important;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
   }`,
     stage: `:root[data-bga~="page-player"] {
     --bga-stage-cap: calc(100vh - min(var(--bga-keep, 0px), 25vh));
@@ -1993,7 +3004,7 @@
   }`,
   };
 
-  const I18N = {"zh-Hans":{"比利重啟":"比利重启","空白鍵":"空格键","數字鍵盤 ":"数字键盘 ","首頁":"首页","播放頁":"播放页","動態 · 空間":"动态 · 空间","左右邊距":"左右边距","所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"所有页面内容区两侧的留白，不会超过窗口宽度的 15%","動態頁":"动态页","側欄吸頂":"侧栏吸顶","側欄內容較長時可能顯示不全":"侧栏内容较长时可能显示不全","隱藏帶貨動態":"隐藏带货动态","自動高度":"自动高度","播放器跟隨影片比例，上下不留黑邊":"播放器跟随视频比例，上下不留黑边","預留高度":"预留高度","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"播放器下方露出多少页面内容；大于 0 时导航栏常驻。不会超过窗口高度的 25%","導航欄":"导航栏","導航欄放在播放器下方":"导航栏放在播放器下方","導航欄吸頂":"导航栏吸顶","向下捲動時導航欄固定在視窗頂部":"向下滚动时导航栏固定在窗口顶部","控制欄":"控制栏","緊湊控制欄":"紧凑控制栏","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"按钮收到图标大小、间距收紧，省下的宽度都给弹幕输入框","顯示在看人數 / 彈幕數":"显示在看人数 / 弹幕数","平時隱藏控制欄":"平时隐藏控制栏","滑鼠移到播放器底部才顯示":"鼠标移到播放器底部才显示","暫停時一直顯示控制欄":"暂停时一直显示控制栏","小窗可調整":"小窗可调整","拖小窗左邊緣改寬度，拖小窗本身改位置，並記住":"拖小窗左边缘改宽度，拖小窗本身改位置，并记住","小窗位置與寬度":"小窗位置与宽度","回到右下角、預設寬度":"回到右下角、默认宽度","重設":"重置","小窗已重設":"小窗已重置","字體":"字体","使用系統字體":"使用系统字体","Mac 上用蘋方 / San Francisco，Windows 上用微軟雅黑，並開啟字體平滑":"Mac 上用苹方 / San Francisco，Windows 上用微软雅黑，并开启字体平滑","等寬數字":"等宽数字","播放時間、播放量等數字等寬顯示，跳動時不抖動":"播放时间、播放量等数字等宽显示，跳动时不抖动","全螢幕暫停時保留原況文字":"全屏暂停时保留实况文本","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"开启后可以在全屏暂停的画面上框选文字，但暂停时右下角的按钮（选集、小窗、退出全屏）会点不动","淨化":"净化","頁面":"页面","去掉全站黑白濾鏡":"去掉全站黑白滤镜","隱藏廣告":"隐藏广告","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"首页推广卡片、播放页右栏的广告位与推广卡片、“检测到广告拦截”提示","跳過片尾充電名單":"跳过片尾充电名单","頁面載入完成後才清空名單，不一定每次都生效":"页面加载完成后才清空名单，不一定每次都生效","專欄允許複製":"专栏允许复制","片尾不顯示相關推薦":"片尾不显示相关推荐","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"视频播完后那一排“相关推荐”视频；重播等按钮还在","隱私":"隐私","清理網址追蹤參數":"清理网址追踪参数","攔截資料上報":"拦截数据上报","data.bilibili.com / cm.bilibili.com、Sentry、瀏覽器指紋":"data.bilibili.com / cm.bilibili.com、Sentry、浏览器指纹","停用 P2P CDN 與 WebRTC":"停用 P2P CDN 与 WebRTC","不替 B站上傳流量；影片位址換回官方 CDN":"不替 B站上传流量；视频地址换回官方 CDN","播放器設定加入「裁切模式」":"播放器设置加入“裁切模式”","在播放器的齒輪選單裡，讓畫面填滿播放器":"在播放器的齿轮菜单里，让画面填满播放器","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"每行一个词；也可以写 /正则/。B站标题多为简体字，请用简体输入","標題黨":"标题党","從標題刪掉這些詞":"从标题删掉这些词","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"视频照常显示，只把这些词从标题里拿掉。{0}","標題含有這些詞就隱藏影片":"标题含有这些词就隐藏视频","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"首页、推荐、搜索、排行榜、动态里整张卡片不显示；正在看的视频不受影响。{0}","收斂誇張標點":"收敛夸张标点","連續的驚嘆號、問號縮成一個（！！！→！）":"连续的感叹号、问号缩成一个（！！！→！）","加入常見的標題黨用詞":"加入常见的标题党用词","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"把一组常见的夸张用词加进“从标题删掉这些词”，之后可以自己增删","這些詞都已經在清單裡了":"这些词都已经在列表里了","已加入 {0} 個詞":"已加入 {0} 个词","首頁推薦過濾":"首页推荐过滤","播放量低於這個數就隱藏":"播放量低于这个数就隐藏","短於這個長度就隱藏":"短于这个长度就隐藏","長於這個長度就隱藏":"长于这个长度就隐藏","發布超過這麼多天就隱藏":"发布超过这么多天就隐藏","隱藏豎屏影片":"隐藏竖屏视频","要逐個查影片資料，卡片會晚一點才消失":"要逐个查视频数据，卡片会晚一点才消失","已關注的 UP 主不過濾":"已关注的 UP 主不过滤","隱藏這些 UP 主的影片":"隐藏这些 UP 主的视频","每行一個，寫 UP 主名稱或 UID":"每行一个，写 UP 主名称或 UID","封面黨（激進）":"封面党（激进）","替換影片封面":"替换视频封面","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"不显示 UP 主上传的封面，改用视频的第一帧或随机一帧。每张卡片要多查一次数据，封面会晚一点才换；查得太多可能被 B站暂时限流。封面工具栏的保存 / 放大仍是原封面","關":"关","第一幀":"第一帧","隨機一幀":"随机一帧","影片卡片":"视频卡片","滑鼠移到影片卡片上，封面左上角出現工具列，點「↓」下載原尺寸封面":"鼠标移到视频卡片上，封面左上角出现工具栏，点“↓”下载原尺寸封面","封面懸浮放大":"封面悬浮放大","滑鼠停在工具列的放大鏡上，顯示大圖":"鼠标停在工具栏的放大镜上，显示大图","一鍵拉黑 UP 主":"一键拉黑 UP 主","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"点工具栏的“⊘”直接加入 B站黑名单，再点一次取消；需要已登录","影片在本頁打開":"视频在本页打开","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"点视频卡片不再开新标签页；按住 ⌘ / Ctrl 或用中键点仍然开新标签页","下載失敗":"下载失败","找不到這個影片的封面":"找不到这个视频的封面","封面保存失敗：{0}":"封面保存失败：{0}","錯誤碼 {0}":"错误码 {0}","要先登入 B站才能拉黑":"要先登录 B站才能拉黑","已拉黑「{0}」，再點一次 ⊘ 可取消":"已拉黑“{0}”，再点一次 ⊘ 可取消","已取消拉黑「{0}」":"已取消拉黑“{0}”","拉黑失敗：{0}":"拉黑失败：{0}","首頁主題":"首页主题","主題":"主题","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"极简：只有视频列表。大宝鉴：最上面是整幅海报的视频推荐，右下是你关注的更新，往下滑才是视频列表","極簡":"极简","大寶鑑":"大宝鉴","海報的推薦來源":"海报的推荐来源","綜合熱門":"综合热门","每週必看":"每周必看","右下角的關注更新":"右下角的关注更新","要登入 B站；沒登入時改放同一來源的其他影片":"要登录 B站；没登录时改放同一来源的其他视频","全部動態":"全部动态","只看影片":"只看视频","不顯示":"不显示","海報多久換一張":"海报多久换一张","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"鼠标停在播放那一排按钮上时暂停；系统开了“减弱动态效果”就不自动换","海報畫質":"海报画质","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"原图最清楚，每张约 0.2–1 MB；再清楚也不会超过 UP 主上传的封面","原圖":"原图","壓縮":"压缩","海報輪流放幾部影片":"海报轮流放几部视频","影片列表":"视频列表","不顯示左上角那塊大的輪播推薦":"不显示左上角那块大的轮播推荐","不顯示直播、番劇等推薦卡":"不显示直播、番剧等推荐卡","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"视频列表中间带“直播”“番剧”“综艺”这类角标的卡片","[按鈕]播放":"播放","{0} 讚":"{0} 赞","稍後再看":"稍后再看","上一部":"上一个","下一部":"下一个","推薦影片":"推荐视频","往後":"往后","來源是空的":"来源是空的","關注更新":"关注更新","更多推薦":"更多推荐","大寶鑑載入失敗：{0}":"大宝鉴加载失败：{0}","動態過濾":"动态过滤","隱藏轉發":"隐藏转发","隱藏直播通知":"隐藏直播通知","隱藏預約（直播 / 影片預約）":"隐藏预约（直播 / 视频预约）","隱藏充電專屬":"隐藏充电专属","隱藏專欄":"隐藏专栏","內容含有這些詞就隱藏":"内容含有这些词就隐藏","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"每行一个词；也可以写 /正则/。匹配动态文字、视频标题和被转发的内容。改动后往下滚加载的新动态开始生效","加入常見的廣告用詞":"加入常见的广告用词","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"把一组常见的带货、促销用语加进上面的列表，补足只靠商品卡片认不出来的广告动态；之后可以自己增删","評論區":"评论区","備註":"备注","IP 屬地":"IP 属地","評論顯示 IP 屬地":"评论显示 IP 属地","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"视频、动态、专栏、番剧、直播等页面的评论与回复","專欄作者顯示 IP 屬地":"专栏作者显示 IP 属地","屬地文字替換":"属地文字替换","JSON 鍵值對，例如 {\"IP属地：\":\"\"} 可去掉前綴":"JSON 键值对，例如 {\"IP属地：\":\"\"} 可去掉前缀","用戶標記":"用户标记","評論顯示性別":"评论显示性别","資料來自評論介面，未公開性別的用戶不顯示":"数据来自评论接口，未公开性别的用户不显示","屬地文字替換不是合法 JSON，已忽略":"属地文字替换不是合法 JSON，已忽略","性別：{0}":"性别：{0}","顯示":"显示","顯示用戶備註":"显示用户备注","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"评论区用户名旁、空间页，以及页面上指向该用户空间首页的链接","顯示方式":"显示方式","暱稱後加標籤":"昵称后加标签","只顯示備註":"只显示备注","輸入備註":"输入备注","備註已儲存":"备注已保存","備註已刪除":"备注已删除","編輯備註":"编辑备注","刪除":"删除","儲存":"保存","點擊修改備註":"点击修改备注","給這位用戶加備註":"给这位用户加备注","備註：{0}":"备注：{0}","＋ 備註":"＋ 备注","評論過濾":"评论过滤","評論區快速拉黑":"评论区快速拉黑","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"鼠标移到评论的用户名那一行，出现“拉黑”；点一下加入 B站黑名单并收起他的评论；误点的话到 B站的“黑名单”里移除。需要已登录","評論含有這些詞就隱藏":"评论含有这些词就隐藏","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"留空 = 不启用。每行一个词；也可以写 /正则/。评论和楼中楼回复都会匹配","隱藏帶貨評論":"隐藏带货评论","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"评论里带有商品链接（蓝色的购物车链接）就整条收起，常见于 UP 主置顶的商业推广","已拉黑「{0}」，他的評論已收起":"已拉黑“{0}”，他的评论已收起","加入 B站黑名單":"加入 B站黑名单","畫質":"画质","強制最高畫質（真・原畫）":"强制最高画质（真・原画）","連續載入失敗時會自動退回播放器選擇的畫質":"连续加载失败时会自动退回播放器选择的画质","介面":"界面","網頁全屏 / 全屏時隱藏禮物欄":"网页全屏 / 全屏时隐藏礼物栏","滑鼠移到畫面底部時不再彈出禮物列":"鼠标移到画面底部时不再弹出礼物栏","平時也隱藏禮物欄":"平时也隐藏礼物栏","播放器下方整條禮物 / 包裹列":"播放器下方整条礼物 / 包裹栏","隱藏榜單":"隐藏榜单","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"聊天区上方的高能榜 / 大航海、标题栏的人气榜、礼物星球等入口","隱藏直播區廣告與活動":"隐藏直播区广告与活动","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"播放器下方的活动轮播、分区页横幅、小橙车、活动入口、播放器内的活动浮层","隱藏直播間雜項":"隐藏直播间杂项","進場歡迎條、播放器角標":"进场欢迎条、播放器角标","彈幕":"弹幕","檢查彈幕是否真的發出":"检查弹幕是否真的发出","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"B站对被拦截的弹幕也返回“成功”；这里会提示是系统拦截还是主播屏蔽词","被攔截時自動複製內容":"被拦截时自动复制内容","方便修改後重發":"方便修改后重发","發送成功也提示":"发送成功也提示","最高畫質不可用，已退回播放器選擇的畫質":"最高画质不可用，已退回播放器选择的画质","系統攔截（全站敏感詞）":"系统拦截（全站敏感词）","主播 / 房管屏蔽詞":"主播 / 房管屏蔽词","彈幕發送失敗：{0}":"弹幕发送失败：{0}","彈幕已發出":"弹幕已发出","彈幕沒有發出：{0}{1}":"弹幕没有发出：{0}{1}"," · 內容已複製":" · 内容已复制","彈幕查詢":"弹幕查询","這個頁面找不到影片 BV 號":"这个页面找不到视频 BV 号","取得分 P 列表失敗":"获取分 P 列表失败","記住倍速":"记住倍速","換影片、重新整理後沿用上次調的倍速":"换视频、刷新后沿用上次调的倍速","彈幕預設":"弹幕默认","不變":"不变","開":"开","字幕預設":"字幕默认","影片有字幕時才有作用":"视频有字幕时才有作用","快退 / 快進的秒數":"快退 / 快进的秒数","全螢幕時滾輪調音量":"全屏时滚轮调音量","滑鼠在畫面上滾動，每格 5%":"鼠标在画面上滚动，每格 5%","播完自動退出全螢幕":"播完自动退出全屏","後面沒有接著播下一個影片時才退出":"后面没有接着播下一个视频时才退出","截圖同時複製到剪貼簿":"截图同时复制到剪贴板","截圖一律會下載成 PNG；這項再多複製一份":"截图一律会下载成 PNG；这项再多复制一份","響度均衡":"响度均衡","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"把太大声的地方压低、整体音量拉高，各视频听起来差不多大声。如果开了以后没声音，关掉并刷新","選集":"选集","合集播放順序":"合集播放顺序","一集播完後接著播哪一集":"一集播完后接着播哪一集","隨機":"随机","複製連結時去掉追蹤參數":"复制链接时去掉追踪参数","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"B站“分享 → 复制链接”得到的网址不再带 vd_source、share_source 等","影片還沒載入，無法截圖":"视频还没加载，无法截图","無法取得畫面":"无法获取画面","截圖已保存並複製（{0}）":"截图已保存并复制（{0}）","截圖已保存（{0}）":"截图已保存（{0}）","截圖失敗：{0}":"截图失败：{0}","畫面旋轉 {0}°":"画面旋转 {0}°","畫面旋轉：還原":"画面旋转：还原","畫面鏡像：開":"画面镜像：开","畫面鏡像：關":"画面镜像：关","已複製乾淨連結":"已复制干净链接","複製失敗":"复制失败","要先登入 B站才能加入稍後再看":"要先登录 B站才能加入稍后再看","已加入稍後再看":"已加入稍后再看","加入稍後再看失敗：{0}":"加入稍后再看失败：{0}","已通知所有開著的影片分頁":"已通知所有开着的视频标签页","把所有開著的影片分頁加入稍後再看":"把所有开着的视频标签页加入稍后再看","每個開著影片頁的分頁各自把自己加入；需要已登入":"每个开着视频页的标签页各自把自己加入；需要已登录","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"响度均衡启用失败（播放器已经占用了音频处理）","開關設定面板":"开关设置面板","選集浮層":"选集浮层","合集 / 分 P 清單，全螢幕下也可以用":"合集 / 分 P 列表，全屏下也可以用","這個影片沒有選集":"这个视频没有选集","畫中畫":"画中画","找不到畫中畫按鈕":"找不到画中画按钮","畫面填滿播放器":"画面填满播放器","裁切模式：開":"裁切模式：开","裁切模式：關":"裁切模式：关","字幕開關":"字幕开关","這個影片沒有字幕":"这个视频没有字幕","播放 / 暫停":"播放 / 暂停","秒數在「播放頁 → 播放」裡設定":"秒数在“播放页 → 播放”里设置","快進":"快进","上一幀":"上一帧","會先暫停":"会先暂停","下一幀":"下一帧","截圖":"截图","以影片原始解析度存成 PNG":"以视频原始分辨率存成 PNG","彈幕開關":"弹幕开关","找不到彈幕開關":"找不到弹幕开关","畫面旋轉 90°":"画面旋转 90°","畫面鏡像":"画面镜像","複製乾淨連結":"复制干净链接","不帶任何追蹤參數的影片網址":"不带任何追踪参数的视频网址","保存目前影片的封面":"保存当前视频的封面","所有開著的影片分頁加入稍後再看":"所有开着的视频标签页加入稍后再看","減速 0.25×":"减速 0.25×","打開彈幕查詢":"打开弹幕查询","網頁全屏":"网页全屏","全螢幕":"全屏","收起 / 展開聊天":"收起 / 展开聊天","網頁全屏或全螢幕時才有作用":"网页全屏或全屏时才有作用","先進入網頁全屏或全螢幕，才能收起聊天":"先进入网页全屏或全屏，才能收起聊天","不是這個腳本匯出的設定檔":"不是这个脚本导出的设置文件","設定面板":"设置面板","還原全部預設值":"还原全部默认值","再按一次確認。備註不會被清除":"再按一次确认。备注不会被清除","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"所有开关、数值、快捷键回到默认；屏蔽词和备注保留","確認還原":"确认还原","還原":"还原","已還原預設，重新整理後完全生效":"已还原默认，刷新后完全生效","匯出全部設定":"导出全部设置","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"所有开关、数值、快捷键、屏蔽词和用户备注存成一个 JSON 文件","匯出":"导出","匯入設定":"导入设置","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"读取“导出全部设置”存的文件，覆盖文件里有的项目，其余不动","選擇檔案":"选择文件","已匯入 {0} 項設定，重新整理後完全生效":"已导入 {0} 项设置，刷新后完全生效","匯入失敗：{0}":"导入失败：{0}","JSON 格式錯誤":"JSON 格式错误","複製診斷資訊":"复制诊断信息","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"版面出问题时按一下，把复制到的文字贴给开发者。只有版面信息，不含账号和你的设置内容","複製":"复制","診斷資訊已複製":"诊断信息已复制","外觀":"外观","跟隨系統":"跟随系统","淺色":"浅色","語言":"语言","「自動」會跟隨瀏覽器的語言":"“自动”会跟随浏览器的语言","自動":"自动","強調色":"强调色","B站藍":"B站蓝","快捷鍵":"快捷键","減少":"减少","重新整理頁面後生效":"刷新页面后生效","「{0}」已還原預設":"“{0}”已还原默认","執行":"执行","寬屏版面的構想來自 posthumz 的 ":"宽屏版面的构想来自 posthumz 的 ","，在此致謝。":"，在此致谢。","關於":"关于","搜尋設定":"搜索设置","沒有符合的設定":"没有匹配的设置","搜尋結果":"搜索结果","未設定":"未设置","關閉":"关闭","{0} 設定":"{0} 设置"," 開關面板":" 开关面板","右鍵任一項還原預設":"右键任一项还原默认","重新整理以套用":"刷新以应用","設定":"设置","格式不對":"格式不对","備註清單":"备注列表","搜尋暱稱、備註或 UID":"搜索昵称、备注或 UID","確認刪除":"确认删除","（未知暱稱）":"（未知昵称）","沒有符合的備註":"没有匹配的备注","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"还没有备注。在评论区把鼠标移到用户名那一行点“备注”，或在空间页点“＋ 备注”。","UID 只能是數字":"UID 只能是数字","請輸入備註":"请输入备注","已匯入 {0} 筆備註":"已导入 {0} 条备注","匯入 JSON":"导入 JSON","查詢":"查询","請在影片 / 番劇播放頁打開這一頁。":"请在视频 / 番剧播放页打开这一页。","關鍵字（留空列出全部彈幕）":"关键词（留空列出全部弹幕）","搜尋":"搜索","反查全部發送者":"反查全部发送者","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"UID 超过 11 位（2022 年后注册的 16 位 UID）无法由弹幕反查","跳到這個時間":"跳到这个时间","時間":"时间","發送者":"发送者","載入彈幕中…":"加载弹幕中…","，只顯示前 {0} 條（加關鍵字縮小範圍）":"，只显示前 {0} 条（加关键词缩小范围）","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"共 {0} 条{1}。点时间跳转，点“反查”获取发送者（结果是 CRC32 对应的最小 UID；16 位新 UID 查不到或可能对应到别人）。","沒有符合的彈幕":"没有匹配的弹幕","查詢失敗：{0}":"查询失败：{0}","按下按鍵…":"按下按键…","{0} 已經給「{1}」用了":"{0} 已经给“{1}”用了","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"点按钮后按下新的按键组合。Esc 取消，Delete 停用，右键还原默认。打字时单键快捷键不会触发；和 B站原有按键相同时，以这里的为准。","設定已同步，重新整理後完全生效":"设置已同步，刷新后完全生效"},"yue":{"所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"所有頁面內容區兩邊嘅留白，唔會超過視窗闊度嘅 15%","側欄內容較長時可能顯示不全":"側欄內容太長嗰陣可能顯示唔晒","隱藏帶貨動態":"收埋帶貨動態","播放器跟隨影片比例，上下不留黑邊":"播放器跟住影片比例，上下唔留黑邊","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"播放器下面露出幾多頁面內容；大過 0 嗰陣導航欄會長駐。唔會超過視窗高度嘅 25%","導航欄放在播放器下方":"導航欄放喺播放器下面","向下捲動時導航欄固定在視窗頂部":"向下捲嗰陣導航欄固定喺視窗頂","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"按鈕縮到圖示咁大、間距收窄，慳返嘅闊度全部畀彈幕輸入框","顯示在看人數 / 彈幕數":"顯示睇緊嘅人數 / 彈幕數","平時隱藏控制欄":"平時收埋控制欄","滑鼠移到播放器底部才顯示":"滑鼠移到播放器底部先至顯示","暫停時一直顯示控制欄":"暫停嗰陣一直顯示控制欄","播放時間、播放量等數字等寬顯示，跳動時不抖動":"播放時間、播放量呢啲數字等寬顯示，跳動嗰陣唔會震","全螢幕暫停時保留原況文字":"全螢幕暫停嗰陣保留原況文字","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"開咗之後可以喺全螢幕暫停嘅畫面度框選文字，不過暫停嗰陣右下角嘅按鈕（選集、小窗、退出全螢幕）會撳唔到","隱藏廣告":"收埋廣告","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"首頁推廣卡片、播放頁右欄嘅廣告位同推廣卡片、「檢測到廣告攔截」提示","頁面載入完成後才清空名單，不一定每次都生效":"頁面載入完先至清空名單，唔一定次次都生效","片尾不顯示相關推薦":"片尾唔顯示相關推薦","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"影片播完之後嗰一排「相關推薦」影片；重播呢啲按鈕仲喺度","不替 B站上傳流量；影片位址換回官方 CDN":"唔幫 B站上傳流量；影片位址換返官方 CDN","在播放器的齒輪選單裡，讓畫面填滿播放器":"喺播放器嘅齒輪選單入面，令畫面填滿播放器","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"每行一個詞；都可以寫 /正則/。B站標題多數係簡體字，請用簡體輸入","從標題刪掉這些詞":"喺標題度刪走呢啲詞","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"影片照常顯示，淨係將呢啲詞喺標題度攞走。{0}","標題含有這些詞就隱藏影片":"標題有呢啲詞就收埋影片","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"首頁、推薦、搜尋、排行榜、動態入面成張卡片唔顯示；睇緊嘅影片唔受影響。{0}","連續的驚嘆號、問號縮成一個（！！！→！）":"連續嘅感嘆號、問號縮成一個（！！！→！）","加入常見的標題黨用詞":"加入常見嘅標題黨用詞","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"將一組常見嘅誇張用詞加入「喺標題度刪走呢啲詞」，之後可以自己增刪","這些詞都已經在清單裡了":"呢啲詞全部已經喺清單入面喇","播放量低於這個數就隱藏":"播放量少過呢個數就收埋","0 = 不限":"0 = 唔限","短於這個長度就隱藏":"短過呢個長度就收埋","長於這個長度就隱藏":"長過呢個長度就收埋","發布超過這麼多天就隱藏":"發布超過咁多日就收埋","隱藏豎屏影片":"收埋直度影片","要逐個查影片資料，卡片會晚一點才消失":"要逐條查影片資料，卡片會遲啲先至消失","已關注的 UP 主不過濾":"已關注嘅 UP 主唔過濾","隱藏這些 UP 主的影片":"收埋呢啲 UP 主嘅影片","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"唔顯示 UP 主上傳嘅封面，改用影片嘅第一幀或者隨機一幀。每張卡片要查多一次資料，封面會遲啲先至換；查得太多可能會畀 B站暫時限流。封面工具列嘅保存 / 放大仍然係原本嘅封面","關":"熄","滑鼠停在工具列的放大鏡上，顯示大圖":"滑鼠停喺工具列嘅放大鏡上面，顯示大圖","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"撳工具列嘅「⊘」直接加入 B站黑名單，再撳一次取消；要先登入","影片在本頁打開":"影片喺本頁打開","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"撳影片卡片唔再開新分頁；撳住 ⌘ / Ctrl 或者用中鍵撳就照樣開新分頁","找不到這個影片的封面":"搵唔到呢條影片嘅封面","要先登入 B站才能拉黑":"要先登入 B站先至可以拉黑","找不到 UP 主":"搵唔到 UP 主","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"極簡：淨係得影片列表。大寶鑑：最上面係成幅海報嘅影片推薦，右下係你關注嘅更新，碌落去先至係影片列表","海報的推薦來源":"海報嘅推薦來源","每週必看":"每週必睇","右下角的關注更新":"右下角嘅關注更新","要登入 B站；沒登入時改放同一來源的其他影片":"要登入 B站；未登入嗰陣改放同一來源嘅其他影片","只看影片":"淨係睇影片","不顯示":"唔顯示","海報多久換一張":"海報幾耐換一張","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"滑鼠停喺播放嗰排掣上面嗰陣暫停；系統開咗「減少動態效果」就唔會自動換","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"原圖最清，每張大約 0.2–1 MB；再清都唔會超過 UP 主上傳嘅封面","海報輪流放幾部影片":"海報輪流放幾多部影片","不顯示左上角那塊大的輪播推薦":"唔顯示左上角嗰嚿大嘅輪播推薦","不顯示直播、番劇等推薦卡":"唔顯示直播、番劇呢類推薦卡","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"影片列表中間帶住「直播」「番劇」「綜藝」呢類角標嘅卡片","[按鈕]播放":"播放","稍後再看":"稍後再睇","來源是空的":"來源係空嘅","隱藏轉發":"收埋轉發","隱藏直播通知":"收埋直播通知","隱藏預約（直播 / 影片預約）":"收埋預約（直播 / 影片預約）","隱藏充電專屬":"收埋充電專屬","隱藏專欄":"收埋專欄","內容含有這些詞就隱藏":"內容有呢啲詞就收埋","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"每行一個詞；都可以寫 /正則/。會比對動態文字、影片標題同被轉發嘅內容。改完之後，向下捲載入嘅新動態先至開始生效","加入常見的廣告用詞":"加入常見嘅廣告用詞","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"將一組常見嘅帶貨、促銷用語加入上面嘅清單，補返淨係靠商品卡片認唔出嘅廣告動態；之後可以自己增刪","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"影片、動態、專欄、番劇、直播呢啲頁面嘅評論同回覆","資料來自評論介面，未公開性別的用戶不顯示":"資料嚟自評論介面，冇公開性別嘅用戶唔顯示","屬地文字替換不是合法 JSON，已忽略":"屬地文字替換唔係合法 JSON，已經忽略","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"評論區用戶名隔籬、空間頁，同埋頁面上面指去呢位用戶空間首頁嘅連結","點擊修改備註":"撳一下改備註","給這位用戶加備註":"幫呢位用戶加備註","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"滑鼠移到評論嘅用戶名嗰一行，會出現「拉黑」；撳一下就加入 B站黑名單兼收埋佢嘅評論；撳錯嘅話去 B站嘅「黑名單」度移除。要先登入","評論含有這些詞就隱藏":"評論有呢啲詞就收埋","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"留空 = 唔啟用。每行一個詞；都可以寫 /正則/。評論同樓中樓回覆都會比對","隱藏帶貨評論":"收埋帶貨評論","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"評論入面有商品連結（藍色嘅購物車連結）就成條收埋，常見於 UP 主置頂嘅工商廣告","已拉黑「{0}」，他的評論已收起":"已拉黑「{0}」，佢嘅評論已經收埋","連續載入失敗時會自動退回播放器選擇的畫質":"連續載入失敗嗰陣會自動退返播放器揀嘅畫質","網頁全屏 / 全屏時隱藏禮物欄":"網頁全屏 / 全屏嗰陣收埋禮物欄","滑鼠移到畫面底部時不再彈出禮物列":"滑鼠移到畫面底部嗰陣唔再彈出禮物列","平時也隱藏禮物欄":"平時都收埋禮物欄","播放器下方整條禮物 / 包裹列":"播放器下面成條禮物 / 包裹列","隱藏榜單":"收埋榜單","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"聊天區上面嘅高能榜 / 大航海、標題列嘅人氣榜、禮物星球呢啲入口","隱藏直播區廣告與活動":"收埋直播區廣告同活動","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"播放器下面嘅活動輪播、分區頁橫額、小橙車、活動入口、播放器入面嘅活動浮層","隱藏直播間雜項":"收埋直播間雜項","檢查彈幕是否真的發出":"檢查彈幕係咪真係發咗出去","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"B站對畀人攔截嘅彈幕都會回報「成功」；呢度會提示係系統攔截定係主播屏蔽詞","被攔截時自動複製內容":"畀人攔截嗰陣自動複製內容","發送成功也提示":"發送成功都提示","最高畫質不可用，已退回播放器選擇的畫質":"最高畫質用唔到，已經退返播放器揀嘅畫質","彈幕沒有發出：{0}{1}":"彈幕冇發出：{0}{1}","這個頁面找不到影片 BV 號":"呢個頁面搵唔到影片 BV 號","換影片、重新整理後沿用上次調的倍速":"換影片、重新整理之後沿用上次調嘅倍速","不變":"唔變","影片有字幕時才有作用":"影片有字幕嗰陣先至有用","快退 / 快進的秒數":"快退 / 快進嘅秒數","全螢幕時滾輪調音量":"全螢幕嗰陣用滾輪調音量","滑鼠在畫面上滾動，每格 5%":"滑鼠喺畫面上面滾動，每格 5%","後面沒有接著播下一個影片時才退出":"後面冇接住播下一條影片嗰陣先至退出","截圖同時複製到剪貼簿":"截圖同時複製去剪貼簿","截圖一律會下載成 PNG；這項再多複製一份":"截圖一定會下載成 PNG；呢項會再複製多一份","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"將太大聲嘅地方壓低、整體音量拉高，每條影片聽落差唔多大聲。如果開咗之後冇聲，就熄咗佢再重新整理","一集播完後接著播哪一集":"一集播完之後接住播邊一集","複製連結時去掉追蹤參數":"複製連結嗰陣去走追蹤參數","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"B站「分享 → 複製連結」得到嘅網址唔再帶 vd_source、share_source 呢啲","影片還沒載入，無法截圖":"影片仲未載入，截唔到圖","畫面鏡像：關":"畫面鏡像：熄","要先登入 B站才能加入稍後再看":"要先登入 B站先至可以加入稍後再睇","已加入稍後再看":"已加入稍後再睇","加入稍後再看失敗：{0}":"加入稍後再睇失敗：{0}","已通知所有開著的影片分頁":"已經通知所有開住嘅影片分頁","把所有開著的影片分頁加入稍後再看":"將所有開住嘅影片分頁加入稍後再睇","每個開著影片頁的分頁各自把自己加入；需要已登入":"每個開住影片頁嘅分頁各自將自己加入；要先登入","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"響度均衡啟用失敗（播放器已經佔用咗音訊處理）","合集 / 分 P 清單，全螢幕下也可以用":"合集 / 分 P 清單，全螢幕之下都用得","這個影片沒有選集":"呢條影片冇選集","找不到畫中畫按鈕":"搵唔到畫中畫按鈕","裁切模式：關":"裁切模式：熄","這個影片沒有字幕":"呢條影片冇字幕","秒數在「播放頁 → 播放」裡設定":"秒數喺「播放頁 → 播放」度設定","會先暫停":"會暫停先","找不到彈幕開關":"搵唔到彈幕開關","不帶任何追蹤參數的影片網址":"唔帶任何追蹤參數嘅影片網址","保存目前影片的封面":"保存而家呢條影片嘅封面","所有開著的影片分頁加入稍後再看":"所有開住嘅影片分頁加入稍後再睇","網頁全屏或全螢幕時才有作用":"網頁全屏或者全螢幕嗰陣先至有用","先進入網頁全屏或全螢幕，才能收起聊天":"要先入網頁全屏或者全螢幕，先至可以收埋聊天","不是這個腳本匯出的設定檔":"唔係呢個腳本匯出嘅設定檔","再按一次確認。備註不會被清除":"再撳一次確認。備註唔會被清除","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"所有開關、數值、快捷鍵返去預設；屏蔽詞同備註保留","已還原預設，重新整理後完全生效":"已還原預設，重新整理之後完全生效","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"所有開關、數值、快捷鍵、屏蔽詞同用戶備註存成一個 JSON 檔","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"讀取「匯出全部設定」存嘅檔案，冚過檔案入面有嘅項目，其餘唔郁","已匯入 {0} 項設定，重新整理後完全生效":"已匯入 {0} 項設定，重新整理之後完全生效","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"版面有問題嗰陣撳一下，將複製到嘅文字貼畀開發者。淨係得版面資訊，冇帳號同你嘅設定內容","「自動」會跟隨瀏覽器的語言":"「自動」會跟瀏覽器嘅語言","重新整理頁面後生效":"重新整理頁面之後生效","寬屏版面的構想來自 posthumz 的 ":"寬屏版面嘅構想嚟自 posthumz 嘅","，在此致謝。":"，喺度多謝。","沒有符合的設定":"搵唔到符合嘅設定","右鍵任一項還原預設":"右鍵撳任何一項還原預設","格式不對":"格式唔啱","沒有符合的備註":"搵唔到符合嘅備註","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"仲未有備註。喺評論區將滑鼠移到用戶名嗰一行撳「備註」，或者喺空間頁撳「＋ 備註」。","UID 只能是數字":"UID 只可以係數字","請在影片 / 番劇播放頁打開這一頁。":"請喺影片 / 番劇播放頁打開呢一頁。","查不到":"查唔到","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"UID 超過 11 位（2022 年之後註冊嘅 16 位 UID）冇辦法由彈幕反查","跳到這個時間":"跳去呢個時間","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"共 {0} 條{1}。撳時間跳轉，撳「反查」攞發送者（結果係 CRC32 對應嘅最細 UID；16 位新 UID 查唔到或者可能對應到第二個人）。","沒有符合的彈幕":"搵唔到符合嘅彈幕","按下按鍵…":"撳掣…","{0} 已經給「{1}」用了":"{0} 已經畀「{1}」用咗","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"撳按鈕之後撳新嘅按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字嗰陣單鍵快捷鍵唔會觸發；同 B站原有按鍵一樣嗰陣，以呢度為準。","設定已同步，重新整理後完全生效":"設定已同步，重新整理之後完全生效"},"en":{"比利重啟":"Re:Bi","空白鍵":"Space","數字鍵盤 ":"Numpad","通用":"General","首頁":"Home","播放頁":"Video page","動態 · 空間":"Feed · Space","版面":"Layout","左右邊距":"Side margins","所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"Blank space on both sides of the content on every page, capped at 15% of the window width","動態頁":"Feed page","側欄吸頂":"Sticky sidebar","側欄內容較長時可能顯示不全":"A long sidebar may be cut off","隱藏帶貨動態":"Hide posts that sell products","播放器":"Player","自動高度":"Auto height","播放器跟隨影片比例，上下不留黑邊":"The player follows the video's aspect ratio, with no black bars above or below","預留高度":"Reserved height","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"How much of the page shows below the player. Above 0, the navigation bar stays visible. Capped at 25% of the window height","導航欄":"Navigation bar","導航欄放在播放器下方":"Put the navigation bar below the player","導航欄吸頂":"Sticky navigation bar","向下捲動時導航欄固定在視窗頂部":"The navigation bar stays at the top of the window as you scroll down","控制欄":"Control bar","緊湊控制欄":"Compact control bar","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"Buttons shrink to icon size with tighter spacing, and the saved width goes to the danmaku input box","顯示在看人數 / 彈幕數":"Show viewer count / danmaku count","平時隱藏控制欄":"Hide the control bar when idle","滑鼠移到播放器底部才顯示":"It appears when the pointer moves to the bottom of the player","暫停時一直顯示控制欄":"Always show the control bar while paused","小窗可調整":"Adjustable mini player","拖小窗左邊緣改寬度，拖小窗本身改位置，並記住":"Drag its left edge to resize and drag the mini player itself to move it. Both are remembered","小窗位置與寬度":"Mini player position and width","回到右下角、預設寬度":"Back to the bottom right corner at the default width","重設":"Reset","小窗已重設":"Mini player reset","字體":"Fonts","使用系統字體":"Use system fonts","Mac 上用蘋方 / San Francisco，Windows 上用微軟雅黑，並開啟字體平滑":"PingFang / San Francisco on Mac, Microsoft YaHei on Windows, with font smoothing turned on","等寬數字":"Tabular numbers","播放時間、播放量等數字等寬顯示，跳動時不抖動":"Numbers such as playback time and view counts use equal widths, so they do not jitter as they change","全螢幕暫停時保留原況文字":"Keep Live Text when paused in full screen","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"When on, you can select text in the paused full screen picture, but the bottom right buttons (episodes, mini player, exit full screen) cannot be clicked while paused","淨化":"Cleanup","直播":"Live","頁面":"Page","去掉全站黑白濾鏡":"Remove the site-wide grayscale filter","隱藏廣告":"Hide ads","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"Promoted cards on the home page, ad slots and promoted cards in the right column of the video page, and the \"ad blocker detected\" notice","跳過片尾充電名單":"Skip the supporter list at the end of videos","頁面載入完成後才清空名單，不一定每次都生效":"The list is cleared only after the page finishes loading, so it may not work every time","專欄允許複製":"Allow copying in articles","片尾不顯示相關推薦":"Hide related videos at the end","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"The row of \"related videos\" shown after a video ends. Replay and the other buttons stay","隱私":"Privacy","清理網址追蹤參數":"Remove tracking parameters from URLs","spm_id_from、vd_source、share_* 等":"spm_id_from, vd_source, share_* and so on","攔截資料上報":"Block data reporting","data.bilibili.com / cm.bilibili.com、Sentry、瀏覽器指紋":"data.bilibili.com / cm.bilibili.com, Sentry, browser fingerprinting","播放":"Playback","停用 P2P CDN 與 WebRTC":"Turn off P2P CDN and WebRTC","不替 B站上傳流量；影片位址換回官方 CDN":"Stops uploading traffic for Bilibili. Video addresses switch back to the official CDN","播放器設定加入「裁切模式」":"Add \"Crop mode\" to the player settings","在播放器的齒輪選單裡，讓畫面填滿播放器":"In the player's gear menu. Makes the picture fill the player","裁切模式":"Crop mode","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"One word per line. /regex/ also works. Most Bilibili titles are in Simplified Chinese, so type in Simplified","標題黨":"Clickbait titles","從標題刪掉這些詞":"Remove these words from titles","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"Videos still show. Only these words are removed from the title. {0}","標題含有這些詞就隱藏影片":"Hide videos whose title contains these words","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"The whole card is hidden on the home page, recommendations, search, rankings and the feed. The video you are watching is not affected. {0}","收斂誇張標點":"Tone down excessive punctuation","連續的驚嘆號、問號縮成一個（！！！→！）":"Repeated exclamation and question marks shrink to one (！！！→！)","加入常見的標題黨用詞":"Add common clickbait words","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"Adds a set of common exaggerated words to \"Remove these words from titles\". You can edit the list afterwards","加入":"Add","這些詞都已經在清單裡了":"These words are all in the list already","已加入 {0} 個詞":"Added {0} words","首頁推薦過濾":"Home recommendation filter","播放量低於這個數就隱藏":"Hide videos with fewer views than this","0 = 不限":"0 = no limit","次":"views","短於這個長度就隱藏":"Hide videos shorter than this","秒":"s","長於這個長度就隱藏":"Hide videos longer than this","分":"min","發布超過這麼多天就隱藏":"Hide videos published more than this many days ago","天":"days","隱藏豎屏影片":"Hide vertical videos","要逐個查影片資料，卡片會晚一點才消失":"Each video has to be looked up, so cards disappear a moment later","已關注的 UP 主不過濾":"Do not filter uploaders you follow","隱藏這些 UP 主的影片":"Hide videos from these uploaders","每行一個，寫 UP 主名稱或 UID":"One per line. Enter an uploader name or UID","封面黨（激進）":"Clickbait covers (aggressive)","替換影片封面":"Replace video covers","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"Hides the cover the uploader chose and uses the first frame or a random frame of the video. Each card needs one more lookup, so covers change a moment later, and too many lookups may get you rate limited by Bilibili for a while. Save / enlarge in the cover toolbar still use the original cover","關":"Off","第一幀":"First frame","隨機一幀":"Random frame","影片卡片":"Video cards","封面快速保存":"Quick cover save","滑鼠移到影片卡片上，封面左上角出現工具列，點「↓」下載原尺寸封面":"Hover over a video card and a toolbar appears at the top left of the cover. Click \"↓\" to download the cover at full size","封面懸浮放大":"Enlarge cover on hover","滑鼠停在工具列的放大鏡上，顯示大圖":"Hover over the magnifier in the toolbar to see the large image","一鍵拉黑 UP 主":"One-click block uploader","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"Click \"⊘\" in the toolbar to add the uploader to your Bilibili blocklist. Click again to undo. Sign-in required","影片在本頁打開":"Open videos in the same tab","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"Clicking a video card no longer opens a new tab. Hold ⌘ / Ctrl or middle-click to open one","下載失敗":"Download failed","找不到這個影片的封面":"Cannot find the cover of this video","封面已保存":"Cover saved","封面保存失敗：{0}":"Could not save the cover: {0}","錯誤碼 {0}":"Error code {0}","保存封面":"Save cover","放大封面":"Enlarge cover","拉黑 UP 主":"Block uploader","要先登入 B站才能拉黑":"Sign in to Bilibili to block","找不到 UP 主":"Cannot find the uploader","已拉黑「{0}」，再點一次 ⊘ 可取消":"Blocked \"{0}\". Click ⊘ again to undo","已取消拉黑「{0}」":"Unblocked \"{0}\"","拉黑失敗：{0}":"Block failed: {0}","首頁主題":"Home theme","主題":"Theme","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"Minimal: only the video list. Showcase: a full-width poster of recommended videos at the top, updates from people you follow at the bottom right, and the video list further down","極簡":"Minimal","大寶鑑":"Showcase","海報的推薦來源":"Poster source","綜合熱門":"Popular","每週必看":"Weekly picks","排行榜":"Rankings","入站必刷":"All-time classics","右下角的關注更新":"Following updates at the bottom right","要登入 B站；沒登入時改放同一來源的其他影片":"Sign-in required. When signed out, other videos from the same source are shown instead","全部動態":"All posts","只看影片":"Videos only","不顯示":"Hidden","海報多久換一張":"How often the poster changes","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"Pauses while the pointer is over the row of buttons with Play. Does not change automatically when the system has Reduce Motion on","海報畫質":"Poster quality","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"Original is sharpest, about 0.2–1 MB each. It can never be sharper than the cover the uploader provided","原圖":"Original","壓縮":"Compressed","海報輪流放幾部影片":"Number of videos in the poster rotation","最少 4 部，最多 30 部":"From 4 to 30","部":"videos","影片列表":"Video list","不顯示左上角那塊大的輪播推薦":"Hide the large carousel at the top left","不顯示直播、番劇等推薦卡":"Hide live and series recommendation cards","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"The cards in the video list that carry a badge such as Live, Anime or Variety","{0} 次播放":"{0} views","[按鈕]播放":"Play","{0} 讚":"{0} likes","稍後再看":"Watch later","上一部":"Previous","下一部":"Next","推薦影片":"Recommended videos","往前":"Back","往後":"Forward","來源是空的":"The source is empty","關注更新":"From people you follow","更多推薦":"More picks","大寶鑑載入失敗：{0}":"Showcase failed to load: {0}","動態過濾":"Feed filter","隱藏轉發":"Hide reposts","隱藏直播通知":"Hide live notifications","隱藏預約（直播 / 影片預約）":"Hide reservations (live / video)","隱藏充電專屬":"Hide supporter-only posts","隱藏專欄":"Hide articles","內容含有這些詞就隱藏":"Hide posts containing these words","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"One word per line. /regex/ also works. Matches the post text, video titles and reposted content. Changes apply to posts loaded as you scroll down","加入常見的廣告用詞":"Add common ad words","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"Adds a set of common sales and promotion phrases to the list above, to catch ad posts that the product card alone does not reveal. You can edit the list afterwards","評論區":"Comments","備註":"Notes","IP 屬地":"IP location","評論顯示 IP 屬地":"Show IP location in comments","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"Comments and replies on videos, posts, articles, anime, live and other pages","專欄作者顯示 IP 屬地":"Show IP location of article authors","屬地文字替換":"Location text replacement","JSON 鍵值對，例如 {\"IP属地：\":\"\"} 可去掉前綴":"JSON key-value pairs. For example {\"IP属地：\":\"\"} removes the prefix","用戶標記":"User marks","評論顯示性別":"Show gender in comments","資料來自評論介面，未公開性別的用戶不顯示":"The data comes from the comment API. Users who keep their gender private are not marked","屬地文字替換不是合法 JSON，已忽略":"The location text replacement is not valid JSON and was ignored","性別：{0}":"Gender: {0}","男":"Male","女":"Female","顯示":"Display","顯示用戶備註":"Show user notes","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"Next to user names in comments, on space pages, and on links that point to the user's space","顯示方式":"Display style","暱稱後加標籤":"Tag after the name","只顯示備註":"Note only","輸入備註":"Enter a note","備註已儲存":"Note saved","備註已刪除":"Note deleted","編輯備註":"Edit note","刪除":"Delete","取消":"Cancel","儲存":"Save","點擊修改備註":"Click to edit the note","給這位用戶加備註":"Add a note for this user","備註：{0}":"Note: {0}","＋ 備註":"+ Note","評論過濾":"Comment filter","評論區快速拉黑":"Quick block in comments","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"Hover over the user name line of a comment and \"Block\" appears. One click adds the user to your Bilibili blocklist and collapses their comments. Remove them in Bilibili's blocklist if it was a mistake. Sign-in required","評論含有這些詞就隱藏":"Hide comments containing these words","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"Empty = off. One word per line. /regex/ also works. Comments and nested replies are both matched","隱藏帶貨評論":"Hide comments that sell products","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"Comments with a product link (the blue shopping cart link) are collapsed entirely. Common in sponsored comments pinned by the uploader","已拉黑「{0}」，他的評論已收起":"Blocked \"{0}\". Their comments are collapsed","加入 B站黑名單":"Add to Bilibili blocklist","拉黑":"Block","畫質":"Quality","直播停用 P2P / 第三方 CDN":"Turn off P2P / third-party CDN for live","強制最高畫質（真・原畫）":"Force the highest quality (true original)","連續載入失敗時會自動退回播放器選擇的畫質":"Falls back to the quality the player chose after repeated loading failures","介面":"Interface","網頁全屏 / 全屏時隱藏禮物欄":"Hide the gift bar in web full screen / full screen","滑鼠移到畫面底部時不再彈出禮物列":"The gift row no longer pops up when the pointer moves to the bottom of the picture","平時也隱藏禮物欄":"Also hide the gift bar normally","播放器下方整條禮物 / 包裹列":"The whole gift / pack row below the player","隱藏榜單":"Hide rankings","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"The top fans / fleet list above the chat, the popularity ranking in the title bar, gift planet and similar entries","隱藏直播區廣告與活動":"Hide ads and events in live","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"The event carousel below the player, section banners, the shopping cart, event entries and event overlays in the player","隱藏直播間雜項":"Hide live room extras","進場歡迎條、播放器角標":"Entrance welcome bars and player corner badges","彈幕":"Danmaku","檢查彈幕是否真的發出":"Check whether danmaku were really sent","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"Bilibili reports \"success\" even for blocked danmaku. This tells you whether the system or the streamer's blocked words stopped it","被攔截時自動複製內容":"Copy the text automatically when blocked","方便修改後重發":"So you can edit it and send again","發送成功也提示":"Also notify on success","最高畫質不可用，已退回播放器選擇的畫質":"The highest quality is not available. Fell back to the quality the player chose","系統攔截（全站敏感詞）":"Blocked by the system (site-wide sensitive words)","主播 / 房管屏蔽詞":"Streamer / moderator blocked words","彈幕發送失敗：{0}":"Danmaku failed to send: {0}","彈幕已發出":"Danmaku sent","彈幕沒有發出：{0}{1}":"Danmaku not sent: {0}{1}"," · 內容已複製":" · Text copied","彈幕查詢":"Danmaku lookup","這個頁面找不到影片 BV 號":"Cannot find a BV number on this page","取得分 P 列表失敗":"Could not get the part list","記住倍速":"Remember playback speed","換影片、重新整理後沿用上次調的倍速":"Keeps the speed you last set across videos and reloads","彈幕預設":"Danmaku default","不變":"Unchanged","開":"On","字幕預設":"Subtitle default","影片有字幕時才有作用":"Only applies when the video has subtitles","快退 / 快進的秒數":"Seconds for rewind / fast forward","全螢幕時滾輪調音量":"Scroll to change volume in full screen","滑鼠在畫面上滾動，每格 5%":"Scroll over the picture, 5% per step","播完自動退出全螢幕":"Exit full screen when playback ends","後面沒有接著播下一個影片時才退出":"Only when no next video follows","截圖同時複製到剪貼簿":"Also copy screenshots to the clipboard","截圖一律會下載成 PNG；這項再多複製一份":"Screenshots are always downloaded as PNG. This copies one as well","響度均衡":"Loudness equalization","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"Lowers the loud parts and raises the overall volume so videos sound about equally loud. If there is no sound after turning it on, turn it off and reload","選集":"Episodes","合集播放順序":"Collection play order","一集播完後接著播哪一集":"Which episode plays after one ends","正常":"Normal","倒序":"Reverse","隨機":"Shuffle","複製連結時去掉追蹤參數":"Remove tracking parameters when copying links","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"URLs from Bilibili's \"Share → Copy link\" no longer carry vd_source, share_source and so on","倍速 {0}×":"Speed {0}×","影片還沒載入，無法截圖":"The video has not loaded yet, so no screenshot can be taken","無法取得畫面":"Cannot get the picture","截圖已保存並複製（{0}）":"Screenshot saved and copied ({0})","截圖已保存（{0}）":"Screenshot saved ({0})","截圖失敗：{0}":"Screenshot failed: {0}","畫面旋轉 {0}°":"Rotated {0}°","畫面旋轉：還原":"Rotation: reset","畫面鏡像：開":"Mirror: on","畫面鏡像：關":"Mirror: off","已複製乾淨連結":"Clean link copied","複製失敗":"Copy failed","要先登入 B站才能加入稍後再看":"Sign in to Bilibili to add to Watch later","已加入稍後再看":"Added to Watch later","加入稍後再看失敗：{0}":"Could not add to Watch later: {0}","已通知所有開著的影片分頁":"All open video tabs have been notified","把所有開著的影片分頁加入稍後再看":"Add all open video tabs to Watch later","每個開著影片頁的分頁各自把自己加入；需要已登入":"Each tab with a video page adds itself. Sign-in required","音量 {0}%":"Volume {0}%","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"Loudness equalization could not start (the player is already using audio processing)","開關設定面板":"Toggle the settings panel","選集浮層":"Episode overlay","合集 / 分 P 清單，全螢幕下也可以用":"Collection / part list. Also works in full screen","這個影片沒有選集":"This video has no episodes","畫中畫":"Picture in picture","找不到畫中畫按鈕":"Cannot find the picture in picture button","畫面填滿播放器":"The picture fills the player","裁切模式：開":"Crop mode: on","裁切模式：關":"Crop mode: off","字幕開關":"Toggle subtitles","這個影片沒有字幕":"This video has no subtitles","播放 / 暫停":"Play / pause","快退":"Rewind","秒數在「播放頁 → 播放」裡設定":"Set the seconds in \"Video page → Playback\"","快進":"Fast forward","上一幀":"Previous frame","會先暫停":"Pauses first","下一幀":"Next frame","截圖":"Screenshot","以影片原始解析度存成 PNG":"Saved as PNG at the video's original resolution","彈幕開關":"Toggle danmaku","找不到彈幕開關":"Cannot find the danmaku switch","畫面旋轉 90°":"Rotate 90°","畫面鏡像":"Mirror","複製乾淨連結":"Copy clean link","不帶任何追蹤參數的影片網址":"The video URL without any tracking parameters","保存目前影片的封面":"Save the cover of the current video","所有開著的影片分頁加入稍後再看":"Add every open video tab to Watch later","加速 0.25×":"Speed up 0.25×","減速 0.25×":"Slow down 0.25×","回到 1× 倍速":"Back to 1× speed","打開彈幕查詢":"Open danmaku lookup","網頁全屏":"Web full screen","全螢幕":"Full screen","收起 / 展開聊天":"Collapse / expand chat","網頁全屏或全螢幕時才有作用":"Only works in web full screen or full screen","先進入網頁全屏或全螢幕，才能收起聊天":"Enter web full screen or full screen first to collapse the chat","不是這個腳本匯出的設定檔":"This settings file was not exported by this script","設定面板":"Settings panel","還原全部預設值":"Restore all defaults","再按一次確認。備註不會被清除":"Press again to confirm. Notes are not cleared","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"All switches, values and shortcuts return to their defaults. Blocked words and notes are kept","確認還原":"Confirm restore","還原":"Restore","已還原預設，重新整理後完全生效":"Defaults restored. Reload for full effect","匯出全部設定":"Export all settings","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"Saves all switches, values, shortcuts, blocked words and user notes as one JSON file","匯出":"Export","匯入設定":"Import settings","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"Reads a file saved by \"Export all settings\". Items in the file are overwritten and the rest stay as they are","選擇檔案":"Choose file","已匯入 {0} 項設定，重新整理後完全生效":"Imported {0} settings. Reload for full effect","匯入失敗：{0}":"Import failed: {0}","JSON 格式錯誤":"Invalid JSON","複製診斷資訊":"Copy diagnostics","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"Press this when the layout looks wrong and paste the copied text to the developer. Layout information only, no account data and none of your settings","複製":"Copy","診斷資訊已複製":"Diagnostics copied","外觀":"Appearance","跟隨系統":"System","淺色":"Light","深色":"Dark","語言":"Language","「自動」會跟隨瀏覽器的語言":"\"Auto\" follows your browser language","自動":"Auto","強調色":"Accent color","B站粉":"Bilibili pink","B站藍":"Bilibili blue","石墨":"Graphite","快捷鍵":"Shortcuts","減少":"Decrease","增加":"Increase","重新整理頁面後生效":"Takes effect after reloading the page","「{0}」已還原預設":"\"{0}\" restored to default","執行":"Run","寬屏版面的構想來自 posthumz 的 ":"The widescreen layout is inspired by posthumz's","，在此致謝。":". Thank you.","關於":"About","搜尋設定":"Search settings","沒有符合的設定":"No matching settings","搜尋結果":"Search results","未設定":"Not set","關閉":"Close","{0} 設定":"{0} settings"," 開關面板":" toggles the panel","右鍵任一項還原預設":"Right-click any item to restore its default","重新整理以套用":"Reload to apply","設定":"Settings","格式不對":"Wrong format","備註清單":"Note list","搜尋暱稱、備註或 UID":"Search name, note or UID","確認刪除":"Confirm delete","（未知暱稱）":"(unknown name)","沒有符合的備註":"No matching notes","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"No notes yet. In comments, hover over the user name line and click \"Note\", or click \"+ Note\" on a space page.","UID 只能是數字":"UID must be digits only","請輸入備註":"Please enter a note","已匯入 {0} 筆備註":"Imported {0} notes","匯入 JSON":"Import JSON","新增":"Add","查詢":"Look up","請在影片 / 番劇播放頁打開這一頁。":"Open this page on a video / anime player page.","關鍵字（留空列出全部彈幕）":"Keyword (leave empty to list all danmaku)","搜尋":"Search","反查全部發送者":"Look up all senders","反查中…":"Looking up…","查不到":"Not found","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"UIDs longer than 11 digits (16-digit UIDs registered after 2022) cannot be looked up from danmaku","反查":"Look up","跳到這個時間":"Jump to this time","時間":"Time","日期":"Date","發送者":"Sender","反查中 {0}/{1}":"Looking up {0}/{1}","載入彈幕中…":"Loading danmaku…","，只顯示前 {0} 條（加關鍵字縮小範圍）":", showing only the first {0} (add a keyword to narrow down)","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"{0} in total{1}. Click a time to jump. Click \"Look up\" to get the sender (the result is the smallest UID matching the CRC32. New 16-digit UIDs cannot be found or may match someone else).","沒有符合的彈幕":"No matching danmaku","查詢失敗：{0}":"Lookup failed: {0}","按下按鍵…":"Press a key…","{0} 已經給「{1}」用了":"{0} is already used by \"{1}\"","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"Click a button, then press the new key combination. Esc cancels, Delete disables, right-click restores the default. Single-key shortcuts do not fire while you type. When a key matches one of Bilibili's own, this one wins.","設定已同步，重新整理後完全生效":"Settings synced. Reload for full effect"},"ja":{"比利重啟":"Re:Bi","空白鍵":"スペース","數字鍵盤 ":"テンキー","通用":"一般","首頁":"ホーム","播放頁":"再生ページ","動態 · 空間":"フィード · スペース","版面":"レイアウト","左右邊距":"左右の余白","所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"すべてのページでコンテンツの両側に空ける幅。ウインドウ幅の 15% まで","動態頁":"フィードページ","側欄吸頂":"サイドバーを固定","側欄內容較長時可能顯示不全":"サイドバーが長いと全部表示されないことがあります","隱藏帶貨動態":"商品紹介の投稿を隠す","播放器":"プレーヤー","自動高度":"高さを自動調整","播放器跟隨影片比例，上下不留黑邊":"プレーヤーを動画の縦横比に合わせ、上下に黒帯を出しません","預留高度":"下に残す高さ","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"プレーヤーの下にページをどれだけ見せるか。0 より大きいとナビゲーションバーが常に表示されます。ウインドウの高さの 25% まで","導航欄":"ナビゲーションバー","導航欄放在播放器下方":"ナビゲーションバーをプレーヤーの下に置く","導航欄吸頂":"ナビゲーションバーを固定","向下捲動時導航欄固定在視窗頂部":"下にスクロールしてもナビゲーションバーがウインドウの上端に残ります","控制欄":"コントロールバー","緊湊控制欄":"コンパクトなコントロールバー","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"ボタンをアイコンの大きさにして間隔を詰め、空いた幅を弾幕の入力欄に回します","顯示在看人數 / 彈幕數":"視聴中の人数 / 弾幕数を表示","平時隱藏控制欄":"ふだんはコントロールバーを隠す","滑鼠移到播放器底部才顯示":"ポインタをプレーヤーの下端に動かすと表示されます","暫停時一直顯示控制欄":"一時停止中はコントロールバーを常に表示","小窗可調整":"ミニプレーヤーを調整可能にする","拖小窗左邊緣改寬度，拖小窗本身改位置，並記住":"左端をドラッグで幅を変更、本体をドラッグで移動。どちらも記憶します","小窗位置與寬度":"ミニプレーヤーの位置と幅","回到右下角、預設寬度":"右下、既定の幅に戻します","重設":"リセット","小窗已重設":"ミニプレーヤーをリセットしました","字體":"フォント","使用系統字體":"システムフォントを使う","Mac 上用蘋方 / San Francisco，Windows 上用微軟雅黑，並開啟字體平滑":"Mac では PingFang / San Francisco、Windows では Microsoft YaHei を使い、フォントスムージングを有効にします","等寬數字":"等幅数字","播放時間、播放量等數字等寬顯示，跳動時不抖動":"再生時間や再生数などの数字を等幅で表示し、変化してもがたつきません","全螢幕暫停時保留原況文字":"フルスクリーンの一時停止中もテキスト認識を残す","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"オンにするとフルスクリーンで一時停止した画面の文字を選択できますが、一時停止中は右下のボタン（エピソード、ミニプレーヤー、フルスクリーン解除）が押せなくなります","淨化":"クリーンアップ","直播":"ライブ","頁面":"ページ","去掉全站黑白濾鏡":"サイト全体のモノクロフィルタを外す","隱藏廣告":"広告を隠す","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"ホームのプロモーションカード、再生ページ右欄の広告枠とプロモーションカード、「広告ブロックを検出」の通知","跳過片尾充電名單":"動画の最後のサポーター一覧を飛ばす","頁面載入完成後才清空名單，不一定每次都生效":"ページの読み込みが終わってから一覧を消すので、毎回効くとは限りません","專欄允許複製":"記事のコピーを許可","片尾不顯示相關推薦":"動画の最後に関連動画を表示しない","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"再生が終わったあとに並ぶ「関連動画」。リプレイなどのボタンは残ります","隱私":"プライバシー","清理網址追蹤參數":"URL の追跡パラメータを削除","spm_id_from、vd_source、share_* 等":"spm_id_from、vd_source、share_* など","攔截資料上報":"データ送信をブロック","data.bilibili.com / cm.bilibili.com、Sentry、瀏覽器指紋":"data.bilibili.com / cm.bilibili.com、Sentry、ブラウザフィンガープリント","播放":"再生","停用 P2P CDN 與 WebRTC":"P2P CDN と WebRTC を無効にする","不替 B站上傳流量；影片位址換回官方 CDN":"ビリビリのために通信をアップロードしません。動画のアドレスを公式 CDN に戻します","播放器設定加入「裁切模式」":"プレーヤー設定に「クロップモード」を追加","在播放器的齒輪選單裡，讓畫面填滿播放器":"プレーヤーの歯車メニューの中。映像をプレーヤーいっぱいに広げます","裁切模式":"クロップモード","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"1 行に 1 語。/正規表現/ も使えます。ビリビリのタイトルは簡体字が多いので、簡体字で入力してください","標題黨":"釣りタイトル","從標題刪掉這些詞":"タイトルからこれらの語を消す","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"動画はそのまま表示し、タイトルからこれらの語だけを取り除きます。{0}","標題含有這些詞就隱藏影片":"タイトルにこれらの語がある動画を隠す","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"ホーム、おすすめ、検索、ランキング、フィードでカードごと表示しません。視聴中の動画には影響しません。{0}","收斂誇張標點":"大げさな記号を抑える","連續的驚嘆號、問號縮成一個（！！！→！）":"連続する感嘆符や疑問符を 1 つにまとめます（！！！→！）","加入常見的標題黨用詞":"よくある釣りタイトルの語を追加","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"よくある大げさな語をまとめて「タイトルからこれらの語を消す」に追加します。あとで自由に増減できます","加入":"追加","這些詞都已經在清單裡了":"これらの語はすでにリストにあります","已加入 {0} 個詞":"{0} 語を追加しました","首頁推薦過濾":"ホームのおすすめフィルタ","播放量低於這個數就隱藏":"再生数がこの数より少ない動画を隠す","0 = 不限":"0 = 制限なし","次":"回","短於這個長度就隱藏":"この長さより短い動画を隠す","長於這個長度就隱藏":"この長さより長い動画を隠す","發布超過這麼多天就隱藏":"公開からこの日数を過ぎた動画を隠す","天":"日","隱藏豎屏影片":"縦型動画を隠す","要逐個查影片資料，卡片會晚一點才消失":"動画を 1 本ずつ調べるので、カードが消えるまで少し時間がかかります","已關注的 UP 主不過濾":"フォロー中の投稿者は対象外","隱藏這些 UP 主的影片":"これらの投稿者の動画を隠す","每行一個，寫 UP 主名稱或 UID":"1 行に 1 人。投稿者名か UID を書きます","封面黨（激進）":"釣りサムネイル（強力）","替換影片封面":"動画のサムネイルを置き換える","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"投稿者が設定したサムネイルを表示せず、動画の最初のフレームかランダムなフレームを使います。カードごとに 1 回多く問い合わせるのでサムネイルの切り替えが少し遅れ、問い合わせが多すぎるとビリビリに一時的に制限されることがあります。サムネイルツールバーの保存 / 拡大は元のサムネイルのままです","關":"オフ","第一幀":"最初のフレーム","隨機一幀":"ランダムなフレーム","影片卡片":"動画カード","封面快速保存":"サムネイルをすばやく保存","滑鼠移到影片卡片上，封面左上角出現工具列，點「↓」下載原尺寸封面":"動画カードにポインタを合わせるとサムネイルの左上にツールバーが出ます。「↓」で元のサイズのサムネイルをダウンロードします","封面懸浮放大":"ホバーでサムネイルを拡大","滑鼠停在工具列的放大鏡上，顯示大圖":"ツールバーの虫めがねにポインタを合わせると大きな画像を表示します","一鍵拉黑 UP 主":"ワンクリックで投稿者をブロック","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"ツールバーの「⊘」でビリビリのブロックリストに追加、もう一度押すと解除。ログインが必要です","影片在本頁打開":"動画を同じタブで開く","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"動画カードをクリックしても新しいタブを開きません。⌘ / Ctrl を押しながら、または中クリックなら新しいタブで開きます","下載失敗":"ダウンロードに失敗しました","找不到這個影片的封面":"この動画のサムネイルが見つかりません","封面已保存":"サムネイルを保存しました","封面保存失敗：{0}":"サムネイルを保存できませんでした：{0}","錯誤碼 {0}":"エラーコード {0}","保存封面":"サムネイルを保存","放大封面":"サムネイルを拡大","拉黑 UP 主":"投稿者をブロック","要先登入 B站才能拉黑":"ブロックするにはビリビリにログインしてください","找不到 UP 主":"投稿者が見つかりません","已拉黑「{0}」，再點一次 ⊘ 可取消":"「{0}」をブロックしました。もう一度 ⊘ を押すと解除できます","已取消拉黑「{0}」":"「{0}」のブロックを解除しました","拉黑失敗：{0}":"ブロックに失敗しました：{0}","首頁主題":"ホームのテーマ","主題":"テーマ","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"ミニマル：動画リストだけ。ショーケース：いちばん上に画面いっぱいのおすすめ動画ポスター、右下にフォロー中の更新、下にスクロールすると動画リスト","極簡":"ミニマル","大寶鑑":"ショーケース","海報的推薦來源":"ポスターのおすすめ元","綜合熱門":"総合人気","每週必看":"毎週の必見","排行榜":"ランキング","入站必刷":"殿堂入り","右下角的關注更新":"右下のフォロー中の更新","要登入 B站；沒登入時改放同一來源的其他影片":"ビリビリへのログインが必要です。未ログインのときは同じおすすめ元のほかの動画を表示します","全部動態":"すべての投稿","只看影片":"動画のみ","不顯示":"表示しない","海報多久換一張":"ポスターを切り替える間隔","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"ポインタが再生ボタンの並びの上にある間は止まります。システムの「視差効果を減らす」がオンのときは自動で切り替わりません","海報畫質":"ポスターの画質","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"オリジナルが最も鮮明で、1 枚あたり約 0.2〜1 MB。投稿者がアップロードしたカバー以上には鮮明になりません","原圖":"オリジナル","壓縮":"圧縮","海報輪流放幾部影片":"ポスターで順に表示する動画の数","最少 4 部，最多 30 部":"4〜30 本","部":"本","影片列表":"動画リスト","不顯示左上角那塊大的輪播推薦":"左上の大きなカルーセルを表示しない","不顯示直播、番劇等推薦卡":"ライブ・アニメなどのおすすめカードを表示しない","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"動画リストの途中にある「ライブ」「アニメ」「バラエティ」などのバッジ付きカード","{0} 次播放":"{0} 回再生","[按鈕]播放":"再生","{0} 讚":"{0} いいね","稍後再看":"あとで見る","上一部":"前へ","下一部":"次へ","推薦影片":"おすすめ動画","往前":"戻る","往後":"進む","來源是空的":"おすすめ元が空です","關注更新":"フォロー中の更新","更多推薦":"ほかのおすすめ","大寶鑑載入失敗：{0}":"ショーケースを読み込めませんでした：{0}","動態過濾":"フィードフィルタ","隱藏轉發":"リポストを隠す","隱藏直播通知":"ライブ通知を隠す","隱藏預約（直播 / 影片預約）":"予約（ライブ / 動画の予約）を隠す","隱藏充電專屬":"サポーター限定の投稿を隠す","隱藏專欄":"記事を隠す","內容含有這些詞就隱藏":"これらの語を含む投稿を隠す","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"1 行に 1 語。/正規表現/ も使えます。投稿の本文、動画タイトル、リポスト元の内容と照合します。変更は、下にスクロールして読み込まれる投稿から反映されます","加入常見的廣告用詞":"よくある広告の語を追加","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"よくある販売・セールの言い回しをまとめて上のリストに追加し、商品カードだけでは見分けられない広告投稿を補います。あとで自由に増減できます","評論區":"コメント欄","備註":"メモ","IP 屬地":"IP 所在地","評論顯示 IP 屬地":"コメントに IP 所在地を表示","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"動画、投稿、記事、アニメ、ライブなどのページのコメントと返信","專欄作者顯示 IP 屬地":"記事の著者の IP 所在地を表示","屬地文字替換":"所在地の文字を置き換える","JSON 鍵值對，例如 {\"IP属地：\":\"\"} 可去掉前綴":"JSON のキーと値の組。たとえば {\"IP属地：\":\"\"} で先頭の文字を消せます","用戶標記":"ユーザーマーク","評論顯示性別":"コメントに性別を表示","資料來自評論介面，未公開性別的用戶不顯示":"データはコメント API から取得します。性別を公開していないユーザーには表示しません","屬地文字替換不是合法 JSON，已忽略":"所在地の文字の置き換えが正しい JSON ではないため、無視しました","男":"男性","女":"女性","顯示":"表示","顯示用戶備註":"ユーザーメモを表示","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"コメント欄のユーザー名の横、スペースページ、そのユーザーのスペースへのリンク","顯示方式":"表示方法","暱稱後加標籤":"名前のあとにタグ","只顯示備註":"メモだけ表示","輸入備註":"メモを入力","備註已儲存":"メモを保存しました","備註已刪除":"メモを削除しました","編輯備註":"メモを編集","刪除":"削除","取消":"キャンセル","儲存":"保存","點擊修改備註":"クリックしてメモを編集","給這位用戶加備註":"このユーザーにメモを付ける","備註：{0}":"メモ：{0}","＋ 備註":"＋ メモ","評論過濾":"コメントフィルタ","評論區快速拉黑":"コメント欄ですばやくブロック","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"コメントのユーザー名の行にポインタを合わせると「ブロック」が出ます。押すとビリビリのブロックリストに追加し、その人のコメントを折りたたみます。押し間違えたときはビリビリの「ブロックリスト」から外してください。ログインが必要です","評論含有這些詞就隱藏":"これらの語を含むコメントを隠す","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"空欄 = 無効。1 行に 1 語。/正規表現/ も使えます。コメントと返信の両方と照合します","隱藏帶貨評論":"商品紹介のコメントを隠す","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"商品リンク（青いショッピングカートのリンク）のあるコメントをまるごと折りたたみます。投稿者が固定した広告コメントによくあります","已拉黑「{0}」，他的評論已收起":"「{0}」をブロックしました。その人のコメントは折りたたみました","加入 B站黑名單":"ビリビリのブロックリストに追加","拉黑":"ブロック","畫質":"画質","直播停用 P2P / 第三方 CDN":"ライブで P2P / サードパーティ CDN を無効にする","強制最高畫質（真・原畫）":"最高画質を強制（本当の原画）","連續載入失敗時會自動退回播放器選擇的畫質":"読み込みに続けて失敗すると、プレーヤーが選んだ画質に自動で戻します","介面":"画面","網頁全屏 / 全屏時隱藏禮物欄":"ウェブフルスクリーン / フルスクリーンでギフト欄を隠す","滑鼠移到畫面底部時不再彈出禮物列":"ポインタを映像の下端に動かしてもギフト欄が出なくなります","平時也隱藏禮物欄":"ふだんもギフト欄を隠す","播放器下方整條禮物 / 包裹列":"プレーヤーの下のギフト / バッグの列全体","隱藏榜單":"ランキングを隠す","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"チャット上部の高能ランキング / 大航海、タイトルバーの人気ランキング、ギフト星球などの入口","隱藏直播區廣告與活動":"ライブの広告とイベントを隠す","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"プレーヤー下のイベントカルーセル、カテゴリページのバナー、ショッピングカート、イベントの入口、プレーヤー内のイベント表示","隱藏直播間雜項":"ライブルームの細かい表示を隠す","進場歡迎條、播放器角標":"入室の歓迎バー、プレーヤーの角のバッジ","彈幕":"弾幕","檢查彈幕是否真的發出":"弾幕が本当に送信されたか確認","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"ビリビリはブロックした弾幕にも「成功」と返します。システムによるブロックか、配信者の NG ワードかを知らせます","被攔截時自動複製內容":"ブロックされたら内容を自動でコピー","方便修改後重發":"直して送り直すときに便利です","發送成功也提示":"送信成功も知らせる","最高畫質不可用，已退回播放器選擇的畫質":"最高画質が使えないため、プレーヤーが選んだ画質に戻しました","系統攔截（全站敏感詞）":"システムによるブロック（サイト全体の NG ワード）","主播 / 房管屏蔽詞":"配信者 / モデレーターの NG ワード","彈幕發送失敗：{0}":"弾幕を送信できませんでした：{0}","彈幕已發出":"弾幕を送信しました","彈幕沒有發出：{0}{1}":"弾幕は送信されていません：{0}{1}"," · 內容已複製":" · 内容をコピーしました","彈幕查詢":"弾幕検索","這個頁面找不到影片 BV 號":"このページでは動画の BV 番号が見つかりません","取得分 P 列表失敗":"パート一覧を取得できませんでした","記住倍速":"再生速度を記憶","換影片、重新整理後沿用上次調的倍速":"動画を変えても再読み込みしても、前回の再生速度を引き継ぎます","彈幕預設":"弾幕の初期状態","不變":"変更しない","開":"オン","字幕預設":"字幕の初期状態","影片有字幕時才有作用":"動画に字幕があるときだけ働きます","快退 / 快進的秒數":"巻き戻し / 早送りの秒数","全螢幕時滾輪調音量":"フルスクリーンでホイールによる音量調整","滑鼠在畫面上滾動，每格 5%":"映像の上でスクロール。1 目盛りで 5%","播完自動退出全螢幕":"再生が終わったらフルスクリーンを解除","後面沒有接著播下一個影片時才退出":"続けて再生する動画がないときだけ解除します","截圖同時複製到剪貼簿":"スクリーンショットをクリップボードにもコピー","截圖一律會下載成 PNG；這項再多複製一份":"スクリーンショットは必ず PNG でダウンロードします。この項目はさらにコピーもします","響度均衡":"ラウドネス均一化","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"大きすぎる音を抑えて全体の音量を上げ、どの動画も同じくらいの大きさに聞こえるようにします。オンにして音が出なくなったら、オフにして再読み込みしてください","選集":"エピソード","合集播放順序":"シリーズの再生順","一集播完後接著播哪一集":"1 本終わったあと、次にどれを再生するか","正常":"通常","倒序":"逆順","隨機":"ランダム","複製連結時去掉追蹤參數":"リンクをコピーするとき追跡パラメータを外す","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"ビリビリの「共有 → リンクをコピー」で得られる URL に vd_source、share_source などが付かなくなります","倍速 {0}×":"再生速度 {0}×","影片還沒載入，無法截圖":"動画がまだ読み込まれていないため、スクリーンショットを撮れません","無法取得畫面":"映像を取得できません","截圖已保存並複製（{0}）":"スクリーンショットを保存してコピーしました（{0}）","截圖已保存（{0}）":"スクリーンショットを保存しました（{0}）","截圖失敗：{0}":"スクリーンショットに失敗しました：{0}","畫面旋轉 {0}°":"映像を {0}° 回転","畫面旋轉：還原":"映像の回転：元に戻す","畫面鏡像：開":"映像の反転：オン","畫面鏡像：關":"映像の反転：オフ","已複製乾淨連結":"クリーンなリンクをコピーしました","複製失敗":"コピーに失敗しました","要先登入 B站才能加入稍後再看":"あとで見るに追加するにはビリビリにログインしてください","已加入稍後再看":"あとで見るに追加しました","加入稍後再看失敗：{0}":"あとで見るに追加できませんでした：{0}","已通知所有開著的影片分頁":"開いているすべての動画タブに通知しました","把所有開著的影片分頁加入稍後再看":"開いているすべての動画タブをあとで見るに追加","每個開著影片頁的分頁各自把自己加入；需要已登入":"動画ページを開いているタブがそれぞれ自分を追加します。ログインが必要です","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"ラウドネス均一化を有効にできませんでした（プレーヤーがすでに音声処理を使っています）","開關設定面板":"設定パネルを開閉","選集浮層":"エピソード一覧","合集 / 分 P 清單，全螢幕下也可以用":"シリーズ / パートの一覧。フルスクリーンでも使えます","這個影片沒有選集":"この動画にはエピソードがありません","畫中畫":"ピクチャ・イン・ピクチャ","找不到畫中畫按鈕":"ピクチャ・イン・ピクチャのボタンが見つかりません","畫面填滿播放器":"映像をプレーヤーいっぱいに広げる","裁切模式：開":"クロップモード：オン","裁切模式：關":"クロップモード：オフ","字幕開關":"字幕の切り替え","這個影片沒有字幕":"この動画には字幕がありません","播放 / 暫停":"再生 / 一時停止","快退":"巻き戻し","秒數在「播放頁 → 播放」裡設定":"秒数は「再生ページ → 再生」で設定します","快進":"早送り","上一幀":"前のフレーム","會先暫停":"先に一時停止します","下一幀":"次のフレーム","截圖":"スクリーンショット","以影片原始解析度存成 PNG":"動画の元の解像度で PNG として保存します","彈幕開關":"弾幕の切り替え","找不到彈幕開關":"弾幕のスイッチが見つかりません","畫面旋轉 90°":"映像を 90° 回転","畫面鏡像":"映像の反転","複製乾淨連結":"クリーンなリンクをコピー","不帶任何追蹤參數的影片網址":"追跡パラメータのない動画の URL","保存目前影片的封面":"現在の動画のサムネイルを保存","所有開著的影片分頁加入稍後再看":"開いている動画タブをすべてあとで見るに追加","加速 0.25×":"0.25× 速くする","減速 0.25×":"0.25× 遅くする","回到 1× 倍速":"1× に戻す","打開彈幕查詢":"弾幕検索を開く","網頁全屏":"ウェブフルスクリーン","全螢幕":"フルスクリーン","收起 / 展開聊天":"チャットを折りたたむ / 展開","網頁全屏或全螢幕時才有作用":"ウェブフルスクリーンかフルスクリーンのときだけ働きます","先進入網頁全屏或全螢幕，才能收起聊天":"チャットを折りたたむには、先にウェブフルスクリーンかフルスクリーンにしてください","不是這個腳本匯出的設定檔":"このスクリプトが書き出した設定ファイルではありません","設定面板":"設定パネル","還原全部預設值":"すべて既定値に戻す","再按一次確認。備註不會被清除":"もう一度押すと確定します。メモは消えません","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"すべてのスイッチ、数値、ショートカットを既定に戻します。NG ワードとメモは残ります","確認還原":"戻すことを確定","還原":"戻す","已還原預設，重新整理後完全生效":"既定に戻しました。再読み込みすると完全に反映されます","匯出全部設定":"すべての設定を書き出す","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"すべてのスイッチ、数値、ショートカット、NG ワード、ユーザーメモを 1 つの JSON ファイルに保存します","匯出":"書き出す","匯入設定":"設定を読み込む","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"「すべての設定を書き出す」で保存したファイルを読み込み、ファイルにある項目を上書きします。ほかはそのままです","選擇檔案":"ファイルを選択","已匯入 {0} 項設定，重新整理後完全生效":"{0} 件の設定を読み込みました。再読み込みすると完全に反映されます","匯入失敗：{0}":"読み込みに失敗しました：{0}","JSON 格式錯誤":"JSON の形式が正しくありません","複製診斷資訊":"診断情報をコピー","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"レイアウトがおかしいときに押して、コピーされた文字を開発者に貼り付けてください。レイアウトの情報だけで、アカウントや設定の内容は含みません","複製":"コピー","診斷資訊已複製":"診断情報をコピーしました","外觀":"外観","跟隨系統":"システムに合わせる","淺色":"ライト","深色":"ダーク","語言":"言語","「自動」會跟隨瀏覽器的語言":"「自動」はブラウザの言語に合わせます","強調色":"アクセントカラー","B站粉":"ビリビリピンク","B站藍":"ビリビリブルー","石墨":"グラファイト","快捷鍵":"ショートカット","減少":"減らす","增加":"増やす","重新整理頁面後生效":"ページを再読み込みすると反映されます","「{0}」已還原預設":"「{0}」を既定に戻しました","執行":"実行","寬屏版面的構想來自 posthumz 的 ":"ワイドレイアウトの着想は posthumz 氏の","，在此致謝。":" から得ました。感謝します。","關於":"このソフトについて","搜尋設定":"設定を検索","沒有符合的設定":"一致する設定がありません","搜尋結果":"検索結果","關閉":"閉じる"," 開關面板":" パネルを開閉","右鍵任一項還原預設":"項目を右クリックすると既定に戻ります","重新整理以套用":"再読み込みして適用","格式不對":"形式が正しくありません","備註清單":"メモ一覧","搜尋暱稱、備註或 UID":"名前、メモ、UID で検索","確認刪除":"削除を確定","（未知暱稱）":"（名前不明）","沒有符合的備註":"一致するメモがありません","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"メモはまだありません。コメント欄でユーザー名の行にポインタを合わせて「メモ」を押すか、スペースページで「＋ メモ」を押してください。","UID 只能是數字":"UID は数字だけです","請輸入備註":"メモを入力してください","已匯入 {0} 筆備註":"{0} 件のメモを読み込みました","匯入 JSON":"JSON を読み込む","新增":"追加","查詢":"検索","請在影片 / 番劇播放頁打開這一頁。":"動画 / アニメの再生ページでこのページを開いてください。","關鍵字（留空列出全部彈幕）":"キーワード（空欄ですべての弾幕を表示）","搜尋":"検索","反查全部發送者":"すべての送信者を逆引き","反查中…":"逆引き中…","查不到":"見つかりません","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"11 桁を超える UID（2022 年以降に登録された 16 桁の UID）は弾幕から逆引きできません","反查":"逆引き","跳到這個時間":"この時間へ移動","日期":"日付","發送者":"送信者","反查中 {0}/{1}":"逆引き中 {0}/{1}","載入彈幕中…":"弾幕を読み込み中…","，只顯示前 {0} 條（加關鍵字縮小範圍）":"、最初の {0} 件だけ表示（キーワードで絞り込めます）","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"全 {0} 件{1}。時間を押すと移動、「逆引き」で送信者を取得します（結果は CRC32 に対応する最小の UID です。16 桁の新しい UID は見つからないか、別の人に当たることがあります）。","沒有符合的彈幕":"一致する弾幕がありません","查詢失敗：{0}":"検索に失敗しました：{0}","按下按鍵…":"キーを押してください…","{0} 已經給「{1}」用了":"{0} はすでに「{1}」で使われています","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"ボタンを押してから新しいキーの組み合わせを押します。Esc でキャンセル、Delete で無効、右クリックで既定に戻します。文字入力中は 1 キーのショートカットは働きません。ビリビリ本来のキーと同じ場合はこちらが優先されます。","設定已同步，重新整理後完全生效":"設定を同期しました。再読み込みすると完全に反映されます"}};
+  const I18N = {"zh-Hans":{"比利重啟":"比利重启","空白鍵":"空格键","數字鍵盤 ":"数字键盘 ","首頁":"首页","播放頁":"播放页","動態 · 空間":"动态 · 空间","左右邊距":"左右边距","所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"所有页面内容区两侧的留白，不会超过窗口宽度的 15%","動態頁":"动态页","側欄吸頂":"侧栏吸顶","側欄內容較長時可能顯示不全":"侧栏内容较长时可能显示不全","隱藏帶貨動態":"隐藏带货动态","播放器撐滿視窗":"播放器撑满视窗","關閉後播放頁回到原本的版面：播放器在左、推薦在右，選集浮層和小窗調整也一併停用":"关闭后播放页回到原本的版面：播放器在左、推荐在右，选集浮层和小窗调整也一并停用","自動高度":"自动高度","播放器跟隨影片比例，上下不留黑邊":"播放器跟随视频比例，上下不留黑边","預留高度":"预留高度","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"播放器下方露出多少页面内容；大于 0 时导航栏常驻。不会超过窗口高度的 25%","導航欄":"导航栏","導航欄放在播放器下方":"导航栏放在播放器下方","導航欄吸頂":"导航栏吸顶","向下捲動時導航欄固定在視窗頂部":"向下滚动时导航栏固定在窗口顶部","控制欄":"控制栏","緊湊控制欄":"紧凑控制栏","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"按钮收到图标大小、间距收紧，省下的宽度都给弹幕输入框","顯示在看人數 / 彈幕數":"显示在看人数 / 弹幕数","平時隱藏控制欄":"平时隐藏控制栏","滑鼠移到播放器底部才顯示":"鼠标移到播放器底部才显示","暫停時一直顯示控制欄":"暂停时一直显示控制栏","小窗可調整":"小窗可调整","拖小窗左邊緣改寬度，拖小窗本身改位置，並記住":"拖小窗左边缘改宽度，拖小窗本身改位置，并记住","小窗位置與寬度":"小窗位置与宽度","回到右下角、預設寬度":"回到右下角、默认宽度","重設":"重置","小窗已重設":"小窗已重置","使用 Re:Bi 的導航欄":"使用 Re:Bi 的导航栏","整條導航欄換成同一套方磚，每個頁面都一樣；個人卡片從頭像打開。關閉後回到原本的導航欄":"整条导航栏换成同一套方砖，每个页面都一样；个人卡片从头像打开。关闭后回到原本的导航栏","滑過入口時顯示預覽":"滑过入口时显示预览","滑鼠停在消息、動態、收藏、歷史上，直接看到最近的內容":"鼠标停在消息、动态、收藏、历史上，直接看到最近的内容","動態":"动态","歷史":"历史","導航欄右側的入口":"导航栏右侧的入口","番劇":"番剧","熱門":"热门","遊戲中心":"游戏中心","會員購":"会员购","漫畫":"漫画","賽事":"赛事","課堂":"课堂","搜尋影片、UP 主":"搜索影片、UP 主","搜尋":"搜索","登入":"登录","個人卡片":"个人卡片","展開":"展开","切換後會重新載入頁面":"切换后会重新载入页面","淺色":"浅色","登出":"退出登录","再按一次確認":"再按一次确认","稍後再看 {0}":"稍后再看 {0}","硬幣 {0}":"硬币 {0}","B幣 {0}":"B币 {0}","{0} 設定":"{0} 设置","已滿級":"已满级","距 LV{0} 還差 {1}":"距 LV{0} 还差 {1}","關注":"关注","粉絲":"粉丝","個人空間":"个人空间","{0} 則未讀":"{0} 条未读","回覆我的":"回复我的","收到的讚":"收到的赞","系統通知":"系统通知","我的訊息":"我的消息","沒有內容":"没有内容","載入失敗":"载入失败","熱搜":"热搜","選集顯示縮圖":"选集显示缩图","合集顯示每一集的封面，分 P 影片每一段都顯示影片的主封面；捲到哪裡才載入哪裡":"合集显示每一集的封面，分 P 影片每一段都显示影片的主封面；卷到哪里才载入哪里","字體":"字体","使用系統字體":"使用系统字体","Mac 上用蘋方 / San Francisco，Windows 上用微軟雅黑，並開啟字體平滑":"Mac 上用苹方 / San Francisco，Windows 上用微软雅黑，并开启字体平滑","等寬數字":"等宽数字","播放時間、播放量等數字等寬顯示，跳動時不抖動":"播放时间、播放量等数字等宽显示，跳动时不抖动","全螢幕暫停時保留原況文字":"全屏暂停时保留实况文本","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"开启后可以在全屏暂停的画面上框选文字，但暂停时右下角的按钮（选集、小窗、退出全屏）会点不动","淨化":"净化","頁面":"页面","去掉全站黑白濾鏡":"去掉全站黑白滤镜","隱藏廣告":"隐藏广告","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"首页推广卡片、播放页右栏的广告位与推广卡片、“检测到广告拦截”提示","跳過片尾充電名單":"跳过片尾充电名单","頁面載入完成後才清空名單，不一定每次都生效":"页面加载完成后才清空名单，不一定每次都生效","專欄允許複製":"专栏允许复制","片尾不顯示相關推薦":"片尾不显示相关推荐","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"视频播完后那一排“相关推荐”视频；重播等按钮还在","隱私":"隐私","清理網址追蹤參數":"清理网址追踪参数","攔截資料上報":"拦截数据上报","data.bilibili.com / cm.bilibili.com、Sentry、瀏覽器指紋":"data.bilibili.com / cm.bilibili.com、Sentry、浏览器指纹","停用 P2P CDN 與 WebRTC":"停用 P2P CDN 与 WebRTC","不替 B站上傳流量；影片位址換回官方 CDN":"不替 B站上传流量；视频地址换回官方 CDN","播放器設定加入「裁切模式」":"播放器设置加入“裁切模式”","在播放器的齒輪選單裡，讓畫面填滿播放器":"在播放器的齿轮菜单里，让画面填满播放器","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"每行一个词；也可以写 /正则/。B站标题多为简体字，请用简体输入","標題黨":"标题党","從標題刪掉這些詞":"从标题删掉这些词","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"视频照常显示，只把这些词从标题里拿掉。{0}","標題含有這些詞就隱藏影片":"标题含有这些词就隐藏视频","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"首页、推荐、搜索、排行榜、动态里整张卡片不显示；正在看的视频不受影响。{0}","收斂誇張標點":"收敛夸张标点","連續的驚嘆號、問號縮成一個（！！！→！）":"连续的感叹号、问号缩成一个（！！！→！）","加入常見的標題黨用詞":"加入常见的标题党用词","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"把一组常见的夸张用词加进“从标题删掉这些词”，之后可以自己增删","這些詞都已經在清單裡了":"这些词都已经在列表里了","已加入 {0} 個詞":"已加入 {0} 个词","首頁推薦過濾":"首页推荐过滤","播放量低於這個數就隱藏":"播放量低于这个数就隐藏","短於這個長度就隱藏":"短于这个长度就隐藏","長於這個長度就隱藏":"长于这个长度就隐藏","發布超過這麼多天就隱藏":"发布超过这么多天就隐藏","隱藏豎屏影片":"隐藏竖屏视频","要逐個查影片資料，卡片會晚一點才消失":"要逐个查视频数据，卡片会晚一点才消失","已關注的 UP 主不過濾":"已关注的 UP 主不过滤","隱藏這些 UP 主的影片":"隐藏这些 UP 主的视频","每行一個，寫 UP 主名稱或 UID":"每行一个，写 UP 主名称或 UID","封面黨（激進）":"封面党（激进）","替換影片封面":"替换视频封面","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"不显示 UP 主上传的封面，改用视频的第一帧或随机一帧。每张卡片要多查一次数据，封面会晚一点才换；查得太多可能被 B站暂时限流。封面工具栏的保存 / 放大仍是原封面","關":"关","第一幀":"第一帧","隨機一幀":"随机一帧","影片卡片":"视频卡片","滑鼠移到影片卡片上，封面左上角出現工具列，點「↓」下載原尺寸封面":"鼠标移到视频卡片上，封面左上角出现工具栏，点“↓”下载原尺寸封面","封面懸浮放大":"封面悬浮放大","滑鼠停在工具列的放大鏡上，顯示大圖":"鼠标停在工具栏的放大镜上，显示大图","一鍵拉黑 UP 主":"一键拉黑 UP 主","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"点工具栏的“⊘”直接加入 B站黑名单，再点一次取消；需要已登录","影片在本頁打開":"视频在本页打开","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"点视频卡片不再开新标签页；按住 ⌘ / Ctrl 或用中键点仍然开新标签页","下載失敗":"下载失败","找不到這個影片的封面":"找不到这个视频的封面","封面保存失敗：{0}":"封面保存失败：{0}","錯誤碼 {0}":"错误码 {0}","要先登入 B站才能拉黑":"要先登录 B站才能拉黑","已拉黑「{0}」，再點一次 ⊘ 可取消":"已拉黑“{0}”，再点一次 ⊘ 可取消","已取消拉黑「{0}」":"已取消拉黑“{0}”","拉黑失敗：{0}":"拉黑失败：{0}","首頁主題":"首页主题","主題":"主题","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"极简：只有视频列表。大宝鉴：最上面是整幅海报的视频推荐，右下是你关注的更新，往下滑才是视频列表","極簡":"极简","大寶鑑":"大宝鉴","海報的推薦來源":"海报的推荐来源","綜合熱門":"综合热门","每週必看":"每周必看","右下角的關注更新":"右下角的关注更新","要登入 B站；沒登入時改放同一來源的其他影片":"要登录 B站；没登录时改放同一来源的其他视频","全部動態":"全部动态","只看影片":"只看视频","不顯示":"不显示","海報多久換一張":"海报多久换一张","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"鼠标停在播放那一排按钮上时暂停；系统开了“减弱动态效果”就不自动换","海報畫質":"海报画质","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"原图最清楚，每张约 0.2–1 MB；再清楚也不会超过 UP 主上传的封面","原圖":"原图","壓縮":"压缩","海報輪流放幾部影片":"海报轮流放几部视频","影片列表":"视频列表","不顯示左上角那塊大的輪播推薦":"不显示左上角那块大的轮播推荐","不顯示直播、番劇等推薦卡":"不显示直播、番剧等推荐卡","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"视频列表中间带“直播”“番剧”“综艺”这类角标的卡片","[按鈕]播放":"播放","{0} 讚":"{0} 赞","稍後再看":"稍后再看","上一部":"上一个","下一部":"下一个","推薦影片":"推荐视频","往後":"往后","來源是空的":"来源是空的","關注更新":"关注更新","更多推薦":"更多推荐","大寶鑑載入失敗：{0}":"大宝鉴加载失败：{0}","動態過濾":"动态过滤","隱藏轉發":"隐藏转发","隱藏直播通知":"隐藏直播通知","隱藏預約（直播 / 影片預約）":"隐藏预约（直播 / 视频预约）","隱藏充電專屬":"隐藏充电专属","隱藏專欄":"隐藏专栏","內容含有這些詞就隱藏":"内容含有这些词就隐藏","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"每行一个词；也可以写 /正则/。匹配动态文字、视频标题和被转发的内容。改动后往下滚加载的新动态开始生效","加入常見的廣告用詞":"加入常见的广告用词","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"把一组常见的带货、促销用语加进上面的列表，补足只靠商品卡片认不出来的广告动态；之后可以自己增删","評論區":"评论区","備註":"备注","IP 屬地":"IP 属地","評論顯示 IP 屬地":"评论显示 IP 属地","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"视频、动态、专栏、番剧、直播等页面的评论与回复","專欄作者顯示 IP 屬地":"专栏作者显示 IP 属地","屬地文字替換":"属地文字替换","JSON 鍵值對，例如 {\"IP属地：\":\"\"} 可去掉前綴":"JSON 键值对，例如 {\"IP属地：\":\"\"} 可去掉前缀","用戶標記":"用户标记","評論顯示性別":"评论显示性别","資料來自評論介面，未公開性別的用戶不顯示":"数据来自评论接口，未公开性别的用户不显示","屬地文字替換不是合法 JSON，已忽略":"属地文字替换不是合法 JSON，已忽略","性別：{0}":"性别：{0}","顯示":"显示","顯示用戶備註":"显示用户备注","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"评论区用户名旁、空间页，以及页面上指向该用户空间首页的链接","顯示方式":"显示方式","暱稱後加標籤":"昵称后加标签","只顯示備註":"只显示备注","輸入備註":"输入备注","備註已儲存":"备注已保存","備註已刪除":"备注已删除","編輯備註":"编辑备注","刪除":"删除","儲存":"保存","點擊修改備註":"点击修改备注","給這位用戶加備註":"给这位用户加备注","備註：{0}":"备注：{0}","＋ 備註":"＋ 备注","評論過濾":"评论过滤","評論區快速拉黑":"评论区快速拉黑","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"鼠标移到评论的用户名那一行，出现“拉黑”；点一下加入 B站黑名单并收起他的评论；误点的话到 B站的“黑名单”里移除。需要已登录","評論含有這些詞就隱藏":"评论含有这些词就隐藏","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"留空 = 不启用。每行一个词；也可以写 /正则/。评论和楼中楼回复都会匹配","隱藏帶貨評論":"隐藏带货评论","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"评论里带有商品链接（蓝色的购物车链接）就整条收起，常见于 UP 主置顶的商业推广","已拉黑「{0}」，他的評論已收起":"已拉黑“{0}”，他的评论已收起","加入 B站黑名單":"加入 B站黑名单","畫質":"画质","強制最高畫質（真・原畫）":"强制最高画质（真・原画）","連續載入失敗時會自動退回播放器選擇的畫質":"连续加载失败时会自动退回播放器选择的画质","介面":"界面","網頁全屏 / 全屏時隱藏禮物欄":"网页全屏 / 全屏时隐藏礼物栏","滑鼠移到畫面底部時不再彈出禮物列":"鼠标移到画面底部时不再弹出礼物栏","平時也隱藏禮物欄":"平时也隐藏礼物栏","播放器下方整條禮物 / 包裹列":"播放器下方整条礼物 / 包裹栏","隱藏榜單":"隐藏榜单","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"聊天区上方的高能榜 / 大航海、标题栏的人气榜、礼物星球等入口","隱藏直播區廣告與活動":"隐藏直播区广告与活动","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"播放器下方的活动轮播、分区页横幅、小橙车、活动入口、播放器内的活动浮层","隱藏直播間雜項":"隐藏直播间杂项","進場歡迎條、播放器角標":"进场欢迎条、播放器角标","隱藏直播間右側的浮動按鈕":"隐藏直播间右侧的浮动按钮","貼在視窗右邊的「實驗室」「關注」那一條":"贴在视窗右边的「实验室」「关注」那一条","直播畫面鋪滿頁面":"直播画面铺满页面","去掉左右留白：畫面佔滿聊天欄以外的寬度和導航欄以下的高度，主播資訊浮在畫面上（滑鼠移到畫面才顯示），禮物欄往下捲才看得到。不是網頁全螢幕，頁面照常捲動":"去掉左右留白：画面占满聊天栏以外的宽度和导航栏以下的高度，主播信息浮在画面上（鼠标移到画面才显示），礼物栏往下卷才看得到。不是网页全屏，页面照常卷动","彈幕":"弹幕","檢查彈幕是否真的發出":"检查弹幕是否真的发出","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"B站对被拦截的弹幕也返回“成功”；这里会提示是系统拦截还是主播屏蔽词","被攔截時自動複製內容":"被拦截时自动复制内容","方便修改後重發":"方便修改后重发","發送成功也提示":"发送成功也提示","最高畫質不可用，已退回播放器選擇的畫質":"最高画质不可用，已退回播放器选择的画质","系統攔截（全站敏感詞）":"系统拦截（全站敏感词）","主播 / 房管屏蔽詞":"主播 / 房管屏蔽词","彈幕發送失敗：{0}":"弹幕发送失败：{0}","彈幕已發出":"弹幕已发出","彈幕沒有發出：{0}{1}":"弹幕没有发出：{0}{1}"," · 內容已複製":" · 内容已复制","彈幕查詢":"弹幕查询","這個頁面找不到影片 BV 號":"这个页面找不到视频 BV 号","取得分 P 列表失敗":"获取分 P 列表失败","記住倍速":"记住倍速","換影片、重新整理後沿用上次調的倍速":"换视频、刷新后沿用上次调的倍速","彈幕預設":"弹幕默认","不變":"不变","開":"开","字幕預設":"字幕默认","影片有字幕時才有作用":"视频有字幕时才有作用","快退 / 快進的秒數":"快退 / 快进的秒数","全螢幕時滾輪調音量":"全屏时滚轮调音量","滑鼠在畫面上滾動，每格 5%":"鼠标在画面上滚动，每格 5%","播完自動退出全螢幕":"播完自动退出全屏","後面沒有接著播下一個影片時才退出":"后面没有接着播下一个视频时才退出","截圖同時複製到剪貼簿":"截图同时复制到剪贴板","截圖一律會下載成 PNG；這項再多複製一份":"截图一律会下载成 PNG；这项再多复制一份","響度均衡":"响度均衡","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"把太大声的地方压低、整体音量拉高，各视频听起来差不多大声。如果开了以后没声音，关掉并刷新","選集":"选集","合集播放順序":"合集播放顺序","一集播完後接著播哪一集":"一集播完后接着播哪一集","隨機":"随机","複製連結時去掉追蹤參數":"复制链接时去掉追踪参数","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"B站“分享 → 复制链接”得到的网址不再带 vd_source、share_source 等","影片還沒載入，無法截圖":"视频还没加载，无法截图","無法取得畫面":"无法获取画面","截圖已保存並複製（{0}）":"截图已保存并复制（{0}）","截圖已保存（{0}）":"截图已保存（{0}）","截圖失敗：{0}":"截图失败：{0}","畫面旋轉 {0}°":"画面旋转 {0}°","畫面旋轉：還原":"画面旋转：还原","畫面鏡像：開":"画面镜像：开","畫面鏡像：關":"画面镜像：关","已複製乾淨連結":"已复制干净链接","複製失敗":"复制失败","要先登入 B站才能加入稍後再看":"要先登录 B站才能加入稍后再看","已加入稍後再看":"已加入稍后再看","加入稍後再看失敗：{0}":"加入稍后再看失败：{0}","已通知所有開著的影片分頁":"已通知所有开着的视频标签页","把所有開著的影片分頁加入稍後再看":"把所有开着的视频标签页加入稍后再看","每個開著影片頁的分頁各自把自己加入；需要已登入":"每个开着视频页的标签页各自把自己加入；需要已登录","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"响度均衡启用失败（播放器已经占用了音频处理）","開關設定面板":"开关设置面板","選集浮層":"选集浮层","合集 / 分 P 清單，全螢幕下也可以用":"合集 / 分 P 列表，全屏下也可以用","這個影片沒有選集":"这个视频没有选集","畫中畫":"画中画","找不到畫中畫按鈕":"找不到画中画按钮","畫面填滿播放器":"画面填满播放器","裁切模式：開":"裁切模式：开","裁切模式：關":"裁切模式：关","字幕開關":"字幕开关","這個影片沒有字幕":"这个视频没有字幕","播放 / 暫停":"播放 / 暂停","秒數在「播放頁 → 播放」裡設定":"秒数在“播放页 → 播放”里设置","快進":"快进","上一幀":"上一帧","會先暫停":"会先暂停","下一幀":"下一帧","截圖":"截图","以影片原始解析度存成 PNG":"以视频原始分辨率存成 PNG","彈幕開關":"弹幕开关","找不到彈幕開關":"找不到弹幕开关","畫面旋轉 90°":"画面旋转 90°","畫面鏡像":"画面镜像","複製乾淨連結":"复制干净链接","不帶任何追蹤參數的影片網址":"不带任何追踪参数的视频网址","保存目前影片的封面":"保存当前视频的封面","所有開著的影片分頁加入稍後再看":"所有开着的视频标签页加入稍后再看","減速 0.25×":"减速 0.25×","打開彈幕查詢":"打开弹幕查询","網頁全屏":"网页全屏","全螢幕":"全屏","收起 / 展開聊天":"收起 / 展开聊天","網頁全屏或全螢幕時才有作用":"网页全屏或全屏时才有作用","先進入網頁全屏或全螢幕，才能收起聊天":"先进入网页全屏或全屏，才能收起聊天","不是這個腳本匯出的設定檔":"不是这个脚本导出的设置文件","設定面板":"设置面板","還原全部預設值":"还原全部默认值","再按一次確認。備註不會被清除":"再按一次确认。备注不会被清除","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"所有开关、数值、快捷键回到默认；屏蔽词和备注保留","確認還原":"确认还原","還原":"还原","已還原預設，重新整理後完全生效":"已还原默认，刷新后完全生效","匯出全部設定":"导出全部设置","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"所有开关、数值、快捷键、屏蔽词和用户备注存成一个 JSON 文件","匯出":"导出","匯入設定":"导入设置","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"读取“导出全部设置”存的文件，覆盖文件里有的项目，其余不动","選擇檔案":"选择文件","已匯入 {0} 項設定，重新整理後完全生效":"已导入 {0} 项设置，刷新后完全生效","匯入失敗：{0}":"导入失败：{0}","JSON 格式錯誤":"JSON 格式错误","複製診斷資訊":"复制诊断信息","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"版面出问题时按一下，把复制到的文字贴给开发者。只有版面信息，不含账号和你的设置内容","複製":"复制","診斷資訊已複製":"诊断信息已复制","外觀":"外观","跟隨系統":"跟随系统","語言":"语言","「自動」會跟隨瀏覽器的語言":"“自动”会跟随浏览器的语言","自動":"自动","強調色":"强调色","B站藍":"B站蓝","快捷鍵":"快捷键","減少":"减少","重新整理頁面後生效":"刷新页面后生效","「{0}」已還原預設":"“{0}”已还原默认","執行":"执行","寬屏版面的構想來自 posthumz 的 ":"宽屏版面的构想来自 posthumz 的 ","，在此致謝。":"，在此致谢。","關於":"关于","搜尋設定":"搜索设置","沒有符合的設定":"没有匹配的设置","搜尋結果":"搜索结果","未設定":"未设置","關閉":"关闭"," 開關面板":" 开关面板","右鍵任一項還原預設":"右键任一项还原默认","重新整理以套用":"刷新以应用","設定":"设置","格式不對":"格式不对","備註清單":"备注列表","搜尋暱稱、備註或 UID":"搜索昵称、备注或 UID","確認刪除":"确认删除","（未知暱稱）":"（未知昵称）","沒有符合的備註":"没有匹配的备注","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"还没有备注。在评论区把鼠标移到用户名那一行点“备注”，或在空间页点“＋ 备注”。","UID 只能是數字":"UID 只能是数字","請輸入備註":"请输入备注","已匯入 {0} 筆備註":"已导入 {0} 条备注","匯入 JSON":"导入 JSON","查詢":"查询","請在影片 / 番劇播放頁打開這一頁。":"请在视频 / 番剧播放页打开这一页。","關鍵字（留空列出全部彈幕）":"关键词（留空列出全部弹幕）","反查全部發送者":"反查全部发送者","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"UID 超过 11 位（2022 年后注册的 16 位 UID）无法由弹幕反查","跳到這個時間":"跳到这个时间","時間":"时间","發送者":"发送者","載入彈幕中…":"加载弹幕中…","，只顯示前 {0} 條（加關鍵字縮小範圍）":"，只显示前 {0} 条（加关键词缩小范围）","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"共 {0} 条{1}。点时间跳转，点“反查”获取发送者（结果是 CRC32 对应的最小 UID；16 位新 UID 查不到或可能对应到别人）。","沒有符合的彈幕":"没有匹配的弹幕","查詢失敗：{0}":"查询失败：{0}","按下按鍵…":"按下按键…","{0} 已經給「{1}」用了":"{0} 已经给“{1}”用了","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"点按钮后按下新的按键组合。Esc 取消，Delete 停用，右键还原默认。打字时单键快捷键不会触发；和 B站原有按键相同时，以这里的为准。","設定已同步，重新整理後完全生效":"设置已同步，刷新后完全生效"},"yue":{"所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"所有頁面內容區兩邊嘅留白，唔會超過視窗闊度嘅 15%","側欄內容較長時可能顯示不全":"側欄內容太長嗰陣可能顯示唔晒","隱藏帶貨動態":"收埋帶貨動態","關閉後播放頁回到原本的版面：播放器在左、推薦在右，選集浮層和小窗調整也一併停用":"熄咗之後播放頁返返原本嘅版面：播放器喺左、推薦喺右，選集浮層同小窗調整都一齊停用","播放器跟隨影片比例，上下不留黑邊":"播放器跟住影片比例，上下唔留黑邊","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"播放器下面露出幾多頁面內容；大過 0 嗰陣導航欄會長駐。唔會超過視窗高度嘅 25%","導航欄放在播放器下方":"導航欄放喺播放器下面","向下捲動時導航欄固定在視窗頂部":"向下捲嗰陣導航欄固定喺視窗頂","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"按鈕縮到圖示咁大、間距收窄，慳返嘅闊度全部畀彈幕輸入框","顯示在看人數 / 彈幕數":"顯示睇緊嘅人數 / 彈幕數","平時隱藏控制欄":"平時收埋控制欄","滑鼠移到播放器底部才顯示":"滑鼠移到播放器底部先至顯示","暫停時一直顯示控制欄":"暫停嗰陣一直顯示控制欄","使用 Re:Bi 的導航欄":"用 Re:Bi 嘅導航欄","整條導航欄換成同一套方磚，每個頁面都一樣；個人卡片從頭像打開。關閉後回到原本的導航欄":"成條導航欄換成同一套方磚，每一頁都一樣；個人卡片由頭像打開。熄咗就返返原本嘅導航欄","滑過入口時顯示預覽":"滑過入口嗰陣顯示預覽","滑鼠停在消息、動態、收藏、歷史上，直接看到最近的內容":"滑鼠停喺訊息、動態、收藏、歷史上面，即刻睇到最近嘅內容","消息":"訊息","導航欄右側的入口":"導航欄右邊嘅入口","搜尋影片、UP 主":"搵影片、UP 主","展開":"打開","收起":"收埋","切換後會重新載入頁面":"切換之後會重新載入頁面","再按一次確認":"再撳一次確認","稍後再看 {0}":"稍後再睇 {0}","距 LV{0} 還差 {1}":"距 LV{0} 仲差 {1}","回覆我的":"回覆我嘅","@ 我的":"@ 我嘅","收到的讚":"收到嘅讚","我的訊息":"我嘅訊息","已看完":"睇完","看全部":"睇晒","沒有內容":"冇內容","合集顯示每一集的封面，分 P 影片每一段都顯示影片的主封面；捲到哪裡才載入哪裡":"合集顯示每一集嘅封面，分 P 影片每一段都顯示影片嘅主封面；捲到邊度先載入邊度","播放時間、播放量等數字等寬顯示，跳動時不抖動":"播放時間、播放量呢啲數字等寬顯示，跳動嗰陣唔會震","全螢幕暫停時保留原況文字":"全螢幕暫停嗰陣保留原況文字","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"開咗之後可以喺全螢幕暫停嘅畫面度框選文字，不過暫停嗰陣右下角嘅按鈕（選集、小窗、退出全螢幕）會撳唔到","隱藏廣告":"收埋廣告","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"首頁推廣卡片、播放頁右欄嘅廣告位同推廣卡片、「檢測到廣告攔截」提示","頁面載入完成後才清空名單，不一定每次都生效":"頁面載入完先至清空名單，唔一定次次都生效","片尾不顯示相關推薦":"片尾唔顯示相關推薦","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"影片播完之後嗰一排「相關推薦」影片；重播呢啲按鈕仲喺度","不替 B站上傳流量；影片位址換回官方 CDN":"唔幫 B站上傳流量；影片位址換返官方 CDN","在播放器的齒輪選單裡，讓畫面填滿播放器":"喺播放器嘅齒輪選單入面，令畫面填滿播放器","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"每行一個詞；都可以寫 /正則/。B站標題多數係簡體字，請用簡體輸入","從標題刪掉這些詞":"喺標題度刪走呢啲詞","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"影片照常顯示，淨係將呢啲詞喺標題度攞走。{0}","標題含有這些詞就隱藏影片":"標題有呢啲詞就收埋影片","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"首頁、推薦、搜尋、排行榜、動態入面成張卡片唔顯示；睇緊嘅影片唔受影響。{0}","連續的驚嘆號、問號縮成一個（！！！→！）":"連續嘅感嘆號、問號縮成一個（！！！→！）","加入常見的標題黨用詞":"加入常見嘅標題黨用詞","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"將一組常見嘅誇張用詞加入「喺標題度刪走呢啲詞」，之後可以自己增刪","這些詞都已經在清單裡了":"呢啲詞全部已經喺清單入面喇","播放量低於這個數就隱藏":"播放量少過呢個數就收埋","0 = 不限":"0 = 唔限","短於這個長度就隱藏":"短過呢個長度就收埋","長於這個長度就隱藏":"長過呢個長度就收埋","發布超過這麼多天就隱藏":"發布超過咁多日就收埋","隱藏豎屏影片":"收埋直度影片","要逐個查影片資料，卡片會晚一點才消失":"要逐條查影片資料，卡片會遲啲先至消失","已關注的 UP 主不過濾":"已關注嘅 UP 主唔過濾","隱藏這些 UP 主的影片":"收埋呢啲 UP 主嘅影片","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"唔顯示 UP 主上傳嘅封面，改用影片嘅第一幀或者隨機一幀。每張卡片要查多一次資料，封面會遲啲先至換；查得太多可能會畀 B站暫時限流。封面工具列嘅保存 / 放大仍然係原本嘅封面","關":"熄","滑鼠停在工具列的放大鏡上，顯示大圖":"滑鼠停喺工具列嘅放大鏡上面，顯示大圖","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"撳工具列嘅「⊘」直接加入 B站黑名單，再撳一次取消；要先登入","影片在本頁打開":"影片喺本頁打開","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"撳影片卡片唔再開新分頁；撳住 ⌘ / Ctrl 或者用中鍵撳就照樣開新分頁","找不到這個影片的封面":"搵唔到呢條影片嘅封面","要先登入 B站才能拉黑":"要先登入 B站先至可以拉黑","找不到 UP 主":"搵唔到 UP 主","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"極簡：淨係得影片列表。大寶鑑：最上面係成幅海報嘅影片推薦，右下係你關注嘅更新，碌落去先至係影片列表","海報的推薦來源":"海報嘅推薦來源","每週必看":"每週必睇","右下角的關注更新":"右下角嘅關注更新","要登入 B站；沒登入時改放同一來源的其他影片":"要登入 B站；未登入嗰陣改放同一來源嘅其他影片","只看影片":"淨係睇影片","不顯示":"唔顯示","海報多久換一張":"海報幾耐換一張","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"滑鼠停喺播放嗰排掣上面嗰陣暫停；系統開咗「減少動態效果」就唔會自動換","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"原圖最清，每張大約 0.2–1 MB；再清都唔會超過 UP 主上傳嘅封面","海報輪流放幾部影片":"海報輪流放幾多部影片","不顯示左上角那塊大的輪播推薦":"唔顯示左上角嗰嚿大嘅輪播推薦","不顯示直播、番劇等推薦卡":"唔顯示直播、番劇呢類推薦卡","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"影片列表中間帶住「直播」「番劇」「綜藝」呢類角標嘅卡片","[按鈕]播放":"播放","稍後再看":"稍後再睇","來源是空的":"來源係空嘅","隱藏轉發":"收埋轉發","隱藏直播通知":"收埋直播通知","隱藏預約（直播 / 影片預約）":"收埋預約（直播 / 影片預約）","隱藏充電專屬":"收埋充電專屬","隱藏專欄":"收埋專欄","內容含有這些詞就隱藏":"內容有呢啲詞就收埋","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"每行一個詞；都可以寫 /正則/。會比對動態文字、影片標題同被轉發嘅內容。改完之後，向下捲載入嘅新動態先至開始生效","加入常見的廣告用詞":"加入常見嘅廣告用詞","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"將一組常見嘅帶貨、促銷用語加入上面嘅清單，補返淨係靠商品卡片認唔出嘅廣告動態；之後可以自己增刪","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"影片、動態、專欄、番劇、直播呢啲頁面嘅評論同回覆","資料來自評論介面，未公開性別的用戶不顯示":"資料嚟自評論介面，冇公開性別嘅用戶唔顯示","屬地文字替換不是合法 JSON，已忽略":"屬地文字替換唔係合法 JSON，已經忽略","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"評論區用戶名隔籬、空間頁，同埋頁面上面指去呢位用戶空間首頁嘅連結","點擊修改備註":"撳一下改備註","給這位用戶加備註":"幫呢位用戶加備註","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"滑鼠移到評論嘅用戶名嗰一行，會出現「拉黑」；撳一下就加入 B站黑名單兼收埋佢嘅評論；撳錯嘅話去 B站嘅「黑名單」度移除。要先登入","評論含有這些詞就隱藏":"評論有呢啲詞就收埋","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"留空 = 唔啟用。每行一個詞；都可以寫 /正則/。評論同樓中樓回覆都會比對","隱藏帶貨評論":"收埋帶貨評論","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"評論入面有商品連結（藍色嘅購物車連結）就成條收埋，常見於 UP 主置頂嘅工商廣告","已拉黑「{0}」，他的評論已收起":"已拉黑「{0}」，佢嘅評論已經收埋","連續載入失敗時會自動退回播放器選擇的畫質":"連續載入失敗嗰陣會自動退返播放器揀嘅畫質","網頁全屏 / 全屏時隱藏禮物欄":"網頁全屏 / 全屏嗰陣收埋禮物欄","滑鼠移到畫面底部時不再彈出禮物列":"滑鼠移到畫面底部嗰陣唔再彈出禮物列","平時也隱藏禮物欄":"平時都收埋禮物欄","播放器下方整條禮物 / 包裹列":"播放器下面成條禮物 / 包裹列","隱藏榜單":"收埋榜單","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"聊天區上面嘅高能榜 / 大航海、標題列嘅人氣榜、禮物星球呢啲入口","隱藏直播區廣告與活動":"收埋直播區廣告同活動","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"播放器下面嘅活動輪播、分區頁橫額、小橙車、活動入口、播放器入面嘅活動浮層","隱藏直播間雜項":"收埋直播間雜項","隱藏直播間右側的浮動按鈕":"隱藏直播間右邊嘅浮動掣","貼在視窗右邊的「實驗室」「關注」那一條":"貼喺視窗右邊「實驗室」「關注」嗰條","去掉左右留白：畫面佔滿聊天欄以外的寬度和導航欄以下的高度，主播資訊浮在畫面上（滑鼠移到畫面才顯示），禮物欄往下捲才看得到。不是網頁全螢幕，頁面照常捲動":"去走左右留白：畫面佔滿聊天欄以外嘅闊度同導航欄以下嘅高度，主播資訊浮喺畫面上面（滑鼠移到畫面先顯示），禮物欄要向下捲先見到。唔係網頁全螢幕，頁面照常捲動","檢查彈幕是否真的發出":"檢查彈幕係咪真係發咗出去","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"B站對畀人攔截嘅彈幕都會回報「成功」；呢度會提示係系統攔截定係主播屏蔽詞","被攔截時自動複製內容":"畀人攔截嗰陣自動複製內容","發送成功也提示":"發送成功都提示","最高畫質不可用，已退回播放器選擇的畫質":"最高畫質用唔到，已經退返播放器揀嘅畫質","彈幕沒有發出：{0}{1}":"彈幕冇發出：{0}{1}","這個頁面找不到影片 BV 號":"呢個頁面搵唔到影片 BV 號","換影片、重新整理後沿用上次調的倍速":"換影片、重新整理之後沿用上次調嘅倍速","不變":"唔變","影片有字幕時才有作用":"影片有字幕嗰陣先至有用","快退 / 快進的秒數":"快退 / 快進嘅秒數","全螢幕時滾輪調音量":"全螢幕嗰陣用滾輪調音量","滑鼠在畫面上滾動，每格 5%":"滑鼠喺畫面上面滾動，每格 5%","後面沒有接著播下一個影片時才退出":"後面冇接住播下一條影片嗰陣先至退出","截圖同時複製到剪貼簿":"截圖同時複製去剪貼簿","截圖一律會下載成 PNG；這項再多複製一份":"截圖一定會下載成 PNG；呢項會再複製多一份","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"將太大聲嘅地方壓低、整體音量拉高，每條影片聽落差唔多大聲。如果開咗之後冇聲，就熄咗佢再重新整理","一集播完後接著播哪一集":"一集播完之後接住播邊一集","複製連結時去掉追蹤參數":"複製連結嗰陣去走追蹤參數","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"B站「分享 → 複製連結」得到嘅網址唔再帶 vd_source、share_source 呢啲","影片還沒載入，無法截圖":"影片仲未載入，截唔到圖","畫面鏡像：關":"畫面鏡像：熄","要先登入 B站才能加入稍後再看":"要先登入 B站先至可以加入稍後再睇","已加入稍後再看":"已加入稍後再睇","加入稍後再看失敗：{0}":"加入稍後再睇失敗：{0}","已通知所有開著的影片分頁":"已經通知所有開住嘅影片分頁","把所有開著的影片分頁加入稍後再看":"將所有開住嘅影片分頁加入稍後再睇","每個開著影片頁的分頁各自把自己加入；需要已登入":"每個開住影片頁嘅分頁各自將自己加入；要先登入","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"響度均衡啟用失敗（播放器已經佔用咗音訊處理）","合集 / 分 P 清單，全螢幕下也可以用":"合集 / 分 P 清單，全螢幕之下都用得","這個影片沒有選集":"呢條影片冇選集","找不到畫中畫按鈕":"搵唔到畫中畫按鈕","裁切模式：關":"裁切模式：熄","這個影片沒有字幕":"呢條影片冇字幕","秒數在「播放頁 → 播放」裡設定":"秒數喺「播放頁 → 播放」度設定","會先暫停":"會暫停先","找不到彈幕開關":"搵唔到彈幕開關","不帶任何追蹤參數的影片網址":"唔帶任何追蹤參數嘅影片網址","保存目前影片的封面":"保存而家呢條影片嘅封面","所有開著的影片分頁加入稍後再看":"所有開住嘅影片分頁加入稍後再睇","網頁全屏或全螢幕時才有作用":"網頁全屏或者全螢幕嗰陣先至有用","先進入網頁全屏或全螢幕，才能收起聊天":"要先入網頁全屏或者全螢幕，先至可以收埋聊天","不是這個腳本匯出的設定檔":"唔係呢個腳本匯出嘅設定檔","再按一次確認。備註不會被清除":"再撳一次確認。備註唔會被清除","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"所有開關、數值、快捷鍵返去預設；屏蔽詞同備註保留","已還原預設，重新整理後完全生效":"已還原預設，重新整理之後完全生效","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"所有開關、數值、快捷鍵、屏蔽詞同用戶備註存成一個 JSON 檔","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"讀取「匯出全部設定」存嘅檔案，冚過檔案入面有嘅項目，其餘唔郁","已匯入 {0} 項設定，重新整理後完全生效":"已匯入 {0} 項設定，重新整理之後完全生效","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"版面有問題嗰陣撳一下，將複製到嘅文字貼畀開發者。淨係得版面資訊，冇帳號同你嘅設定內容","「自動」會跟隨瀏覽器的語言":"「自動」會跟瀏覽器嘅語言","重新整理頁面後生效":"重新整理頁面之後生效","寬屏版面的構想來自 posthumz 的 ":"寬屏版面嘅構想嚟自 posthumz 嘅","，在此致謝。":"，喺度多謝。","沒有符合的設定":"搵唔到符合嘅設定","右鍵任一項還原預設":"右鍵撳任何一項還原預設","格式不對":"格式唔啱","沒有符合的備註":"搵唔到符合嘅備註","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"仲未有備註。喺評論區將滑鼠移到用戶名嗰一行撳「備註」，或者喺空間頁撳「＋ 備註」。","UID 只能是數字":"UID 只可以係數字","請在影片 / 番劇播放頁打開這一頁。":"請喺影片 / 番劇播放頁打開呢一頁。","查不到":"查唔到","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"UID 超過 11 位（2022 年之後註冊嘅 16 位 UID）冇辦法由彈幕反查","跳到這個時間":"跳去呢個時間","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"共 {0} 條{1}。撳時間跳轉，撳「反查」攞發送者（結果係 CRC32 對應嘅最細 UID；16 位新 UID 查唔到或者可能對應到第二個人）。","沒有符合的彈幕":"搵唔到符合嘅彈幕","按下按鍵…":"撳掣…","{0} 已經給「{1}」用了":"{0} 已經畀「{1}」用咗","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"撳按鈕之後撳新嘅按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字嗰陣單鍵快捷鍵唔會觸發；同 B站原有按鍵一樣嗰陣，以呢度為準。","設定已同步，重新整理後完全生效":"設定已同步，重新整理之後完全生效"},"en":{"比利重啟":"Re:Bi","空白鍵":"Space","數字鍵盤 ":"Numpad","通用":"General","首頁":"Home","播放頁":"Video page","動態 · 空間":"Feed · Space","版面":"Layout","左右邊距":"Side margins","所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"Blank space on both sides of the content on every page, capped at 15% of the window width","動態頁":"Feed page","側欄吸頂":"Sticky sidebar","側欄內容較長時可能顯示不全":"A long sidebar may be cut off","隱藏帶貨動態":"Hide posts that sell products","播放器":"Player","播放器撐滿視窗":"Player fills the window","關閉後播放頁回到原本的版面：播放器在左、推薦在右，選集浮層和小窗調整也一併停用":"When off, the video page keeps its original layout (player on the left, recommendations on the right); the episode overlay and mini-player adjustments are disabled too","自動高度":"Auto height","播放器跟隨影片比例，上下不留黑邊":"The player follows the video's aspect ratio, with no black bars above or below","預留高度":"Reserved height","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"How much of the page shows below the player. Above 0, the navigation bar stays visible. Capped at 25% of the window height","導航欄":"Navigation bar","導航欄放在播放器下方":"Put the navigation bar below the player","導航欄吸頂":"Sticky navigation bar","向下捲動時導航欄固定在視窗頂部":"The navigation bar stays at the top of the window as you scroll down","控制欄":"Control bar","緊湊控制欄":"Compact control bar","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"Buttons shrink to icon size with tighter spacing, and the saved width goes to the danmaku input box","顯示在看人數 / 彈幕數":"Show viewer count / danmaku count","平時隱藏控制欄":"Hide the control bar when idle","滑鼠移到播放器底部才顯示":"It appears when the pointer moves to the bottom of the player","暫停時一直顯示控制欄":"Always show the control bar while paused","小窗可調整":"Adjustable mini player","拖小窗左邊緣改寬度，拖小窗本身改位置，並記住":"Drag its left edge to resize and drag the mini player itself to move it. Both are remembered","小窗位置與寬度":"Mini player position and width","回到右下角、預設寬度":"Back to the bottom right corner at the default width","重設":"Reset","小窗已重設":"Mini player reset","使用 Re:Bi 的導航欄":"Use the Re:Bi navigation bar","整條導航欄換成同一套方磚，每個頁面都一樣；個人卡片從頭像打開。關閉後回到原本的導航欄":"Replaces the whole navigation bar with one set of tiles that looks the same on every page; the profile card opens from your avatar. Turn off to get the original bar back","滑過入口時顯示預覽":"Show previews on hover","滑鼠停在消息、動態、收藏、歷史上，直接看到最近的內容":"Hover over Messages, Feed, Favorites or History to see the latest items","消息":"Messages","動態":"Feed","收藏":"Favorites","歷史":"History","導航欄右側的入口":"Entries on the right of the navigation bar","番劇":"Anime","直播":"Live","熱門":"Popular","排行榜":"Rankings","遊戲中心":"Games","會員購":"Shop","漫畫":"Manga","賽事":"Esports","課堂":"Courses","更多":"More","搜尋影片、UP 主":"Search videos and creators","搜尋":"Search","登入":"Log in","個人卡片":"Profile card","展開":"Expand","收起":"Collapse","切換後會重新載入頁面":"The page reloads after switching","深色":"Dark","淺色":"Light","登出":"Log out","再按一次確認":"Click again to confirm","稍後再看 {0}":"Watch later {0}","硬幣 {0}":"{0} coins","B幣 {0}":"{0} B-coins","{0} 設定":"{0} settings","已滿級":"Max level","距 LV{0} 還差 {1}":"{1} to LV{0}","關注":"Following","粉絲":"Followers","個人空間":"My space","{0} 則未讀":"{0} unread","有更新":"New posts","投稿管理":"My uploads","回覆我的":"Replies","@ 我的":"Mentions","收到的讚":"Likes","系統通知":"System notices","我的訊息":"Direct messages","已看完":"Finished","看全部":"See all","沒有內容":"Nothing here","載入失敗":"Failed to load","熱搜":"Trending","選集顯示縮圖":"Thumbnails in the episode list","合集顯示每一集的封面，分 P 影片每一段都顯示影片的主封面；捲到哪裡才載入哪裡":"Collections show the cover of each episode; every part of a multi-part video shows the main cover of the video. Images load only as you scroll to them","字體":"Fonts","使用系統字體":"Use system fonts","Mac 上用蘋方 / San Francisco，Windows 上用微軟雅黑，並開啟字體平滑":"PingFang / San Francisco on Mac, Microsoft YaHei on Windows, with font smoothing turned on","等寬數字":"Tabular numbers","播放時間、播放量等數字等寬顯示，跳動時不抖動":"Numbers such as playback time and view counts use equal widths, so they do not jitter as they change","全螢幕暫停時保留原況文字":"Keep Live Text when paused in full screen","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"When on, you can select text in the paused full screen picture, but the bottom right buttons (episodes, mini player, exit full screen) cannot be clicked while paused","淨化":"Cleanup","頁面":"Page","去掉全站黑白濾鏡":"Remove the site-wide grayscale filter","隱藏廣告":"Hide ads","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"Promoted cards on the home page, ad slots and promoted cards in the right column of the video page, and the \"ad blocker detected\" notice","跳過片尾充電名單":"Skip the supporter list at the end of videos","頁面載入完成後才清空名單，不一定每次都生效":"The list is cleared only after the page finishes loading, so it may not work every time","專欄允許複製":"Allow copying in articles","片尾不顯示相關推薦":"Hide related videos at the end","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"The row of \"related videos\" shown after a video ends. Replay and the other buttons stay","隱私":"Privacy","清理網址追蹤參數":"Remove tracking parameters from URLs","spm_id_from、vd_source、share_* 等":"spm_id_from, vd_source, share_* and so on","攔截資料上報":"Block data reporting","data.bilibili.com / cm.bilibili.com、Sentry、瀏覽器指紋":"data.bilibili.com / cm.bilibili.com, Sentry, browser fingerprinting","播放":"Playback","停用 P2P CDN 與 WebRTC":"Turn off P2P CDN and WebRTC","不替 B站上傳流量；影片位址換回官方 CDN":"Stops uploading traffic for Bilibili. Video addresses switch back to the official CDN","播放器設定加入「裁切模式」":"Add \"Crop mode\" to the player settings","在播放器的齒輪選單裡，讓畫面填滿播放器":"In the player's gear menu. Makes the picture fill the player","裁切模式":"Crop mode","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"One word per line. /regex/ also works. Most Bilibili titles are in Simplified Chinese, so type in Simplified","標題黨":"Clickbait titles","從標題刪掉這些詞":"Remove these words from titles","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"Videos still show. Only these words are removed from the title. {0}","標題含有這些詞就隱藏影片":"Hide videos whose title contains these words","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"The whole card is hidden on the home page, recommendations, search, rankings and the feed. The video you are watching is not affected. {0}","收斂誇張標點":"Tone down excessive punctuation","連續的驚嘆號、問號縮成一個（！！！→！）":"Repeated exclamation and question marks shrink to one (！！！→！)","加入常見的標題黨用詞":"Add common clickbait words","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"Adds a set of common exaggerated words to \"Remove these words from titles\". You can edit the list afterwards","加入":"Add","這些詞都已經在清單裡了":"These words are all in the list already","已加入 {0} 個詞":"Added {0} words","首頁推薦過濾":"Home recommendation filter","播放量低於這個數就隱藏":"Hide videos with fewer views than this","0 = 不限":"0 = no limit","次":"views","短於這個長度就隱藏":"Hide videos shorter than this","秒":"s","長於這個長度就隱藏":"Hide videos longer than this","分":"min","發布超過這麼多天就隱藏":"Hide videos published more than this many days ago","天":"days","隱藏豎屏影片":"Hide vertical videos","要逐個查影片資料，卡片會晚一點才消失":"Each video has to be looked up, so cards disappear a moment later","已關注的 UP 主不過濾":"Do not filter uploaders you follow","隱藏這些 UP 主的影片":"Hide videos from these uploaders","每行一個，寫 UP 主名稱或 UID":"One per line. Enter an uploader name or UID","封面黨（激進）":"Clickbait covers (aggressive)","替換影片封面":"Replace video covers","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"Hides the cover the uploader chose and uses the first frame or a random frame of the video. Each card needs one more lookup, so covers change a moment later, and too many lookups may get you rate limited by Bilibili for a while. Save / enlarge in the cover toolbar still use the original cover","關":"Off","第一幀":"First frame","隨機一幀":"Random frame","影片卡片":"Video cards","封面快速保存":"Quick cover save","滑鼠移到影片卡片上，封面左上角出現工具列，點「↓」下載原尺寸封面":"Hover over a video card and a toolbar appears at the top left of the cover. Click \"↓\" to download the cover at full size","封面懸浮放大":"Enlarge cover on hover","滑鼠停在工具列的放大鏡上，顯示大圖":"Hover over the magnifier in the toolbar to see the large image","一鍵拉黑 UP 主":"One-click block uploader","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"Click \"⊘\" in the toolbar to add the uploader to your Bilibili blocklist. Click again to undo. Sign-in required","影片在本頁打開":"Open videos in the same tab","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"Clicking a video card no longer opens a new tab. Hold ⌘ / Ctrl or middle-click to open one","下載失敗":"Download failed","找不到這個影片的封面":"Cannot find the cover of this video","封面已保存":"Cover saved","封面保存失敗：{0}":"Could not save the cover: {0}","錯誤碼 {0}":"Error code {0}","保存封面":"Save cover","放大封面":"Enlarge cover","拉黑 UP 主":"Block uploader","要先登入 B站才能拉黑":"Sign in to Bilibili to block","找不到 UP 主":"Cannot find the uploader","已拉黑「{0}」，再點一次 ⊘ 可取消":"Blocked \"{0}\". Click ⊘ again to undo","已取消拉黑「{0}」":"Unblocked \"{0}\"","拉黑失敗：{0}":"Block failed: {0}","首頁主題":"Home theme","主題":"Theme","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"Minimal: only the video list. Showcase: a full-width poster of recommended videos at the top, updates from people you follow at the bottom right, and the video list further down","極簡":"Minimal","大寶鑑":"Showcase","海報的推薦來源":"Poster source","綜合熱門":"Popular","每週必看":"Weekly picks","入站必刷":"All-time classics","右下角的關注更新":"Following updates at the bottom right","要登入 B站；沒登入時改放同一來源的其他影片":"Sign-in required. When signed out, other videos from the same source are shown instead","全部動態":"All posts","只看影片":"Videos only","不顯示":"Hidden","海報多久換一張":"How often the poster changes","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"Pauses while the pointer is over the row of buttons with Play. Does not change automatically when the system has Reduce Motion on","海報畫質":"Poster quality","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"Original is sharpest, about 0.2–1 MB each. It can never be sharper than the cover the uploader provided","原圖":"Original","壓縮":"Compressed","海報輪流放幾部影片":"Number of videos in the poster rotation","最少 4 部，最多 30 部":"From 4 to 30","部":"videos","影片列表":"Video list","不顯示左上角那塊大的輪播推薦":"Hide the large carousel at the top left","不顯示直播、番劇等推薦卡":"Hide live and series recommendation cards","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"The cards in the video list that carry a badge such as Live, Anime or Variety","{0} 次播放":"{0} views","[按鈕]播放":"Play","{0} 讚":"{0} likes","稍後再看":"Watch later","上一部":"Previous","下一部":"Next","推薦影片":"Recommended videos","往前":"Back","往後":"Forward","來源是空的":"The source is empty","關注更新":"From people you follow","更多推薦":"More picks","大寶鑑載入失敗：{0}":"Showcase failed to load: {0}","動態過濾":"Feed filter","隱藏轉發":"Hide reposts","隱藏直播通知":"Hide live notifications","隱藏預約（直播 / 影片預約）":"Hide reservations (live / video)","隱藏充電專屬":"Hide supporter-only posts","隱藏專欄":"Hide articles","內容含有這些詞就隱藏":"Hide posts containing these words","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"One word per line. /regex/ also works. Matches the post text, video titles and reposted content. Changes apply to posts loaded as you scroll down","加入常見的廣告用詞":"Add common ad words","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"Adds a set of common sales and promotion phrases to the list above, to catch ad posts that the product card alone does not reveal. You can edit the list afterwards","評論區":"Comments","備註":"Notes","IP 屬地":"IP location","評論顯示 IP 屬地":"Show IP location in comments","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"Comments and replies on videos, posts, articles, anime, live and other pages","專欄作者顯示 IP 屬地":"Show IP location of article authors","屬地文字替換":"Location text replacement","JSON 鍵值對，例如 {\"IP属地：\":\"\"} 可去掉前綴":"JSON key-value pairs. For example {\"IP属地：\":\"\"} removes the prefix","用戶標記":"User marks","評論顯示性別":"Show gender in comments","資料來自評論介面，未公開性別的用戶不顯示":"The data comes from the comment API. Users who keep their gender private are not marked","屬地文字替換不是合法 JSON，已忽略":"The location text replacement is not valid JSON and was ignored","性別：{0}":"Gender: {0}","男":"Male","女":"Female","顯示":"Display","顯示用戶備註":"Show user notes","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"Next to user names in comments, on space pages, and on links that point to the user's space","顯示方式":"Display style","暱稱後加標籤":"Tag after the name","只顯示備註":"Note only","輸入備註":"Enter a note","備註已儲存":"Note saved","備註已刪除":"Note deleted","編輯備註":"Edit note","刪除":"Delete","取消":"Cancel","儲存":"Save","點擊修改備註":"Click to edit the note","給這位用戶加備註":"Add a note for this user","備註：{0}":"Note: {0}","＋ 備註":"+ Note","評論過濾":"Comment filter","評論區快速拉黑":"Quick block in comments","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"Hover over the user name line of a comment and \"Block\" appears. One click adds the user to your Bilibili blocklist and collapses their comments. Remove them in Bilibili's blocklist if it was a mistake. Sign-in required","評論含有這些詞就隱藏":"Hide comments containing these words","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"Empty = off. One word per line. /regex/ also works. Comments and nested replies are both matched","隱藏帶貨評論":"Hide comments that sell products","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"Comments with a product link (the blue shopping cart link) are collapsed entirely. Common in sponsored comments pinned by the uploader","已拉黑「{0}」，他的評論已收起":"Blocked \"{0}\". Their comments are collapsed","加入 B站黑名單":"Add to Bilibili blocklist","拉黑":"Block","畫質":"Quality","直播停用 P2P / 第三方 CDN":"Turn off P2P / third-party CDN for live","強制最高畫質（真・原畫）":"Force the highest quality (true original)","連續載入失敗時會自動退回播放器選擇的畫質":"Falls back to the quality the player chose after repeated loading failures","介面":"Interface","網頁全屏 / 全屏時隱藏禮物欄":"Hide the gift bar in web full screen / full screen","滑鼠移到畫面底部時不再彈出禮物列":"The gift row no longer pops up when the pointer moves to the bottom of the picture","平時也隱藏禮物欄":"Also hide the gift bar normally","播放器下方整條禮物 / 包裹列":"The whole gift / pack row below the player","隱藏榜單":"Hide rankings","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"The top fans / fleet list above the chat, the popularity ranking in the title bar, gift planet and similar entries","隱藏直播區廣告與活動":"Hide ads and events in live","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"The event carousel below the player, section banners, the shopping cart, event entries and event overlays in the player","隱藏直播間雜項":"Hide live room extras","進場歡迎條、播放器角標":"Entrance welcome bars and player corner badges","隱藏直播間右側的浮動按鈕":"Hide the floating buttons on the right of live rooms","貼在視窗右邊的「實驗室」「關注」那一條":"The strip on the right edge of the window with Lab and Follow","直播畫面鋪滿頁面":"Live video fills the page","去掉左右留白：畫面佔滿聊天欄以外的寬度和導航欄以下的高度，主播資訊浮在畫面上（滑鼠移到畫面才顯示），禮物欄往下捲才看得到。不是網頁全螢幕，頁面照常捲動":"Removes the side margins: the video takes all the width beside the chat and all the height below the navigation bar; the streamer info floats over the video (shown while the pointer is over it); scroll down for the gift bar. This is not web fullscreen, the page still scrolls","彈幕":"Danmaku","檢查彈幕是否真的發出":"Check whether danmaku were really sent","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"Bilibili reports \"success\" even for blocked danmaku. This tells you whether the system or the streamer's blocked words stopped it","被攔截時自動複製內容":"Copy the text automatically when blocked","方便修改後重發":"So you can edit it and send again","發送成功也提示":"Also notify on success","最高畫質不可用，已退回播放器選擇的畫質":"The highest quality is not available. Fell back to the quality the player chose","系統攔截（全站敏感詞）":"Blocked by the system (site-wide sensitive words)","主播 / 房管屏蔽詞":"Streamer / moderator blocked words","彈幕發送失敗：{0}":"Danmaku failed to send: {0}","彈幕已發出":"Danmaku sent","彈幕沒有發出：{0}{1}":"Danmaku not sent: {0}{1}"," · 內容已複製":" · Text copied","彈幕查詢":"Danmaku lookup","這個頁面找不到影片 BV 號":"Cannot find a BV number on this page","取得分 P 列表失敗":"Could not get the part list","記住倍速":"Remember playback speed","換影片、重新整理後沿用上次調的倍速":"Keeps the speed you last set across videos and reloads","彈幕預設":"Danmaku default","不變":"Unchanged","開":"On","字幕預設":"Subtitle default","影片有字幕時才有作用":"Only applies when the video has subtitles","快退 / 快進的秒數":"Seconds for rewind / fast forward","全螢幕時滾輪調音量":"Scroll to change volume in full screen","滑鼠在畫面上滾動，每格 5%":"Scroll over the picture, 5% per step","播完自動退出全螢幕":"Exit full screen when playback ends","後面沒有接著播下一個影片時才退出":"Only when no next video follows","截圖同時複製到剪貼簿":"Also copy screenshots to the clipboard","截圖一律會下載成 PNG；這項再多複製一份":"Screenshots are always downloaded as PNG. This copies one as well","響度均衡":"Loudness equalization","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"Lowers the loud parts and raises the overall volume so videos sound about equally loud. If there is no sound after turning it on, turn it off and reload","選集":"Episodes","合集播放順序":"Collection play order","一集播完後接著播哪一集":"Which episode plays after one ends","正常":"Normal","倒序":"Reverse","隨機":"Shuffle","複製連結時去掉追蹤參數":"Remove tracking parameters when copying links","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"URLs from Bilibili's \"Share → Copy link\" no longer carry vd_source, share_source and so on","倍速 {0}×":"Speed {0}×","影片還沒載入，無法截圖":"The video has not loaded yet, so no screenshot can be taken","無法取得畫面":"Cannot get the picture","截圖已保存並複製（{0}）":"Screenshot saved and copied ({0})","截圖已保存（{0}）":"Screenshot saved ({0})","截圖失敗：{0}":"Screenshot failed: {0}","畫面旋轉 {0}°":"Rotated {0}°","畫面旋轉：還原":"Rotation: reset","畫面鏡像：開":"Mirror: on","畫面鏡像：關":"Mirror: off","已複製乾淨連結":"Clean link copied","複製失敗":"Copy failed","要先登入 B站才能加入稍後再看":"Sign in to Bilibili to add to Watch later","已加入稍後再看":"Added to Watch later","加入稍後再看失敗：{0}":"Could not add to Watch later: {0}","已通知所有開著的影片分頁":"All open video tabs have been notified","把所有開著的影片分頁加入稍後再看":"Add all open video tabs to Watch later","每個開著影片頁的分頁各自把自己加入；需要已登入":"Each tab with a video page adds itself. Sign-in required","音量 {0}%":"Volume {0}%","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"Loudness equalization could not start (the player is already using audio processing)","開關設定面板":"Toggle the settings panel","選集浮層":"Episode overlay","合集 / 分 P 清單，全螢幕下也可以用":"Collection / part list. Also works in full screen","這個影片沒有選集":"This video has no episodes","畫中畫":"Picture in picture","找不到畫中畫按鈕":"Cannot find the picture in picture button","畫面填滿播放器":"The picture fills the player","裁切模式：開":"Crop mode: on","裁切模式：關":"Crop mode: off","字幕開關":"Toggle subtitles","這個影片沒有字幕":"This video has no subtitles","播放 / 暫停":"Play / pause","快退":"Rewind","秒數在「播放頁 → 播放」裡設定":"Set the seconds in \"Video page → Playback\"","快進":"Fast forward","上一幀":"Previous frame","會先暫停":"Pauses first","下一幀":"Next frame","截圖":"Screenshot","以影片原始解析度存成 PNG":"Saved as PNG at the video's original resolution","彈幕開關":"Toggle danmaku","找不到彈幕開關":"Cannot find the danmaku switch","畫面旋轉 90°":"Rotate 90°","畫面鏡像":"Mirror","複製乾淨連結":"Copy clean link","不帶任何追蹤參數的影片網址":"The video URL without any tracking parameters","保存目前影片的封面":"Save the cover of the current video","所有開著的影片分頁加入稍後再看":"Add every open video tab to Watch later","加速 0.25×":"Speed up 0.25×","減速 0.25×":"Slow down 0.25×","回到 1× 倍速":"Back to 1× speed","打開彈幕查詢":"Open danmaku lookup","網頁全屏":"Web full screen","全螢幕":"Full screen","收起 / 展開聊天":"Collapse / expand chat","網頁全屏或全螢幕時才有作用":"Only works in web full screen or full screen","先進入網頁全屏或全螢幕，才能收起聊天":"Enter web full screen or full screen first to collapse the chat","不是這個腳本匯出的設定檔":"This settings file was not exported by this script","設定面板":"Settings panel","還原全部預設值":"Restore all defaults","再按一次確認。備註不會被清除":"Press again to confirm. Notes are not cleared","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"All switches, values and shortcuts return to their defaults. Blocked words and notes are kept","確認還原":"Confirm restore","還原":"Restore","已還原預設，重新整理後完全生效":"Defaults restored. Reload for full effect","匯出全部設定":"Export all settings","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"Saves all switches, values, shortcuts, blocked words and user notes as one JSON file","匯出":"Export","匯入設定":"Import settings","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"Reads a file saved by \"Export all settings\". Items in the file are overwritten and the rest stay as they are","選擇檔案":"Choose file","已匯入 {0} 項設定，重新整理後完全生效":"Imported {0} settings. Reload for full effect","匯入失敗：{0}":"Import failed: {0}","JSON 格式錯誤":"Invalid JSON","複製診斷資訊":"Copy diagnostics","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"Press this when the layout looks wrong and paste the copied text to the developer. Layout information only, no account data and none of your settings","複製":"Copy","診斷資訊已複製":"Diagnostics copied","外觀":"Appearance","跟隨系統":"System","語言":"Language","「自動」會跟隨瀏覽器的語言":"\"Auto\" follows your browser language","自動":"Auto","強調色":"Accent color","B站粉":"Bilibili pink","B站藍":"Bilibili blue","石墨":"Graphite","快捷鍵":"Shortcuts","減少":"Decrease","增加":"Increase","重新整理頁面後生效":"Takes effect after reloading the page","「{0}」已還原預設":"\"{0}\" restored to default","執行":"Run","寬屏版面的構想來自 posthumz 的 ":"The widescreen layout is inspired by posthumz's","，在此致謝。":". Thank you.","關於":"About","搜尋設定":"Search settings","沒有符合的設定":"No matching settings","搜尋結果":"Search results","未設定":"Not set","關閉":"Close"," 開關面板":" toggles the panel","右鍵任一項還原預設":"Right-click any item to restore its default","重新整理以套用":"Reload to apply","設定":"Settings","格式不對":"Wrong format","備註清單":"Note list","搜尋暱稱、備註或 UID":"Search name, note or UID","確認刪除":"Confirm delete","（未知暱稱）":"(unknown name)","沒有符合的備註":"No matching notes","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"No notes yet. In comments, hover over the user name line and click \"Note\", or click \"+ Note\" on a space page.","UID 只能是數字":"UID must be digits only","請輸入備註":"Please enter a note","已匯入 {0} 筆備註":"Imported {0} notes","匯入 JSON":"Import JSON","新增":"Add","查詢":"Look up","請在影片 / 番劇播放頁打開這一頁。":"Open this page on a video / anime player page.","關鍵字（留空列出全部彈幕）":"Keyword (leave empty to list all danmaku)","反查全部發送者":"Look up all senders","反查中…":"Looking up…","查不到":"Not found","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"UIDs longer than 11 digits (16-digit UIDs registered after 2022) cannot be looked up from danmaku","反查":"Look up","跳到這個時間":"Jump to this time","時間":"Time","日期":"Date","發送者":"Sender","反查中 {0}/{1}":"Looking up {0}/{1}","載入彈幕中…":"Loading danmaku…","，只顯示前 {0} 條（加關鍵字縮小範圍）":", showing only the first {0} (add a keyword to narrow down)","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"{0} in total{1}. Click a time to jump. Click \"Look up\" to get the sender (the result is the smallest UID matching the CRC32. New 16-digit UIDs cannot be found or may match someone else).","沒有符合的彈幕":"No matching danmaku","查詢失敗：{0}":"Lookup failed: {0}","按下按鍵…":"Press a key…","{0} 已經給「{1}」用了":"{0} is already used by \"{1}\"","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"Click a button, then press the new key combination. Esc cancels, Delete disables, right-click restores the default. Single-key shortcuts do not fire while you type. When a key matches one of Bilibili's own, this one wins.","設定已同步，重新整理後完全生效":"Settings synced. Reload for full effect"},"ja":{"比利重啟":"Re:Bi","空白鍵":"スペース","數字鍵盤 ":"テンキー","通用":"一般","首頁":"ホーム","播放頁":"再生ページ","動態 · 空間":"フィード · スペース","版面":"レイアウト","左右邊距":"左右の余白","所有頁面內容區兩側的留白，不會超過視窗寬度的 15%":"すべてのページでコンテンツの両側に空ける幅。ウインドウ幅の 15% まで","動態頁":"フィードページ","側欄吸頂":"サイドバーを固定","側欄內容較長時可能顯示不全":"サイドバーが長いと全部表示されないことがあります","隱藏帶貨動態":"商品紹介の投稿を隠す","播放器":"プレーヤー","播放器撐滿視窗":"プレーヤーをウィンドウいっぱいに","關閉後播放頁回到原本的版面：播放器在左、推薦在右，選集浮層和小窗調整也一併停用":"オフにすると再生ページは元のレイアウト（左にプレーヤー、右におすすめ）に戻り、エピソード一覧とミニプレーヤーの調整も無効になります","自動高度":"高さを自動調整","播放器跟隨影片比例，上下不留黑邊":"プレーヤーを動画の縦横比に合わせ、上下に黒帯を出しません","預留高度":"下に残す高さ","播放器下方露出多少頁面內容；大於 0 時導航欄常駐。不會超過視窗高度的 25%":"プレーヤーの下にページをどれだけ見せるか。0 より大きいとナビゲーションバーが常に表示されます。ウインドウの高さの 25% まで","導航欄":"ナビゲーションバー","導航欄放在播放器下方":"ナビゲーションバーをプレーヤーの下に置く","導航欄吸頂":"ナビゲーションバーを固定","向下捲動時導航欄固定在視窗頂部":"下にスクロールしてもナビゲーションバーがウインドウの上端に残ります","控制欄":"コントロールバー","緊湊控制欄":"コンパクトなコントロールバー","按鈕收到圖示大小、間距收緊，省下的寬度都給彈幕輸入框":"ボタンをアイコンの大きさにして間隔を詰め、空いた幅を弾幕の入力欄に回します","顯示在看人數 / 彈幕數":"視聴中の人数 / 弾幕数を表示","平時隱藏控制欄":"ふだんはコントロールバーを隠す","滑鼠移到播放器底部才顯示":"ポインタをプレーヤーの下端に動かすと表示されます","暫停時一直顯示控制欄":"一時停止中はコントロールバーを常に表示","小窗可調整":"ミニプレーヤーを調整可能にする","拖小窗左邊緣改寬度，拖小窗本身改位置，並記住":"左端をドラッグで幅を変更、本体をドラッグで移動。どちらも記憶します","小窗位置與寬度":"ミニプレーヤーの位置と幅","回到右下角、預設寬度":"右下、既定の幅に戻します","重設":"リセット","小窗已重設":"ミニプレーヤーをリセットしました","使用 Re:Bi 的導航欄":"Re:Bi のナビゲーションバーを使う","整條導航欄換成同一套方磚，每個頁面都一樣；個人卡片從頭像打開。關閉後回到原本的導航欄":"ナビゲーションバー全体を同じタイルに置き換え、どのページでも同じ見た目にします。プロフィールカードはアイコンから開きます。オフにすると元のバーに戻ります","滑過入口時顯示預覽":"入口にカーソルを載せるとプレビューを表示","滑鼠停在消息、動態、收藏、歷史上，直接看到最近的內容":"メッセージ・動態・お気に入り・履歴にカーソルを載せると最近の内容を表示します","消息":"メッセージ","收藏":"お気に入り","歷史":"履歴","導航欄右側的入口":"ナビゲーションバー右側の入口","番劇":"アニメ","直播":"ライブ","熱門":"人気","排行榜":"ランキング","遊戲中心":"ゲームセンター","會員購":"会員購","漫畫":"マンガ","賽事":"大会","課堂":"講座","更多":"その他","搜尋影片、UP 主":"動画・投稿者を検索","搜尋":"検索","登入":"ログイン","個人卡片":"プロフィールカード","展開":"開く","收起":"たたむ","切換後會重新載入頁面":"切り替えるとページを再読み込みします","深色":"ダーク","淺色":"ライト","登出":"ログアウト","再按一次確認":"もう一度押して確認","稍後再看 {0}":"後で見る {0}","硬幣 {0}":"コイン {0}","B幣 {0}":"Bコイン {0}","已滿級":"最大レベル","距 LV{0} 還差 {1}":"LV{0} まであと {1}","關注":"フォロー","粉絲":"フォロワー","個人空間":"マイスペース","{0} 則未讀":"未読 {0} 件","有更新":"新着あり","回覆我的":"返信","@ 我的":"メンション","收到的讚":"もらったいいね","系統通知":"システム通知","我的訊息":"ダイレクトメッセージ","已看完":"視聴済み","看全部":"すべて見る","沒有內容":"内容がありません","載入失敗":"読み込みに失敗しました","熱搜":"トレンド","選集顯示縮圖":"エピソード一覧にサムネイルを表示","合集顯示每一集的封面，分 P 影片每一段都顯示影片的主封面；捲到哪裡才載入哪裡":"コレクションは各話のカバーを、分割動画はどのパートにも動画のメインカバーを表示します。スクロールした位置の画像だけ読み込みます","字體":"フォント","使用系統字體":"システムフォントを使う","Mac 上用蘋方 / San Francisco，Windows 上用微軟雅黑，並開啟字體平滑":"Mac では PingFang / San Francisco、Windows では Microsoft YaHei を使い、フォントスムージングを有効にします","等寬數字":"等幅数字","播放時間、播放量等數字等寬顯示，跳動時不抖動":"再生時間や再生数などの数字を等幅で表示し、変化してもがたつきません","全螢幕暫停時保留原況文字":"フルスクリーンの一時停止中もテキスト認識を残す","開啟後可以在全螢幕暫停的畫面上框選文字，但暫停時右下角的按鈕（選集、小窗、退出全螢幕）會點不動":"オンにするとフルスクリーンで一時停止した画面の文字を選択できますが、一時停止中は右下のボタン（エピソード、ミニプレーヤー、フルスクリーン解除）が押せなくなります","淨化":"クリーンアップ","頁面":"ページ","去掉全站黑白濾鏡":"サイト全体のモノクロフィルタを外す","隱藏廣告":"広告を隠す","首頁推廣卡片、播放頁右欄的廣告位與推廣卡片、「檢測到廣告攔截」提示":"ホームのプロモーションカード、再生ページ右欄の広告枠とプロモーションカード、「広告ブロックを検出」の通知","跳過片尾充電名單":"動画の最後のサポーター一覧を飛ばす","頁面載入完成後才清空名單，不一定每次都生效":"ページの読み込みが終わってから一覧を消すので、毎回効くとは限りません","專欄允許複製":"記事のコピーを許可","片尾不顯示相關推薦":"動画の最後に関連動画を表示しない","影片播完後那一排「相關推薦」影片；重播等按鈕還在":"再生が終わったあとに並ぶ「関連動画」。リプレイなどのボタンは残ります","隱私":"プライバシー","清理網址追蹤參數":"URL の追跡パラメータを削除","spm_id_from、vd_source、share_* 等":"spm_id_from、vd_source、share_* など","攔截資料上報":"データ送信をブロック","data.bilibili.com / cm.bilibili.com、Sentry、瀏覽器指紋":"data.bilibili.com / cm.bilibili.com、Sentry、ブラウザフィンガープリント","播放":"再生","停用 P2P CDN 與 WebRTC":"P2P CDN と WebRTC を無効にする","不替 B站上傳流量；影片位址換回官方 CDN":"ビリビリのために通信をアップロードしません。動画のアドレスを公式 CDN に戻します","播放器設定加入「裁切模式」":"プレーヤー設定に「クロップモード」を追加","在播放器的齒輪選單裡，讓畫面填滿播放器":"プレーヤーの歯車メニューの中。映像をプレーヤーいっぱいに広げます","裁切模式":"クロップモード","每行一個詞；也可以寫 /正則/。B站標題多為簡體字，請用簡體輸入":"1 行に 1 語。/正規表現/ も使えます。ビリビリのタイトルは簡体字が多いので、簡体字で入力してください","標題黨":"釣りタイトル","從標題刪掉這些詞":"タイトルからこれらの語を消す","影片照常顯示，只把這些詞從標題裡拿掉。{0}":"動画はそのまま表示し、タイトルからこれらの語だけを取り除きます。{0}","標題含有這些詞就隱藏影片":"タイトルにこれらの語がある動画を隠す","首頁、推薦、搜尋、排行榜、動態裡整張卡片不顯示；正在看的影片不受影響。{0}":"ホーム、おすすめ、検索、ランキング、フィードでカードごと表示しません。視聴中の動画には影響しません。{0}","收斂誇張標點":"大げさな記号を抑える","連續的驚嘆號、問號縮成一個（！！！→！）":"連続する感嘆符や疑問符を 1 つにまとめます（！！！→！）","加入常見的標題黨用詞":"よくある釣りタイトルの語を追加","把一組常見的誇張用詞加進「從標題刪掉這些詞」，之後可以自己增刪":"よくある大げさな語をまとめて「タイトルからこれらの語を消す」に追加します。あとで自由に増減できます","加入":"追加","這些詞都已經在清單裡了":"これらの語はすでにリストにあります","已加入 {0} 個詞":"{0} 語を追加しました","首頁推薦過濾":"ホームのおすすめフィルタ","播放量低於這個數就隱藏":"再生数がこの数より少ない動画を隠す","0 = 不限":"0 = 制限なし","次":"回","短於這個長度就隱藏":"この長さより短い動画を隠す","長於這個長度就隱藏":"この長さより長い動画を隠す","發布超過這麼多天就隱藏":"公開からこの日数を過ぎた動画を隠す","天":"日","隱藏豎屏影片":"縦型動画を隠す","要逐個查影片資料，卡片會晚一點才消失":"動画を 1 本ずつ調べるので、カードが消えるまで少し時間がかかります","已關注的 UP 主不過濾":"フォロー中の投稿者は対象外","隱藏這些 UP 主的影片":"これらの投稿者の動画を隠す","每行一個，寫 UP 主名稱或 UID":"1 行に 1 人。投稿者名か UID を書きます","封面黨（激進）":"釣りサムネイル（強力）","替換影片封面":"動画のサムネイルを置き換える","不顯示 UP 主上傳的封面，改用影片的第一幀或隨機一幀。每張卡片要多查一次資料，封面會晚一點才換；查得太多可能被 B站暫時限流。封面工具列的保存 / 放大仍是原封面":"投稿者が設定したサムネイルを表示せず、動画の最初のフレームかランダムなフレームを使います。カードごとに 1 回多く問い合わせるのでサムネイルの切り替えが少し遅れ、問い合わせが多すぎるとビリビリに一時的に制限されることがあります。サムネイルツールバーの保存 / 拡大は元のサムネイルのままです","關":"オフ","第一幀":"最初のフレーム","隨機一幀":"ランダムなフレーム","影片卡片":"動画カード","封面快速保存":"サムネイルをすばやく保存","滑鼠移到影片卡片上，封面左上角出現工具列，點「↓」下載原尺寸封面":"動画カードにポインタを合わせるとサムネイルの左上にツールバーが出ます。「↓」で元のサイズのサムネイルをダウンロードします","封面懸浮放大":"ホバーでサムネイルを拡大","滑鼠停在工具列的放大鏡上，顯示大圖":"ツールバーの虫めがねにポインタを合わせると大きな画像を表示します","一鍵拉黑 UP 主":"ワンクリックで投稿者をブロック","點工具列的「⊘」直接加入 B站黑名單，再點一次取消；需要已登入":"ツールバーの「⊘」でビリビリのブロックリストに追加、もう一度押すと解除。ログインが必要です","影片在本頁打開":"動画を同じタブで開く","點影片卡片不再開新分頁；按住 ⌘ / Ctrl 或用中鍵點仍然開新分頁":"動画カードをクリックしても新しいタブを開きません。⌘ / Ctrl を押しながら、または中クリックなら新しいタブで開きます","下載失敗":"ダウンロードに失敗しました","找不到這個影片的封面":"この動画のサムネイルが見つかりません","封面已保存":"サムネイルを保存しました","封面保存失敗：{0}":"サムネイルを保存できませんでした：{0}","錯誤碼 {0}":"エラーコード {0}","保存封面":"サムネイルを保存","放大封面":"サムネイルを拡大","拉黑 UP 主":"投稿者をブロック","要先登入 B站才能拉黑":"ブロックするにはビリビリにログインしてください","找不到 UP 主":"投稿者が見つかりません","已拉黑「{0}」，再點一次 ⊘ 可取消":"「{0}」をブロックしました。もう一度 ⊘ を押すと解除できます","已取消拉黑「{0}」":"「{0}」のブロックを解除しました","拉黑失敗：{0}":"ブロックに失敗しました：{0}","首頁主題":"ホームのテーマ","主題":"テーマ","極簡：只有影片列表。大寶鑑：最上面是整幅海報的影片推薦，右下是你關注的更新，往下滑才是影片列表":"ミニマル：動画リストだけ。ショーケース：いちばん上に画面いっぱいのおすすめ動画ポスター、右下にフォロー中の更新、下にスクロールすると動画リスト","極簡":"ミニマル","大寶鑑":"ショーケース","海報的推薦來源":"ポスターのおすすめ元","綜合熱門":"総合人気","每週必看":"毎週の必見","入站必刷":"殿堂入り","右下角的關注更新":"右下のフォロー中の更新","要登入 B站；沒登入時改放同一來源的其他影片":"ビリビリへのログインが必要です。未ログインのときは同じおすすめ元のほかの動画を表示します","全部動態":"すべての投稿","只看影片":"動画のみ","不顯示":"表示しない","海報多久換一張":"ポスターを切り替える間隔","滑鼠停在播放那一排按鈕上時暫停；系統開了「減少動態效果」就不自動換":"ポインタが再生ボタンの並びの上にある間は止まります。システムの「視差効果を減らす」がオンのときは自動で切り替わりません","海報畫質":"ポスターの画質","原圖最清楚，每張約 0.2–1 MB；再清楚也不會超過 UP 主上傳的封面":"オリジナルが最も鮮明で、1 枚あたり約 0.2〜1 MB。投稿者がアップロードしたカバー以上には鮮明になりません","原圖":"オリジナル","壓縮":"圧縮","海報輪流放幾部影片":"ポスターで順に表示する動画の数","最少 4 部，最多 30 部":"4〜30 本","部":"本","影片列表":"動画リスト","不顯示左上角那塊大的輪播推薦":"左上の大きなカルーセルを表示しない","不顯示直播、番劇等推薦卡":"ライブ・アニメなどのおすすめカードを表示しない","影片列表中間帶「直播」「番劇」「綜藝」這類角標的卡片":"動画リストの途中にある「ライブ」「アニメ」「バラエティ」などのバッジ付きカード","{0} 次播放":"{0} 回再生","[按鈕]播放":"再生","{0} 讚":"{0} いいね","稍後再看":"あとで見る","上一部":"前へ","下一部":"次へ","推薦影片":"おすすめ動画","往前":"戻る","往後":"進む","來源是空的":"おすすめ元が空です","關注更新":"フォロー中の更新","更多推薦":"ほかのおすすめ","大寶鑑載入失敗：{0}":"ショーケースを読み込めませんでした：{0}","動態過濾":"フィードフィルタ","隱藏轉發":"リポストを隠す","隱藏直播通知":"ライブ通知を隠す","隱藏預約（直播 / 影片預約）":"予約（ライブ / 動画の予約）を隠す","隱藏充電專屬":"サポーター限定の投稿を隠す","隱藏專欄":"記事を隠す","內容含有這些詞就隱藏":"これらの語を含む投稿を隠す","每行一個詞；也可以寫 /正則/。比對動態文字、影片標題和被轉發的內容。改動後往下捲載入的新動態開始生效":"1 行に 1 語。/正規表現/ も使えます。投稿の本文、動画タイトル、リポスト元の内容と照合します。変更は、下にスクロールして読み込まれる投稿から反映されます","加入常見的廣告用詞":"よくある広告の語を追加","把一組常見的帶貨、促銷用語加進上面的清單，補足只靠商品卡片認不出來的廣告動態；之後可以自己增刪":"よくある販売・セールの言い回しをまとめて上のリストに追加し、商品カードだけでは見分けられない広告投稿を補います。あとで自由に増減できます","評論區":"コメント欄","備註":"メモ","IP 屬地":"IP 所在地","評論顯示 IP 屬地":"コメントに IP 所在地を表示","影片、動態、專欄、番劇、直播等頁面的評論與回覆":"動画、投稿、記事、アニメ、ライブなどのページのコメントと返信","專欄作者顯示 IP 屬地":"記事の著者の IP 所在地を表示","屬地文字替換":"所在地の文字を置き換える","JSON 鍵值對，例如 {\"IP属地：\":\"\"} 可去掉前綴":"JSON のキーと値の組。たとえば {\"IP属地：\":\"\"} で先頭の文字を消せます","用戶標記":"ユーザーマーク","評論顯示性別":"コメントに性別を表示","資料來自評論介面，未公開性別的用戶不顯示":"データはコメント API から取得します。性別を公開していないユーザーには表示しません","屬地文字替換不是合法 JSON，已忽略":"所在地の文字の置き換えが正しい JSON ではないため、無視しました","男":"男性","女":"女性","顯示":"表示","顯示用戶備註":"ユーザーメモを表示","評論區用戶名旁、空間頁，以及頁面上指向該用戶空間首頁的連結":"コメント欄のユーザー名の横、スペースページ、そのユーザーのスペースへのリンク","顯示方式":"表示方法","暱稱後加標籤":"名前のあとにタグ","只顯示備註":"メモだけ表示","輸入備註":"メモを入力","備註已儲存":"メモを保存しました","備註已刪除":"メモを削除しました","編輯備註":"メモを編集","刪除":"削除","取消":"キャンセル","儲存":"保存","點擊修改備註":"クリックしてメモを編集","給這位用戶加備註":"このユーザーにメモを付ける","備註：{0}":"メモ：{0}","＋ 備註":"＋ メモ","評論過濾":"コメントフィルタ","評論區快速拉黑":"コメント欄ですばやくブロック","滑鼠移到評論的用戶名那一行，出現「拉黑」；點一下加入 B站黑名單並收起他的評論；誤點的話到 B站的「黑名單」裡移除。需要已登入":"コメントのユーザー名の行にポインタを合わせると「ブロック」が出ます。押すとビリビリのブロックリストに追加し、その人のコメントを折りたたみます。押し間違えたときはビリビリの「ブロックリスト」から外してください。ログインが必要です","評論含有這些詞就隱藏":"これらの語を含むコメントを隠す","留空 = 不啟用。每行一個詞；也可以寫 /正則/。評論和樓中樓回覆都會比對":"空欄 = 無効。1 行に 1 語。/正規表現/ も使えます。コメントと返信の両方と照合します","隱藏帶貨評論":"商品紹介のコメントを隠す","評論裡帶有商品連結（藍色的購物車連結）就整條收起，常見於 UP 主置頂的工商廣告":"商品リンク（青いショッピングカートのリンク）のあるコメントをまるごと折りたたみます。投稿者が固定した広告コメントによくあります","已拉黑「{0}」，他的評論已收起":"「{0}」をブロックしました。その人のコメントは折りたたみました","加入 B站黑名單":"ビリビリのブロックリストに追加","拉黑":"ブロック","畫質":"画質","直播停用 P2P / 第三方 CDN":"ライブで P2P / サードパーティ CDN を無効にする","強制最高畫質（真・原畫）":"最高画質を強制（本当の原画）","連續載入失敗時會自動退回播放器選擇的畫質":"読み込みに続けて失敗すると、プレーヤーが選んだ画質に自動で戻します","介面":"画面","網頁全屏 / 全屏時隱藏禮物欄":"ウェブフルスクリーン / フルスクリーンでギフト欄を隠す","滑鼠移到畫面底部時不再彈出禮物列":"ポインタを映像の下端に動かしてもギフト欄が出なくなります","平時也隱藏禮物欄":"ふだんもギフト欄を隠す","播放器下方整條禮物 / 包裹列":"プレーヤーの下のギフト / バッグの列全体","隱藏榜單":"ランキングを隠す","聊天區上方的高能榜 / 大航海、標題列的人氣榜、禮物星球等入口":"チャット上部の高能ランキング / 大航海、タイトルバーの人気ランキング、ギフト星球などの入口","隱藏直播區廣告與活動":"ライブの広告とイベントを隠す","播放器下方的活動輪播、分區頁橫幅、小橙車、活動入口、播放器內的活動浮層":"プレーヤー下のイベントカルーセル、カテゴリページのバナー、ショッピングカート、イベントの入口、プレーヤー内のイベント表示","隱藏直播間雜項":"ライブルームの細かい表示を隠す","進場歡迎條、播放器角標":"入室の歓迎バー、プレーヤーの角のバッジ","隱藏直播間右側的浮動按鈕":"ライブルーム右側のフローティングボタンを隠す","貼在視窗右邊的「實驗室」「關注」那一條":"ウィンドウ右端の「実験室」「フォロー」の帯","直播畫面鋪滿頁面":"ライブ映像をページいっぱいに","去掉左右留白：畫面佔滿聊天欄以外的寬度和導航欄以下的高度，主播資訊浮在畫面上（滑鼠移到畫面才顯示），禮物欄往下捲才看得到。不是網頁全螢幕，頁面照常捲動":"左右の余白をなくします。映像はチャット欄以外の幅とナビゲーションバーより下の高さをすべて使い、配信者の情報は映像の上に重ねて表示します（ポインターを映像に載せたときだけ）。ギフト欄は下にスクロールすると表示されます。ウェブ全画面ではなく、ページは通常どおりスクロールできます","彈幕":"弾幕","檢查彈幕是否真的發出":"弾幕が本当に送信されたか確認","B站對被攔截的彈幕也回報「成功」；這裡會提示是系統攔截還是主播屏蔽詞":"ビリビリはブロックした弾幕にも「成功」と返します。システムによるブロックか、配信者の NG ワードかを知らせます","被攔截時自動複製內容":"ブロックされたら内容を自動でコピー","方便修改後重發":"直して送り直すときに便利です","發送成功也提示":"送信成功も知らせる","最高畫質不可用，已退回播放器選擇的畫質":"最高画質が使えないため、プレーヤーが選んだ画質に戻しました","系統攔截（全站敏感詞）":"システムによるブロック（サイト全体の NG ワード）","主播 / 房管屏蔽詞":"配信者 / モデレーターの NG ワード","彈幕發送失敗：{0}":"弾幕を送信できませんでした：{0}","彈幕已發出":"弾幕を送信しました","彈幕沒有發出：{0}{1}":"弾幕は送信されていません：{0}{1}"," · 內容已複製":" · 内容をコピーしました","彈幕查詢":"弾幕検索","這個頁面找不到影片 BV 號":"このページでは動画の BV 番号が見つかりません","取得分 P 列表失敗":"パート一覧を取得できませんでした","記住倍速":"再生速度を記憶","換影片、重新整理後沿用上次調的倍速":"動画を変えても再読み込みしても、前回の再生速度を引き継ぎます","彈幕預設":"弾幕の初期状態","不變":"変更しない","開":"オン","字幕預設":"字幕の初期状態","影片有字幕時才有作用":"動画に字幕があるときだけ働きます","快退 / 快進的秒數":"巻き戻し / 早送りの秒数","全螢幕時滾輪調音量":"フルスクリーンでホイールによる音量調整","滑鼠在畫面上滾動，每格 5%":"映像の上でスクロール。1 目盛りで 5%","播完自動退出全螢幕":"再生が終わったらフルスクリーンを解除","後面沒有接著播下一個影片時才退出":"続けて再生する動画がないときだけ解除します","截圖同時複製到剪貼簿":"スクリーンショットをクリップボードにもコピー","截圖一律會下載成 PNG；這項再多複製一份":"スクリーンショットは必ず PNG でダウンロードします。この項目はさらにコピーもします","響度均衡":"ラウドネス均一化","把太大聲的地方壓低、整體音量拉高，各影片聽起來差不多大聲。如果開了以後沒聲音，關掉並重新整理":"大きすぎる音を抑えて全体の音量を上げ、どの動画も同じくらいの大きさに聞こえるようにします。オンにして音が出なくなったら、オフにして再読み込みしてください","選集":"エピソード","合集播放順序":"シリーズの再生順","一集播完後接著播哪一集":"1 本終わったあと、次にどれを再生するか","正常":"通常","倒序":"逆順","隨機":"ランダム","複製連結時去掉追蹤參數":"リンクをコピーするとき追跡パラメータを外す","B站「分享 → 複製連結」得到的網址不再帶 vd_source、share_source 等":"ビリビリの「共有 → リンクをコピー」で得られる URL に vd_source、share_source などが付かなくなります","倍速 {0}×":"再生速度 {0}×","影片還沒載入，無法截圖":"動画がまだ読み込まれていないため、スクリーンショットを撮れません","無法取得畫面":"映像を取得できません","截圖已保存並複製（{0}）":"スクリーンショットを保存してコピーしました（{0}）","截圖已保存（{0}）":"スクリーンショットを保存しました（{0}）","截圖失敗：{0}":"スクリーンショットに失敗しました：{0}","畫面旋轉 {0}°":"映像を {0}° 回転","畫面旋轉：還原":"映像の回転：元に戻す","畫面鏡像：開":"映像の反転：オン","畫面鏡像：關":"映像の反転：オフ","已複製乾淨連結":"クリーンなリンクをコピーしました","複製失敗":"コピーに失敗しました","要先登入 B站才能加入稍後再看":"あとで見るに追加するにはビリビリにログインしてください","已加入稍後再看":"あとで見るに追加しました","加入稍後再看失敗：{0}":"あとで見るに追加できませんでした：{0}","已通知所有開著的影片分頁":"開いているすべての動画タブに通知しました","把所有開著的影片分頁加入稍後再看":"開いているすべての動画タブをあとで見るに追加","每個開著影片頁的分頁各自把自己加入；需要已登入":"動画ページを開いているタブがそれぞれ自分を追加します。ログインが必要です","響度均衡啟用失敗（播放器已經佔用了音訊處理）":"ラウドネス均一化を有効にできませんでした（プレーヤーがすでに音声処理を使っています）","開關設定面板":"設定パネルを開閉","選集浮層":"エピソード一覧","合集 / 分 P 清單，全螢幕下也可以用":"シリーズ / パートの一覧。フルスクリーンでも使えます","這個影片沒有選集":"この動画にはエピソードがありません","畫中畫":"ピクチャ・イン・ピクチャ","找不到畫中畫按鈕":"ピクチャ・イン・ピクチャのボタンが見つかりません","畫面填滿播放器":"映像をプレーヤーいっぱいに広げる","裁切模式：開":"クロップモード：オン","裁切模式：關":"クロップモード：オフ","字幕開關":"字幕の切り替え","這個影片沒有字幕":"この動画には字幕がありません","播放 / 暫停":"再生 / 一時停止","快退":"巻き戻し","秒數在「播放頁 → 播放」裡設定":"秒数は「再生ページ → 再生」で設定します","快進":"早送り","上一幀":"前のフレーム","會先暫停":"先に一時停止します","下一幀":"次のフレーム","截圖":"スクリーンショット","以影片原始解析度存成 PNG":"動画の元の解像度で PNG として保存します","彈幕開關":"弾幕の切り替え","找不到彈幕開關":"弾幕のスイッチが見つかりません","畫面旋轉 90°":"映像を 90° 回転","畫面鏡像":"映像の反転","複製乾淨連結":"クリーンなリンクをコピー","不帶任何追蹤參數的影片網址":"追跡パラメータのない動画の URL","保存目前影片的封面":"現在の動画のサムネイルを保存","所有開著的影片分頁加入稍後再看":"開いている動画タブをすべてあとで見るに追加","加速 0.25×":"0.25× 速くする","減速 0.25×":"0.25× 遅くする","回到 1× 倍速":"1× に戻す","打開彈幕查詢":"弾幕検索を開く","網頁全屏":"ウェブフルスクリーン","全螢幕":"フルスクリーン","收起 / 展開聊天":"チャットを折りたたむ / 展開","網頁全屏或全螢幕時才有作用":"ウェブフルスクリーンかフルスクリーンのときだけ働きます","先進入網頁全屏或全螢幕，才能收起聊天":"チャットを折りたたむには、先にウェブフルスクリーンかフルスクリーンにしてください","不是這個腳本匯出的設定檔":"このスクリプトが書き出した設定ファイルではありません","設定面板":"設定パネル","還原全部預設值":"すべて既定値に戻す","再按一次確認。備註不會被清除":"もう一度押すと確定します。メモは消えません","所有開關、數值、快捷鍵回到預設；屏蔽詞和備註保留":"すべてのスイッチ、数値、ショートカットを既定に戻します。NG ワードとメモは残ります","確認還原":"戻すことを確定","還原":"戻す","已還原預設，重新整理後完全生效":"既定に戻しました。再読み込みすると完全に反映されます","匯出全部設定":"すべての設定を書き出す","所有開關、數值、快捷鍵、屏蔽詞和用戶備註存成一個 JSON 檔":"すべてのスイッチ、数値、ショートカット、NG ワード、ユーザーメモを 1 つの JSON ファイルに保存します","匯出":"書き出す","匯入設定":"設定を読み込む","讀取「匯出全部設定」存的檔案，覆蓋檔案裡有的項目，其餘不動":"「すべての設定を書き出す」で保存したファイルを読み込み、ファイルにある項目を上書きします。ほかはそのままです","選擇檔案":"ファイルを選択","已匯入 {0} 項設定，重新整理後完全生效":"{0} 件の設定を読み込みました。再読み込みすると完全に反映されます","匯入失敗：{0}":"読み込みに失敗しました：{0}","JSON 格式錯誤":"JSON の形式が正しくありません","複製診斷資訊":"診断情報をコピー","版面出問題時按一下，把複製到的文字貼給開發者。只有版面資訊，不含帳號和你的設定內容":"レイアウトがおかしいときに押して、コピーされた文字を開発者に貼り付けてください。レイアウトの情報だけで、アカウントや設定の内容は含みません","複製":"コピー","診斷資訊已複製":"診断情報をコピーしました","外觀":"外観","跟隨系統":"システムに合わせる","語言":"言語","「自動」會跟隨瀏覽器的語言":"「自動」はブラウザの言語に合わせます","強調色":"アクセントカラー","B站粉":"ビリビリピンク","B站藍":"ビリビリブルー","石墨":"グラファイト","快捷鍵":"ショートカット","減少":"減らす","增加":"増やす","重新整理頁面後生效":"ページを再読み込みすると反映されます","「{0}」已還原預設":"「{0}」を既定に戻しました","執行":"実行","寬屏版面的構想來自 posthumz 的 ":"ワイドレイアウトの着想は posthumz 氏の","，在此致謝。":" から得ました。感謝します。","關於":"このソフトについて","搜尋設定":"設定を検索","沒有符合的設定":"一致する設定がありません","搜尋結果":"検索結果","關閉":"閉じる"," 開關面板":" パネルを開閉","右鍵任一項還原預設":"項目を右クリックすると既定に戻ります","重新整理以套用":"再読み込みして適用","格式不對":"形式が正しくありません","備註清單":"メモ一覧","搜尋暱稱、備註或 UID":"名前、メモ、UID で検索","確認刪除":"削除を確定","（未知暱稱）":"（名前不明）","沒有符合的備註":"一致するメモがありません","還沒有備註。在評論區把滑鼠移到用戶名那一行點「備註」，或在空間頁點「＋ 備註」。":"メモはまだありません。コメント欄でユーザー名の行にポインタを合わせて「メモ」を押すか、スペースページで「＋ メモ」を押してください。","UID 只能是數字":"UID は数字だけです","請輸入備註":"メモを入力してください","已匯入 {0} 筆備註":"{0} 件のメモを読み込みました","匯入 JSON":"JSON を読み込む","新增":"追加","查詢":"検索","請在影片 / 番劇播放頁打開這一頁。":"動画 / アニメの再生ページでこのページを開いてください。","關鍵字（留空列出全部彈幕）":"キーワード（空欄ですべての弾幕を表示）","反查全部發送者":"すべての送信者を逆引き","反查中…":"逆引き中…","查不到":"見つかりません","UID 超過 11 位（2022 年後註冊的 16 位 UID）無法由彈幕反查":"11 桁を超える UID（2022 年以降に登録された 16 桁の UID）は弾幕から逆引きできません","反查":"逆引き","跳到這個時間":"この時間へ移動","日期":"日付","發送者":"送信者","反查中 {0}/{1}":"逆引き中 {0}/{1}","載入彈幕中…":"弾幕を読み込み中…","，只顯示前 {0} 條（加關鍵字縮小範圍）":"、最初の {0} 件だけ表示（キーワードで絞り込めます）","共 {0} 條{1}。點時間跳轉，點「反查」取得發送者（結果是 CRC32 對應的最小 UID；16 位新 UID 查不到或可能對應到別人）。":"全 {0} 件{1}。時間を押すと移動、「逆引き」で送信者を取得します（結果は CRC32 に対応する最小の UID です。16 桁の新しい UID は見つからないか、別の人に当たることがあります）。","沒有符合的彈幕":"一致する弾幕がありません","查詢失敗：{0}":"検索に失敗しました：{0}","按下按鍵…":"キーを押してください…","{0} 已經給「{1}」用了":"{0} はすでに「{1}」で使われています","點按鈕後按下新的按鍵組合。Esc 取消，Delete 停用，右鍵還原預設。打字時單鍵快捷鍵不會觸發；和 B站原有按鍵相同時，以這裡的為準。":"ボタンを押してから新しいキーの組み合わせを押します。Esc でキャンセル、Delete で無効、右クリックで既定に戻します。文字入力中は 1 キーのショートカットは働きません。ビリビリ本来のキーと同じ場合はこちらが優先されます。","設定已同步，重新整理後完全生效":"設定を同期しました。再読み込みすると完全に反映されます"}};
 
   const platform = {
     page: typeof unsafeWindow === 'undefined' ? window : unsafeWindow,
@@ -2691,6 +3702,13 @@
     else if (PAGE.message) flag('page-message', true);
   }
 
+  defOpt('x.stage', true, {
+    tab: 'video',
+    group: t('播放器'),
+    label: t('播放器撐滿視窗'),
+    hint: t('關閉後播放頁回到原本的版面：播放器在左、推薦在右，選集浮層和小窗調整也一併停用'),
+    reload: true,
+  });
   defOpt('自动高度', true, {
     tab: 'video',
     group: t('播放器'),
@@ -2915,6 +3933,8 @@
   };
 
   async function setupStage() {
+    if (!val('x.stage')) return void log('播放页舞台已关闭，保持原版面');
+
     const certain = PLAYER_PATH.test(PATH);
     flag('page-player', certain);
     if (certain) {
@@ -2953,6 +3973,788 @@
     log('播放页舞台已启用');
   }
 
+  defOpt('x.nav.card', true, {
+    tab: 'general',
+    group: t('導航欄'),
+    label: t('使用 Re:Bi 的導航欄'),
+    hint: t('整條導航欄換成同一套方磚，每個頁面都一樣；個人卡片從頭像打開。關閉後回到原本的導航欄'),
+    reload: true,
+  });
+  defOpt('x.nav.peek', true, {
+    tab: 'general',
+    group: t('導航欄'),
+    label: t('滑過入口時顯示預覽'),
+    hint: t('滑鼠停在消息、動態、收藏、歷史上，直接看到最近的內容'),
+  });
+
+  const NAV_ENTRIES = [
+    ['message', t('消息'), 'mail', 'https://message.bilibili.com/'],
+    ['dynamic', t('動態'), 'windmill', 'https://t.bilibili.com/'],
+    ['fav', t('收藏'), 'star', ''],
+    ['history', t('歷史'), 'clock', 'https://www.bilibili.com/history'],
+  ];
+  for (const [name, label] of NAV_ENTRIES) {
+    defOpt(`x.nav.${name}`, true, { tab: 'general', group: t('導航欄右側的入口'), label });
+  }
+
+  const NAV_ICONS = {
+    home: '<path d="M5 12l-2 0l9 -9l9 9l-2 0"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>',
+    search: '<circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/>',
+    dots: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+    chevron: '<path d="M15 6l-6 6l6 6"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6l9 -6"/>',
+    windmill:
+      '<path d="M12 12c2.76 0 5 -2.01 5 -4.5s-2.24 -4.5 -5 -4.5v9z"/><path d="M12 12c0 2.76 2.01 5 4.5 5s4.5 -2.24 4.5 -5h-9z"/><path d="M12 12c-2.76 0 -5 2.01 -5 4.5s2.24 4.5 5 4.5v-9z"/><path d="M12 12c0 -2.76 -2.01 -5 -4.5 -5s-4.5 2.24 -4.5 5h9z"/>',
+    logout:
+      '<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/><path d="M9 12h12l-3 -3"/><path d="M18 15l3 -3"/>',
+    star: '<path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    user: '<circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>',
+    video:
+      '<path d="M15 10l4.553 -2.276a1 1 0 0 1 1.447 .894v6.764a1 1 0 0 1 -1.447 .894l-4.553 -2.276v-4z"/><rect x="3" y="6" width="12" height="12" rx="2"/>',
+    bookmark: '<path d="M18 7v14l-6 -4l-6 4v-14a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4z"/>',
+    crown: '<path d="M12 6l4 6l5 -4l-2 10h-14l-2 -10l5 4z"/>',
+    shield: '<path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/>',
+    moon: '<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/>',
+    flame: '<path d="M12 12c2 -2.96 0 -7 -1 -8c0 3.038 -1.773 4.741 -3 6c-1.226 1.26 -2 3.24 -2 5a6 6 0 1 0 12 0c0 -1.532 -1.056 -3.94 -2 -5c-1.786 3 -2.791 3 -4 2z"/>',
+  };
+  const navIcon = (name) =>
+    svgIcon(
+      `<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NAV_ICONS[name]}</g>`,
+      24,
+    );
+
+  function setupNavCard() {
+    const supported = PAGE.www || PAGE.search || PAGE.t || PAGE.space || PAGE.live;
+    if (!supported || !val('x.nav.card')) return;
+    flag('nav-own', true);
+
+    const SPACE = 'https://space.bilibili.com/';
+    const CALM = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const number = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
+
+    const picture = (address, width, height = width) => {
+      const secure = String(address || '').replace(/^(https?:)?\/\//, 'https://');
+      return /^https:\/\/[\w.-]+\.hdslb\.com\/[\w./-]+$/.test(secure) ? `${secure}@${width}w_${height}h_1c.webp` : '';
+    };
+
+    const safeLink = (address, fallback) => {
+      const full = String(address || '').replace(/^\/\//, 'https://');
+      return /^https:\/\/[\w.-]+\.bilibili\.com\//.test(full) ? full : fallback;
+    };
+
+    const whenIdle = (run) => {
+      let started = false;
+      const start = () => {
+        if (started) return;
+        started = true;
+        if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 3000 });
+        else setTimeout(run, 600);
+      };
+      if (document.readyState === 'complete') return void start();
+      window.addEventListener('load', start, { once: true });
+      setTimeout(start, 4000);
+    };
+    const fresh = new Map();
+
+    const cached = (key, ttl, load) => {
+      const hit = fresh.get(key);
+      if (hit && Date.now() - hit.time < ttl) return hit.promise;
+      const promise = load().catch((error) => {
+        fresh.delete(key);
+        throw error;
+      });
+      fresh.set(key, { time: Date.now(), promise });
+      return promise;
+    };
+    const api = async (url) => {
+      const result = await dm.getJSON(url);
+      if (result?.code !== 0) throw new Error(result?.message || `code ${result?.code}`);
+      return result.data ?? result.result;
+    };
+
+    const section = PAGE.live ? 'live' : PAGE.home ? 'home' : /^\/(anime|bangumi)\b/.test(PATH) ? 'anime' : '';
+
+    const tileLink = (id, label, href, icon) =>
+      h(
+        'a',
+        { class: `bga-nav-t${icon ? ' bga-nav-i' : ''}${section === id ? ' bga-on' : ''}`, href, title: icon ? label : null },
+        icon ? navIcon(icon) : label,
+      );
+    const home = tileLink('home', t('首頁'), 'https://www.bilibili.com/', 'home');
+    const leftLinks = h(
+      'div',
+      { class: 'bga-nav-fold' },
+      tileLink('anime', t('番劇'), 'https://www.bilibili.com/anime/'),
+      tileLink('live', t('直播'), 'https://live.bilibili.com/'),
+    );
+    const MORE_LINKS = [
+      [t('熱門'), 'https://www.bilibili.com/v/popular/all'],
+      [t('排行榜'), 'https://www.bilibili.com/v/popular/rank/all'],
+      [t('遊戲中心'), 'https://game.bilibili.com/platform/'],
+      [t('會員購'), 'https://show.bilibili.com/platform/home.html'],
+      [t('漫畫'), 'https://manga.bilibili.com/'],
+      [t('賽事'), 'https://www.bilibili.com/match/home/'],
+      [t('課堂'), 'https://www.bilibili.com/cheese/'],
+    ];
+    const menu = h(
+      'div',
+      { class: 'bga-nav-pop bga-nav-menu', role: 'menu', hidden: true },
+      MORE_LINKS.map(([label, href]) =>
+        h('a', { class: 'bga-nav-row', role: 'menuitem', href, target: '_blank', rel: 'noopener' }, label),
+      ),
+    );
+    const more = h(
+      'button',
+      { type: 'button', class: 'bga-nav-t bga-nav-i', title: t('更多'), 'aria-haspopup': 'menu', 'aria-expanded': 'false' },
+      navIcon('dots'),
+    );
+    leftLinks.append(more);
+    const foldLeft = h('button', { type: 'button', class: 'bga-nav-arrow' }, navIcon('chevron'));
+    const leftTile = h('div', { class: 'bga-nav-tile bga-nav-left' }, home, leftLinks, foldLeft);
+
+    const input = h('input', {
+      class: 'bga-nav-input',
+      type: 'search',
+      name: 'keyword',
+      autocomplete: 'off',
+      maxlength: '100',
+      placeholder: t('搜尋影片、UP 主'),
+      'aria-label': t('搜尋'),
+    });
+    if (PAGE.search) input.value = new URLSearchParams(location.search).get('keyword') || '';
+    const suggest = h('div', { class: 'bga-nav-pop bga-nav-suggest', role: 'listbox', hidden: true });
+    const searchForm = h(
+      'form',
+      { class: 'bga-nav-tile bga-nav-search', role: 'search' },
+      input,
+      h('button', { type: 'submit', class: 'bga-nav-t bga-nav-i', title: t('搜尋') }, navIcon('search')),
+      suggest,
+    );
+    const search = (keyword) => {
+      const words = String(keyword || '').trim();
+      if (!words) return void input.focus();
+      const target = `https://search.bilibili.com/all?keyword=${encodeURIComponent(words)}`;
+
+      if (PAGE.search) location.assign(target);
+      else window.open(target, '_blank', 'noopener');
+      suggest.hidden = true;
+    };
+
+    const entryLinks = {};
+    const rightLinks = h('div', { class: 'bga-nav-fold' });
+    for (const [name, label, icon, href] of NAV_ENTRIES) {
+      const badge = h('b', { class: `bga-nav-badge${name === 'dynamic' ? ' bga-nav-dot' : ''}`, hidden: true });
+      const link = h(
+        'a',
+        { class: 'bga-nav-t bga-nav-i', href: href || SPACE, 'aria-label': label, target: '_blank', rel: 'noopener' },
+        navIcon(icon),
+        badge,
+      );
+      entryLinks[name] = { link, badge };
+      rightLinks.append(link);
+      watch(`x.nav.${name}`, (on) => (link.hidden = !on));
+    }
+    const face = h('img', { class: 'bga-nav-face', alt: '', decoding: 'async', hidden: true });
+    const avatar = h(
+      'button',
+      { type: 'button', class: 'bga-nav-t bga-nav-i bga-nav-me', 'aria-haspopup': 'dialog', 'aria-expanded': 'false' },
+      face,
+      h('span', { class: 'bga-nav-login' }, t('登入')),
+      h('b', { class: 'bga-nav-badge bga-nav-dot', hidden: true }),
+    );
+    const foldRight = h('button', { type: 'button', class: 'bga-nav-arrow' }, navIcon('chevron'));
+    const rightTile = h('div', { class: 'bga-nav-tile bga-nav-right' }, foldRight, rightLinks, avatar);
+
+    const card = h('div', { class: 'bga-nav-pop bga-nav-card', role: 'dialog', 'aria-label': t('個人卡片'), hidden: true });
+    const peek = h('div', { class: 'bga-nav-pop bga-nav-peek', hidden: true });
+
+    const bar = h('nav', { class: 'bga-nav', 'aria-label': t('導航欄') }, leftTile, searchForm, rightTile, menu, card, peek);
+
+    const FOLDS = [
+      { key: 'x.nav.leftClosed', button: foldLeft, tile: leftTile },
+      { key: 'x.nav.rightClosed', button: foldRight, tile: rightTile },
+    ];
+    for (const fold of FOLDS) {
+      const apply = (closed) => {
+        fold.tile.classList.toggle('bga-closed', !!closed);
+        fold.button.title = closed ? t('展開') : t('收起');
+        fold.button.setAttribute('aria-expanded', String(!closed));
+      };
+      apply(store.get(fold.key));
+      store.on(fold.key, apply);
+      fold.button.addEventListener('click', () => {
+        closePops();
+        store.set(fold.key, !store.get(fold.key));
+      });
+    }
+
+    const POPS = [
+      { pop: menu, trigger: more },
+      { pop: card, trigger: avatar },
+    ];
+    const setPop = (target, open) => {
+      for (const { pop, trigger } of POPS) {
+        const show = pop === target && open;
+        pop.hidden = !show;
+        trigger.setAttribute('aria-expanded', String(show));
+      }
+      if (open) {
+        closePeek();
+        suggest.hidden = true;
+        syncDirection();
+      }
+    };
+    const closePops = () => setPop(null, false);
+    more.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setPop(menu, menu.hidden);
+    });
+    document.addEventListener('click', (event) => {
+      if (!menu.hidden && !menu.contains(event.target)) closePops();
+      else if (!card.hidden && !card.contains(event.target) && !avatar.contains(event.target)) closePops();
+      if (!searchForm.contains(event.target)) suggest.hidden = true;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      closePops();
+      closePeek();
+    });
+
+    const ACCOUNT_KEY = 'x.nav.account';
+    const ACCOUNT_TTL = 60000;
+    let account = null;
+    const unread = { message: 0, dynamic: 0, parts: null };
+    const setBadge = (badge, count) => {
+      badge.hidden = !count;
+      badge.textContent = badge.classList.contains('bga-nav-dot') ? '' : count > 99 ? '99+' : String(count || '');
+    };
+
+    const countUp = (node, value) => {
+      const show = (current) => (node.textContent = COMPACT_NUMBER.format(current));
+      if (CALM.matches || value < 2) return void show(value);
+      const begin = performance.now();
+      const step = (now) => {
+        const progress = Math.min(1, (now - begin) / 650);
+        show(Math.round(value * (1 - (1 - progress) ** 3)));
+        if (progress < 1 && node.isConnected) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+
+    const isDark = () => /(?:^|;\s*)theme_style=dark(?:;|$)/.test(document.cookie);
+    const switchTheme = () => {
+      document.cookie = `theme_style=${isDark() ? 'light' : 'dark'}; domain=.bilibili.com; path=/; max-age=31536000`;
+      location.reload();
+    };
+    const themeButton = () => {
+      const dark = isDark();
+      return h(
+        'button',
+        { type: 'button', class: 'bga-nav-act', onclick: switchTheme, title: t('切換後會重新載入頁面') },
+        navIcon(dark ? 'moon' : 'sun'),
+        dark ? t('深色') : t('淺色'),
+      );
+    };
+
+    const logoutButton = () => {
+      const label = h('span', {}, t('登出'));
+      let armed = 0;
+      const button = h('button', { type: 'button', class: 'bga-nav-act' }, navIcon('logout'), label);
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (!armed) {
+          button.classList.add('bga-hot');
+          label.textContent = t('再按一次確認');
+          armed = setTimeout(() => {
+            armed = 0;
+            button.classList.remove('bga-hot');
+            label.textContent = t('登出');
+          }, 3000);
+          return;
+        }
+        clearTimeout(armed);
+        const token = document.cookie.match(/(?:^|;\s*)bili_jct=([0-9a-f]+)/)?.[1] || '';
+        store.del(ACCOUNT_KEY);
+        const form = h(
+          'form',
+          { method: 'post', action: 'https://passport.bilibili.com/login/exit/v2', hidden: true },
+          h('input', { type: 'hidden', name: 'biliCSRF', value: token }),
+          h('input', { type: 'hidden', name: 'gourl', value: location.href }),
+        );
+        document.body.append(form);
+        form.submit();
+      });
+      return button;
+    };
+
+    const cardRow = (icon, label, href, note, hot) =>
+      h(
+        'a',
+        { class: 'bga-nav-row', href, target: '_blank', rel: 'noopener' },
+        navIcon(icon),
+        h('span', { class: 'bga-nav-label' }, label),
+        note ? h('span', { class: `bga-nav-note${hot ? ' bga-hot' : ''}` }, note) : null,
+      );
+    const renderCard = () => {
+      if (!account || card.hidden) return;
+      const { name, mid, level, exp, next, coins, bcoin, vip, stat } = account;
+      const space = `${SPACE}${mid}`;
+      const full = !Number.isFinite(next) || next <= exp;
+
+      const later = Number.isFinite(account.later)
+        ? h(
+            'a',
+            { href: 'https://www.bilibili.com/watchlater/', target: '_blank', rel: 'noopener', onclick: (event) => event.stopPropagation() },
+            t`稍後再看 ${account.later}`,
+          )
+        : '';
+      const figure = (value, label, href) => {
+        const figureNode = h('b', {}, '–');
+        if (stat) countUp(figureNode, value);
+        return h('a', { class: 'bga-nav-stat', href, target: '_blank', rel: 'noopener' }, figureNode, h('span', {}, label));
+      };
+      card.replaceChildren(
+        h(
+          'div',
+          { class: 'bga-nav-head' },
+          h(
+            'a',
+            { class: 'bga-nav-id', href: space, target: '_blank', rel: 'noopener' },
+            h('img', { class: 'bga-nav-face', alt: '', src: picture(account.face, 128) || null }),
+            h(
+              'span',
+              { class: 'bga-nav-who' },
+              h('b', {}, name),
+              h('span', {}, [`LV${level}`, vip, t`硬幣 ${coins}`, t`B幣 ${bcoin}`].filter(Boolean).join(' · ')),
+            ),
+          ),
+
+          h('button', {
+            type: 'button',
+            class: 'bga-nav-duo',
+            title: t`${PRODUCT} 設定`,
+            'aria-label': t`${PRODUCT} 設定`,
+            onclick: (event) => {
+              event.stopPropagation();
+              closePops();
+
+              setTimeout(() => panelToggle?.(), 0);
+            },
+          }),
+        ),
+        h(
+          'div',
+          { class: 'bga-nav-level' },
+          h('span', { class: 'bga-nav-track' }, h('i', { style: `width:${full ? 100 : Math.round((exp / next) * 100)}%` })),
+          h('span', {}, full ? t('已滿級') : t`距 LV${level + 1} 還差 ${next - exp}`),
+        ),
+        h(
+          'div',
+          { class: 'bga-nav-stats' },
+          figure(stat?.following, t('關注'), `${space}/fans/follow`),
+          figure(stat?.follower, t('粉絲'), `${space}/fans/fans`),
+          figure(stat?.dynamic, t('動態'), `${space}/dynamic`),
+        ),
+        h(
+          'div',
+          { class: 'bga-nav-list' },
+          cardRow('user', t('個人空間'), space),
+          cardRow('mail', t('消息'), 'https://message.bilibili.com/', unread.message ? t`${unread.message} 則未讀` : '', true),
+          cardRow('windmill', t('動態'), 'https://t.bilibili.com/', unread.dynamic ? t('有更新') : '', true),
+          cardRow('star', t('收藏'), `${space}/favlist`),
+          cardRow('clock', t('歷史'), 'https://www.bilibili.com/history', later),
+          cardRow('video', t('投稿管理'), 'https://member.bilibili.com/platform/upload-manager/article'),
+        ),
+        h('div', { class: 'bga-nav-foot' }, themeButton(), logoutButton()),
+      );
+    };
+    const renderBar = () => {
+      const source = account && picture(account.face, 96);
+      if (source && face.getAttribute('src') !== source) face.src = source;
+      face.hidden = !source;
+      avatar.classList.toggle('bga-in', !!account);
+      avatar.title = account ? account.name : t('登入');
+      if (account) entryLinks.fav.link.href = `${SPACE}${account.mid}/favlist`;
+      setBadge(entryLinks.message.badge, account ? unread.message : 0);
+      setBadge(entryLinks.dynamic.badge, account && unread.dynamic ? 1 : 0);
+
+      setBadge(avatar.querySelector('.bga-nav-dot'), account && (unread.message || unread.dynamic) ? 1 : 0);
+    };
+
+    const loadStat = async () => {
+      if (!account || account.stat) return;
+      const stat = await cached('stat', 60000, () => api('https://api.bilibili.com/x/web-interface/nav/stat'));
+      if (!account) return;
+      account.stat = { following: number(stat?.following), follower: number(stat?.follower), dynamic: number(stat?.dynamic_count) };
+      renderCard();
+    };
+
+    const loadLater = async () => {
+      if (!account || Number.isFinite(account.later)) return;
+      const list = await cached('later', 60000, () => api('https://api.bilibili.com/x/v2/history/toview'));
+      if (!account) return;
+      account.later = number(list?.count);
+      renderCard();
+    };
+    avatar.addEventListener('click', async (event) => {
+      event.stopPropagation();
+
+      if (!account && !settled) await loadAccount().catch((error) => warn('导航栏：账号信息', error));
+
+      if (!account && !settled) return;
+      if (!account) return void location.assign(`https://passport.bilibili.com/login?gourl=${encodeURIComponent(location.href)}`);
+      setPop(card, card.hidden);
+      if (card.hidden) return;
+      renderCard();
+      loadStat().catch((error) => warn('导航栏：关注数', error));
+      loadLater().catch((error) => warn('导航栏：稍后再看', error));
+    });
+
+    let settled = false;
+
+    let asking = null;
+    const loadAccount = () => (asking ||= askAccount().finally(() => (asking = null)));
+    const askAccount = async () => {
+      const reply = await dm.getJSON('https://api.bilibili.com/x/web-interface/nav');
+      const info = reply?.data;
+
+      if (reply?.code !== 0 && reply?.code !== -101) throw new Error(`nav code ${reply?.code}`);
+      settled = true;
+      avatar.classList.add('bga-known');
+      if (!info?.isLogin) {
+        account = null;
+        store.del(ACCOUNT_KEY);
+        return void renderBar();
+      }
+      account = {
+        name: String(info.uname || ''),
+        mid: number(info.mid),
+        face: info.face,
+        level: number(info.level_info?.current_level),
+        exp: number(info.level_info?.current_exp),
+        next: Number(info.level_info?.next_exp),
+        coins: number(info.money),
+        bcoin: number(info.wallet?.bcoin_balance),
+        vip: info.vipStatus ? String(info.vip_label?.text || '') : '',
+        stat: account?.stat || null,
+      };
+      store.set(ACCOUNT_KEY, { time: Date.now(), data: { ...account, stat: null } });
+      renderBar();
+      renderCard();
+    };
+    const loadUnread = async () => {
+      if (!account || document.hidden) return;
+      const counts = await Promise.allSettled([
+        dm.getJSON('https://api.bilibili.com/x/msgfeed/unread'),
+        dm.getJSON('https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread'),
+        dm.getJSON('https://api.bilibili.com/x/web-interface/dynamic/entrance'),
+      ]);
+      const [feed, chat, entrance] = counts.map((result) => (result.status === 'fulfilled' ? result.value?.data : null));
+      unread.parts = {
+        reply: number(feed?.reply),
+        at: number(feed?.at),
+        like: number(feed?.like),
+        system: number(feed?.sys_msg),
+        chat: number(chat?.follow_unread) + number(chat?.unfollow_unread),
+      };
+      unread.message = Object.values(unread.parts).reduce((sum, count) => sum + count, 0) + number(feed?.up);
+      unread.dynamic = number(entrance?.update_info?.item?.count);
+      renderBar();
+      renderCard();
+    };
+
+    const remembered = store.get(ACCOUNT_KEY);
+    if (remembered?.data?.mid) {
+      account = { ...remembered.data, stat: null };
+      renderBar();
+    }
+    whenIdle(() => {
+      const recent = remembered?.data?.mid && Date.now() - number(remembered.time) < ACCOUNT_TTL;
+      Promise.resolve(recent ? null : loadAccount())
+        .then(loadUnread)
+        .catch((error) => warn('导航栏：账号信息', error));
+    });
+    setInterval(() => loadUnread().catch(() => {}), 120000);
+
+    const mediaRow = ({ href, cover, title, note }) =>
+      h(
+        'a',
+        { class: 'bga-nav-media', href, target: '_blank', rel: 'noopener', title },
+        h('img', { class: 'bga-nav-cover', alt: '', loading: 'lazy', decoding: 'async', src: picture(cover, 192, 120) || null }),
+        h('span', { class: 'bga-nav-text' }, h('b', {}, title), h('span', {}, note)),
+      );
+    const clock = (seconds) => {
+      const total = Math.max(0, Math.round(number(seconds)));
+      return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+    };
+    const video = (bvid) => `https://www.bilibili.com/video/${encodeURIComponent(bvid)}/`;
+    const PEEKS = {
+      message: {
+        title: t('消息'),
+        more: 'https://message.bilibili.com/',
+        async rows() {
+          const parts = unread.parts || {};
+          return [
+            [t('回覆我的'), 'reply', 'https://message.bilibili.com/#/reply'],
+            [t('@ 我的'), 'at', 'https://message.bilibili.com/#/at'],
+            [t('收到的讚'), 'like', 'https://message.bilibili.com/#/love'],
+            [t('系統通知'), 'system', 'https://message.bilibili.com/#/system'],
+            [t('我的訊息'), 'chat', 'https://message.bilibili.com/#/whisper'],
+          ].map(([label, key, href]) => cardRow('mail', label, href, parts[key] ? String(parts[key]) : '', true));
+        },
+      },
+      dynamic: {
+        title: t('動態'),
+        more: 'https://t.bilibili.com/',
+        async rows() {
+          const feed = await cached('dynamic', 60000, () =>
+            api('https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all?type=video&page=1'),
+          );
+          return (feed?.items || []).slice(0, 8).flatMap((item) => {
+            const archive = item?.modules?.module_dynamic?.major?.archive;
+            const author = item?.modules?.module_author;
+            if (!archive?.title) return [];
+            return mediaRow({
+              href: safeLink(archive.jump_url, archive.bvid ? video(archive.bvid) : 'https://t.bilibili.com/'),
+              cover: archive.cover,
+              title: String(archive.title),
+              note: [author?.name, author?.pub_time, archive.duration_text].filter(Boolean).join(' · '),
+            });
+          });
+        },
+      },
+      fav: {
+        title: t('收藏'),
+        more: () => `${SPACE}${account.mid}/favlist`,
+        async rows() {
+          const folders = await cached('folders', 300000, () =>
+            api(`https://api.bilibili.com/x/v3/fav/folder/created/list-all?up_mid=${account.mid}`),
+          );
+          const folder = folders?.list?.[0];
+          if (!folder?.id) return [];
+          const list = await cached('fav', 60000, () =>
+            api(`https://api.bilibili.com/x/v3/fav/resource/list?media_id=${number(folder.id)}&ps=8&pn=1&platform=web`),
+          );
+          return (list?.medias || []).slice(0, 8).flatMap((media) =>
+            media?.bvid
+              ? mediaRow({
+                  href: video(media.bvid),
+                  cover: media.cover,
+                  title: String(media.title || ''),
+                  note: [media.upper?.name, clock(media.duration)].filter(Boolean).join(' · '),
+                })
+              : [],
+          );
+        },
+      },
+      history: {
+        title: t('歷史'),
+        more: 'https://www.bilibili.com/history',
+        async rows() {
+          const list = await cached('history', 60000, () =>
+            api('https://api.bilibili.com/x/web-interface/history/cursor?ps=8&type=archive'),
+          );
+          return (list?.list || []).slice(0, 8).flatMap((entry) => {
+            const bvid = entry?.history?.bvid;
+            if (!bvid) return [];
+            const watched = number(entry.progress) < 0 ? t('已看完') : `${clock(entry.progress)} / ${clock(entry.duration)}`;
+            return mediaRow({
+              href: video(bvid),
+              cover: entry.cover,
+              title: String(entry.title || ''),
+              note: [entry.author_name, watched].filter(Boolean).join(' · '),
+            });
+          });
+        },
+      },
+    };
+    let peekName = '';
+    let peekTimer = 0;
+    const closePeek = () => {
+      clearTimeout(peekTimer);
+      peekName = '';
+      peek.hidden = true;
+    };
+    const openPeek = async (name) => {
+      if (!account || !val('x.nav.peek') || peekName === name) return;
+      closePops();
+      suggest.hidden = true;
+      peekName = name;
+      const view = PEEKS[name];
+      const body = h('div', { class: 'bga-nav-peek-body' }, [1, 2, 3].map(() => h('div', { class: 'bga-nav-ghost' })));
+      const more = typeof view.more === 'function' ? view.more() : view.more;
+      peek.replaceChildren(
+        h(
+          'div',
+          { class: 'bga-nav-peek-head' },
+          h('b', {}, view.title),
+          h('a', { href: more, target: '_blank', rel: 'noopener' }, t('看全部')),
+        ),
+        body,
+      );
+
+      const box = entryLinks[name].link.getBoundingClientRect();
+      const frame = bar.getBoundingClientRect();
+      peek.style.right = `${Math.max(16, Math.round(frame.right - box.right - 150))}px`;
+      peek.hidden = false;
+      syncDirection();
+      try {
+        const rows = await view.rows();
+        if (peekName !== name) return;
+        body.replaceChildren(...(rows.length ? rows : [h('p', { class: 'bga-nav-empty' }, t('沒有內容'))]));
+      } catch (error) {
+        warn(`导航栏：${name} 预览`, error);
+        if (peekName === name) body.replaceChildren(h('p', { class: 'bga-nav-empty' }, t('載入失敗')));
+      }
+    };
+    const schedule = (run, delay) => {
+      clearTimeout(peekTimer);
+      peekTimer = setTimeout(run, delay);
+    };
+    for (const [name] of NAV_ENTRIES) {
+      const { link } = entryLinks[name];
+      link.addEventListener('pointerenter', () => schedule(() => openPeek(name), 180));
+      link.addEventListener('pointerleave', () => schedule(closePeek, 260));
+      link.addEventListener('focus', () => schedule(() => openPeek(name), 0));
+    }
+    peek.addEventListener('pointerenter', () => clearTimeout(peekTimer));
+    peek.addEventListener('pointerleave', () => schedule(closePeek, 260));
+
+    let suggestRun = 0;
+    let picked = -1;
+    const suggestRows = () => [...suggest.querySelectorAll('.bga-nav-row')];
+    const showSuggest = (title, words, ranked) => {
+      picked = -1;
+      if (!words.length) return void (suggest.hidden = true);
+
+      suggest.classList.toggle('bga-two', ranked);
+      suggest.replaceChildren(
+        ...(title ? [h('div', { class: 'bga-nav-peek-head' }, h('b', {}, title))] : []),
+        ...words.map((word, index) =>
+          h(
+            'button',
+            { type: 'button', class: 'bga-nav-row', role: 'option', tabindex: '-1', dataset: { word } },
+            ranked ? h('i', { class: `bga-nav-rank${index < 3 ? ' bga-hot' : ''}` }, String(index + 1)) : navIcon('search'),
+            h('span', { class: 'bga-nav-label' }, word),
+          ),
+        ),
+      );
+      suggest.hidden = false;
+      syncDirection();
+    };
+    const loadSuggest = async () => {
+      const run = ++suggestRun;
+      const term = input.value.trim();
+      try {
+        if (!term) {
+          const square = await cached('hot', 300000, () => api('https://api.bilibili.com/x/web-interface/search/square?limit=10'));
+          if (run !== suggestRun || document.activeElement !== input) return;
+          const words = (square?.trending?.list || []).map((entry) => String(entry?.show_name || entry?.keyword || '')).filter(Boolean);
+          return void showSuggest(t('熱搜'), words.slice(0, 10), true);
+        }
+        const result = await cached(`suggest:${term}`, 60000, () =>
+          api(
+            `https://s.search.bilibili.com/main/suggest?func=suggest&suggest_type=accurate&sub_type=tag&main_ver=v1&term=${encodeURIComponent(term)}`,
+          ),
+        );
+        if (run !== suggestRun || document.activeElement !== input) return;
+        showSuggest('', (result?.tag || []).map((entry) => String(entry?.value || '')).filter(Boolean).slice(0, 8), false);
+      } catch (error) {
+        if (run === suggestRun) suggest.hidden = true;
+      }
+    };
+    let suggestTimer = 0;
+    input.addEventListener('focus', loadSuggest);
+
+    input.addEventListener('blur', () => setTimeout(() => document.activeElement === input || (suggest.hidden = true), 160));
+    input.addEventListener('input', () => {
+      clearTimeout(suggestTimer);
+      suggestTimer = setTimeout(loadSuggest, 160);
+    });
+    input.addEventListener('keydown', (event) => {
+      event.stopPropagation();
+      const rows = suggest.hidden ? [] : suggestRows();
+      if (event.key === 'Escape') return void (suggest.hidden ? input.blur() : (suggest.hidden = true));
+      if (!rows.length || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
+      event.preventDefault();
+      picked = (picked + (event.key === 'ArrowDown' ? 1 : -1) + rows.length + (picked < 0 && event.key === 'ArrowUp' ? 1 : 0)) % rows.length;
+      rows.forEach((row, index) => row.classList.toggle('bga-on', index === picked));
+      input.value = rows[picked].dataset.word;
+    });
+    for (const type of ['keyup', 'keypress']) input.addEventListener(type, (event) => event.stopPropagation());
+    suggest.addEventListener('mousedown', (event) => event.preventDefault());
+    suggest.addEventListener('click', (event) => {
+      const row = event.target.closest('.bga-nav-row');
+      if (!row) return;
+      input.value = row.dataset.word;
+      search(row.dataset.word);
+    });
+    searchForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      search(input.value);
+    });
+    searchForm.addEventListener('click', (event) => event.target === searchForm && input.focus());
+
+    let glowQueued = false;
+    bar.addEventListener(
+      'pointermove',
+      (event) => {
+        if (glowQueued || CALM.matches) return;
+        const tile = event.target.closest?.('.bga-nav-tile');
+        if (!tile) return;
+        glowQueued = true;
+        requestAnimationFrame(() => {
+          glowQueued = false;
+          const box = tile.getBoundingClientRect();
+          tile.style.setProperty('--bga-mx', `${Math.round(event.clientX - box.left)}px`);
+          tile.style.setProperty('--bga-my', `${Math.round(event.clientY - box.top)}px`);
+        });
+      },
+      { passive: true },
+    );
+
+    const syncDirection = () => bar.classList.toggle('bga-up', bar.getBoundingClientRect().top > window.innerHeight * 0.5);
+
+    const syncTop = () => flag('nav-clear', PAGE.home && window.scrollY < 72);
+    let scrollQueued = false;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (scrollQueued) return;
+        scrollQueued = true;
+        requestAnimationFrame(() => {
+          scrollQueued = false;
+          syncDirection();
+          syncTop();
+        });
+      },
+      { passive: true },
+    );
+
+    const NATIVE_BARS = '.bili-header, .link-navbar, #biliMainHeader, #bili-header-container, #internationalHeader';
+    let retired = false;
+    const mount = () => {
+      if (retired) return;
+      if (bar.parentElement !== document.body || document.body.firstElementChild !== bar) document.body.prepend(bar);
+      syncDirection();
+      syncTop();
+    };
+    bodyReady().then(() => {
+      mount();
+
+      setInterval(() => document.hidden || mount(), 2000);
+
+      setTimeout(() => {
+        if (document.querySelector(NATIVE_BARS)) return;
+        retired = true;
+        bar.remove();
+        flag('nav-own', false);
+      }, 6000);
+    });
+  }
+
   defOpt('x.pod', true, {
     tab: 'video',
     group: '選集',
@@ -2960,6 +4762,12 @@
     hint: '點控制欄的「选集」，合集 / 分 P 清單直接浮在播放器右側，不用往下捲；全螢幕下也一樣。再點一次收起',
   });
   defOpt('x.pod.autoClose', true, { tab: 'video', group: '選集', label: '選好一集後自動收起' });
+  defOpt('x.pod.thumb', false, {
+    tab: 'video',
+    group: '選集',
+    label: t('選集顯示縮圖'),
+    hint: t('合集顯示每一集的封面，分 P 影片每一段都顯示影片的主封面；捲到哪裡才載入哪裡'),
+  });
   defOpt('x.pod.width', 380, { tab: 'video', group: '選集', label: '浮層寬度', unit: 'px', step: 20 });
 
   function setupPod(container) {
@@ -2980,6 +4788,55 @@
       requestAnimationFrame(() => {
         if (Math.abs(centerCurrent(getPod())) > 4 && tries > 0) setTimeout(() => centerSoon(getPod, tries - 1), 60);
       });
+
+    const thumbRules = h('style', { class: 'bga-pod-thumbs' });
+    const thumbDone = new Set();
+    let thumbSource = { bvid: '', urls: new Map() };
+
+    const thumbUrls = () => {
+      const data = W.__INITIAL_STATE__?.videoData;
+      if (!data || data.bvid === thumbSource.bvid) return thumbSource.urls;
+      const urls = new Map();
+      for (const section of data.ugc_season?.sections || []) {
+        for (const episode of section.episodes || []) {
+          if (episode.bvid && episode.arc?.pic) urls.set(String(episode.bvid), episode.arc.pic);
+        }
+      }
+
+      for (const page of data.pages || []) {
+        if (page.cid && data.pic) urls.set(String(page.cid), data.pic);
+      }
+      thumbSource = { bvid: data.bvid, urls };
+      return urls;
+    };
+    const addThumb = (item) => {
+      const key = item.dataset.key;
+      if (!key || thumbDone.has(key)) return;
+      const address = String(thumbUrls().get(key) || '').replace(/^(https?:)?\/\//, 'https://');
+
+      if (!/^https:\/\/[\w.-]+\.hdslb\.com\/[\w./-]+$/.test(address)) return;
+      thumbDone.add(key);
+      thumbRules.append(`[data-key="${key.replace(/[^\w-]/g, '')}"]{--bga-thumb:url("${address}@192w_120h_1c.webp")}\n`);
+    };
+    const thumbWatcher = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        addThumb(entry.target);
+        thumbWatcher.unobserve(entry.target);
+      }
+    });
+
+    const watchThumbs = () => {
+      if (!val('x.pod.thumb')) return;
+      if (!thumbRules.isConnected) document.head.append(thumbRules);
+      for (const item of document.querySelectorAll('.video-pod__body [data-key]')) {
+        if (!thumbDone.has(item.dataset.key)) thumbWatcher.observe(item);
+      }
+    };
+    watch('x.pod.thumb', (on) => {
+      flag('pod-thumb', !!on);
+      watchThumbs();
+    });
 
     let copyHost = null;
     const closeCopy = () => {
@@ -3027,6 +4884,7 @@
       const body = copyHost.querySelector('.video-pod__body');
       if (body && scrollTop != null) body.scrollTop = scrollTop;
       else centerSoon(() => copyHost);
+      watchThumbs();
     };
 
     const isOpen = () => (fullscreenElement() ? !!copyHost : hasFlag('pod-open'));
@@ -3038,7 +4896,10 @@
       }
       closeCopy();
       flag('pod-open', open);
-      if (open) centerSoon(pagePod);
+      if (open) {
+        watchThumbs();
+        centerSoon(pagePod);
+      }
     };
 
     watch('x.pod', (on) => {
@@ -3102,6 +4963,7 @@
         mine.remove();
       }
       if (isOpen() && !pagePod()) setOpen(false);
+      watchThumbs();
     };
     syncButton();
     setInterval(syncButton, 2500);
@@ -5593,6 +7455,18 @@
     label: t('隱藏直播間雜項'),
     hint: t('進場歡迎條、播放器角標'),
   });
+  defOpt('x.live.noSidebar', true, {
+    tab: 'live',
+    group: t('介面'),
+    label: t('隱藏直播間右側的浮動按鈕'),
+    hint: t('貼在視窗右邊的「實驗室」「關注」那一條'),
+  });
+  defOpt('x.live.fill', true, {
+    tab: 'live',
+    group: t('版面'),
+    label: t('直播畫面鋪滿頁面'),
+    hint: t('去掉左右留白：畫面佔滿聊天欄以外的寬度和導航欄以下的高度，主播資訊浮在畫面上（滑鼠移到畫面才顯示），禮物欄往下捲才看得到。不是網頁全螢幕，頁面照常捲動'),
+  });
   defOpt('x.live.sendCheck', true, {
     tab: 'live',
     group: t('彈幕'),
@@ -5698,6 +7572,8 @@
   function setupLive() {
     if (!PAGE.live) return;
     reflect('x.live.cleanUI', 'live-clean');
+    reflect('x.live.noSidebar', 'live-no-sidebar');
+    reflect('x.live.fill', 'live-fill');
     reflect('x.live.noRank', 'live-no-rank');
     reflect('x.live.noAds', 'live-no-ads');
     reflect('x.live.noGift', 'live-no-gift');
@@ -7595,7 +9471,7 @@
   }
 
   function boot() {
-    const BOOT_STYLES = ['base', 'stage', 'pod', 'pages', 'typography', 'clean', 'player', 'live', 'cards', 'home', 'ui'];
+    const BOOT_STYLES = ['base', 'stage', 'nav', 'pod', 'pages', 'typography', 'clean', 'player', 'live', 'cards', 'home', 'ui'];
     for (const name of BOOT_STYLES) addStyle(STYLES[name], name);
     guardStyles();
 
@@ -7604,6 +9480,7 @@
     safe(setupLiveTextGuard, '全屏点击');
     if (IS_TOP) safe(setupSearchRelayout, '搜索框重排');
     if (IS_TOP) safe(setupWide, '宽屏');
+    if (IS_TOP) safe(setupNavCard, '卡片式导航栏');
     safe(setupClean, '净化');
     safe(setupComments, '评论区');
     safe(setupMemo, '备注');

@@ -5,6 +5,13 @@
 //   3. 把弹幕输入栏并进控制栏；
 //   4. 小窗：拖动改位置、拖左边缘改宽度，并记住。
 
+defOpt('x.stage', true, {
+  tab: 'video',
+  group: t('播放器'),
+  label: t('播放器撐滿視窗'),
+  hint: t('關閉後播放頁回到原本的版面：播放器在左、推薦在右，選集浮層和小窗調整也一併停用'),
+  reload: true,
+});
 defOpt('自动高度', true, {
   tab: 'video',
   group: t('播放器'),
@@ -259,6 +266,8 @@ const holdStageUntilSized = () => {
 };
 
 async function setupStage() {
+  // 回退：整套舞台版面都不启用，播放页保持 B站原样（其他模块不依赖舞台的记号）
+  if (!val('x.stage')) return void log('播放页舞台已关闭，保持原版面');
   // 确定是播放页的路径，一开始就挂上记号，样式从第一帧起生效，不闪一下原版面
   const certain = PLAYER_PATH.test(PATH);
   flag('page-player', certain);

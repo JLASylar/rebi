@@ -8,6 +8,12 @@ defOpt('x.pod', true, {
   hint: '點控制欄的「选集」，合集 / 分 P 清單直接浮在播放器右側，不用往下捲；全螢幕下也一樣。再點一次收起',
 });
 defOpt('x.pod.autoClose', true, { tab: 'video', group: '選集', label: '選好一集後自動收起' });
+defOpt('x.pod.thumb', false, {
+  tab: 'video',
+  group: '選集',
+  label: t('選集顯示縮圖'),
+  hint: t('合集顯示每一集的封面，分 P 影片每一段都顯示影片的主封面；捲到哪裡才載入哪裡'),
+});
 defOpt('x.pod.width', 380, { tab: 'video', group: '選集', label: '浮層寬度', unit: 'px', step: 20 });
 
 function setupPod(container) {
@@ -33,6 +39,58 @@ function setupPod(container) {
     requestAnimationFrame(() => {
       if (Math.abs(centerCurrent(getPod())) > 4 && tries > 0) setTimeout(() => centerSoon(getPod, tries - 1), 60);
     });
+
+  // ── 缩图 ──
+  // 不往条目里插节点（那是 Vue 管的）：条目卷进视窗时，往一张样式表里写一条「这个 data-key 的缩图地址」，
+  // 条目的 ::before 拿它当背景。全屏时的副本是克隆出来的，data-key 相同，同一条规则也管得到。
+  const thumbRules = h('style', { class: 'bga-pod-thumbs' });
+  const thumbDone = new Set();
+  let thumbSource = { bvid: '', urls: new Map() };
+  /** data-key → 图片地址：合集的 key 是 BV 号（各集自己的封面），分 P 的 key 是 cid（影片的主封面） */
+  const thumbUrls = () => {
+    const data = W.__INITIAL_STATE__?.videoData;
+    if (!data || data.bvid === thumbSource.bvid) return thumbSource.urls;
+    const urls = new Map();
+    for (const section of data.ugc_season?.sections || []) {
+      for (const episode of section.episodes || []) {
+        if (episode.bvid && episode.arc?.pic) urls.set(String(episode.bvid), episode.arc.pic);
+      }
+    }
+    // 分 P：各段的第一帧多半是黑画面，一律用影片的主封面
+    for (const page of data.pages || []) {
+      if (page.cid && data.pic) urls.set(String(page.cid), data.pic);
+    }
+    thumbSource = { bvid: data.bvid, urls };
+    return urls;
+  };
+  const addThumb = (item) => {
+    const key = item.dataset.key;
+    if (!key || thumbDone.has(key)) return;
+    const address = String(thumbUrls().get(key) || '').replace(/^(https?:)?\/\//, 'https://');
+    // 只收 B站图床的地址，别让奇怪的字符进样式表
+    if (!/^https:\/\/[\w.-]+\.hdslb\.com\/[\w./-]+$/.test(address)) return;
+    thumbDone.add(key);
+    thumbRules.append(`[data-key="${key.replace(/[^\w-]/g, '')}"]{--bga-thumb:url("${address}@192w_120h_1c.webp")}\n`);
+  };
+  const thumbWatcher = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      addThumb(entry.target);
+      thumbWatcher.unobserve(entry.target);
+    }
+  });
+  /** 列表是 B站陆续建出来的（换一集还会重建），所以开浮层时、以及定时都对一遍 */
+  const watchThumbs = () => {
+    if (!val('x.pod.thumb')) return;
+    if (!thumbRules.isConnected) document.head.append(thumbRules);
+    for (const item of document.querySelectorAll('.video-pod__body [data-key]')) {
+      if (!thumbDone.has(item.dataset.key)) thumbWatcher.observe(item);
+    }
+  };
+  watch('x.pod.thumb', (on) => {
+    flag('pod-thumb', !!on);
+    watchThumbs();
+  });
 
   // ── 全屏：播放器里放一份副本，点击转发给页面上的原件 ──
   let copyHost = null;
@@ -83,6 +141,7 @@ function setupPod(container) {
     const body = copyHost.querySelector('.video-pod__body');
     if (body && scrollTop != null) body.scrollTop = scrollTop;
     else centerSoon(() => copyHost);
+    watchThumbs();
   };
 
   // ── 开合 ──
@@ -95,7 +154,10 @@ function setupPod(container) {
     }
     closeCopy();
     flag('pod-open', open);
-    if (open) centerSoon(pagePod);
+    if (open) {
+      watchThumbs();
+      centerSoon(pagePod);
+    }
   };
 
   watch('x.pod', (on) => {
@@ -161,6 +223,7 @@ function setupPod(container) {
       mine.remove();
     }
     if (isOpen() && !pagePod()) setOpen(false);
+    watchThumbs();
   };
   syncButton();
   setInterval(syncButton, 2500);
