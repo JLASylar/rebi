@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Re:Bi 比利重啟
 // @namespace    https://space.bilibili.com/5094278
-// @version      1.1.0
+// @version      1.1.1
 // @author       蘋果大王
 // @description  B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞
 // @name:zh-CN   Re:Bi 比利重启
@@ -10,7 +10,7 @@
 // @description:zh-CN B站宽屏、大宝鉴首页、净化、评论区 IP 属地与性别、用户备注、直播净化、弹幕查询、自定义快捷键、标题屏蔽词
 // @description:en Bilibili, rebooted: widescreen layout, showcase home, cleanup, comment IP location, user notes, custom shortcuts
 // @description:ja ビリビリをもう一度：ワイドレイアウト、ショーケースホーム、クリーンアップ、コメントの IP 所在地と性別、ユーザーメモ、ライブのクリーンアップ、弾幕検索、ショートカット、タイトルの NG ワード
-// @license      MIT
+// @license      PolyForm-Noncommercial-1.0.0; https://polyformproject.org/licenses/noncommercial/1.0.0
 // @homepageURL  https://rebi.appleking.net/
 // @supportURL   https://github.com/JLASylar/rebi/issues
 // @downloadURL  https://raw.githubusercontent.com/JLASylar/rebi/main/dist/rebi.user.js
@@ -48,7 +48,7 @@
 (function () {
   'use strict';
 
-  const BUILD = {"name": "Re:Bi", "version": "1.1.0", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
+  const BUILD = {"name": "Re:Bi", "version": "1.1.1", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
 
   const STYLES = {
     base: `:root {

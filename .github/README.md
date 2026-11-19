@@ -53,6 +53,12 @@ python3 tools/build.py --ext    # 連同擴充功能 → dist/extension/<chrome|
 
 寬屏版面的思路來自 posthumz 的 [Wider Bilibili](https://github.com/posthumz/wider-bilibili)。
 
+導航欄的線條圖示來自 [Tabler Icons](https://github.com/tabler/tabler-icons)（MIT License，Copyright (c) 2020-2024 Paweł Kuna）。
+
 ## 授權
 
-[MIT](../LICENSE)
+原始碼公開，採用 [PolyForm Noncommercial License 1.0.0](../LICENSE)：
+
+- 個人使用、學習、研究、修改、非營利的分享，都可以，不用問。
+- **不可以用於商業用途**：不能販售，也不能放進營利的產品或服務。需要商業授權請聯絡作者。
+- 散布或修改時要保留授權檔裡的著作權聲明。
