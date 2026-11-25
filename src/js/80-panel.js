@@ -134,7 +134,15 @@ const numberControl = (option, commit) => {
   return { el, reset: () => setValue(option.def) };
 };
 
+/**
+ * 选项少、字也短：一排分段按钮，一眼看全；多了（超过 4 个，或者字加起来太长）：下拉菜单，
+ * 不然分段按钮会把左边的说明文字挤成一字一行（2026-11-24 「右下角放什麼」7 个选项就这样）。
+ */
+const SEGMENT_MAX = 4;
+const SEGMENT_MAX_CHARS = 16;
 const selectControl = (option, commit) => {
+  const chars = option.choices.reduce((sum, [, text]) => sum + String(text).length, 0);
+  if (option.choices.length > SEGMENT_MAX || chars > SEGMENT_MAX_CHARS) return dropdownControl(option, commit);
   const buttons = option.choices.map(([value, text]) => h('button', { type: 'button', dataset: { value } }, text));
   const paint = (current) => {
     for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.value === String(current)));
@@ -149,6 +157,25 @@ const selectControl = (option, commit) => {
   return {
     el: h('span', { class: 'bga-seg', role: 'group', 'aria-label': option.label }, buttons),
     reset: () => choose(option.def),
+  };
+};
+
+const dropdownControl = (option, commit) => {
+  const select = h(
+    'select',
+    { class: 'bga-select', 'aria-label': option.label },
+    option.choices.map(([value, text]) => h('option', { value }, text)),
+  );
+  const paint = (current) => (select.value = String(current));
+  select.addEventListener('change', () => commit(select.value));
+  paint(val(option.key));
+  store.on(option.key, (value) => paint(value === undefined ? option.def : value));
+  return {
+    el: select,
+    reset: () => {
+      commit(option.def);
+      paint(option.def);
+    },
   };
 };
 

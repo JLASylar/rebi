@@ -459,6 +459,31 @@
     font-weight: 550;
   }
 
+  /* 下拉菜单（选项多的时候用）：和分段按钮同一个底色、圆角 */
+  .bga-select {
+    flex: none;
+    max-width: 220px;
+    height: 30px;
+    padding: 0 30px 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E")
+        right 10px center / 12px no-repeat,
+      var(--bga-ctl);
+    color: var(--bga-fg);
+    font: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .bga-select:focus-visible {
+    outline: 2px solid var(--bga-accent, #fb7299);
+    outline-offset: 1px;
+  }
+
   /* 输入框、多行文本框 */
   .bga-input,
   textarea {

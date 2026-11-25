@@ -717,13 +717,14 @@ function setupNavCard() {
         const words = (square?.trending?.list || []).map((entry) => String(entry?.show_name || entry?.keyword || '')).filter(Boolean);
         return void showSuggest(t('熱搜'), words.slice(0, 10), true);
       }
+      // 用 B站导航栏自己用的那个接口：它带登录态，会把你关注的 UP 主排在最前面
+      // （s.search.bilibili.com 那个旧接口不认登录，1.1.0 用了它，关注的人就不出来了）
       const result = await cached(`suggest:${term}`, 60000, () =>
-        api(
-          `https://s.search.bilibili.com/main/suggest?func=suggest&suggest_type=accurate&sub_type=tag&main_ver=v1&term=${encodeURIComponent(term)}`,
-        ),
+        api(`https://api.bilibili.com/x/web-interface/suggest?highlight=0&term=${encodeURIComponent(term)}`),
       );
       if (run !== suggestRun || document.activeElement !== input) return;
-      showSuggest('', (result?.tag || []).map((entry) => String(entry?.value || '')).filter(Boolean).slice(0, 8), false);
+      const tags = result?.result?.tag || result?.tag || [];
+      showSuggest('', tags.map((entry) => String(entry?.value || '')).filter(Boolean).slice(0, 10), false);
     } catch (error) {
       // 拿不到建议不影响搜索本身
       if (run === suggestRun) suggest.hidden = true;

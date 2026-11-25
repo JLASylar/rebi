@@ -78,6 +78,141 @@
     transform: none;
   }
 
+  .bga-hero-media {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* 预览：盖在海报图上，开始播了才淡入；换片时立刻收掉，露出下一张海报 */
+  .bga-hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+
+  .bga-hero-video[data-on] {
+    opacity: 1;
+    transition: opacity 0.8s ease;
+  }
+
+  /* 喇叭：预览在播时才出现 */
+  /* 比 .bga-hero-round 的 display:grid 多一个类，才盖得过（那条写在后面） */
+  .bga-hero-round.bga-hero-sound {
+    display: none;
+  }
+
+  &[data-previewing] .bga-hero-round.bga-hero-sound {
+    display: grid;
+    animation: bga-hero-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+
+  /* 认真看：点画面去影片页；底部一条细进度。标题、右下卡片、导航栏的收和放统一由下面「滑鼠不动」那一组管，
+     一起收、一起回来 */
+  &[data-watching] {
+    cursor: pointer;
+  }
+
+  /* 影片在播、滑鼠不动一会儿：左边整块（标题、按钮、进度点）和右下卡片收起，阴影收淡 */
+  .bga-hero-left {
+    transition:
+      opacity 0.5s ease,
+      transform 0.6s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+
+  &[data-previewing][data-idle] .bga-hero-left {
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+  }
+
+  &[data-previewing][data-idle] .bga-hero-shade {
+    opacity: 0.25;
+    transition: opacity 0.8s ease;
+  }
+
+  &[data-previewing][data-idle] .bga-hero-side {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+
+  &[data-previewing][data-idle] {
+    cursor: none;
+  }
+
+  /* 停住就继续看的提示：画面正中下方一个小胶囊，底下一条 1.5 秒填满的线 */
+  .bga-hero-arm {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    overflow: hidden;
+    padding: 7px 16px 9px;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.5);
+    color: #fff;
+    font-size: 13px;
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition:
+      opacity 0.25s,
+      transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: none;
+  }
+
+  .bga-hero-arm i {
+    position: absolute;
+    inset: auto 0 0;
+    height: 2px;
+    background: var(--bga-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  &[data-arming] .bga-hero-arm {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  &[data-arming] .bga-hero-arm i {
+    animation: bga-hero-fill 1.5s linear forwards;
+  }
+
+  .bga-hero-watchbar {
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: rgb(255 255 255 / 0.12);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .bga-hero-watchbar i {
+    display: block;
+    height: 100%;
+    background: var(--bga-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s linear;
+  }
+
+  &[data-watching] .bga-hero-watchbar {
+    opacity: 1;
+  }
+
+  /* 换片时上一部的画面立刻收掉，不要和下一张海报叠着淡出 */
+  .bga-hero-video:not([data-on]) {
+    transition: none;
+  }
+
   /* 上面一层阴影托住菜单栏的白字，下面一层托住标题和卡片 */
   .bga-hero-shade {
     position: absolute;
@@ -368,6 +503,13 @@
   }
 }
 
+@keyframes bga-hero-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
 @keyframes bga-hero-fill {
   to {
     transform: scaleX(1);
@@ -406,3 +548,17 @@
   display: none !important;
 }
 
+
+/* 同上：最上面的导航栏也收起（记号由 47-home.js 挂） */
+:root[data-bga~="home-hero-idle"] .bga-nav {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
+}
+
+.bga-nav {
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s cubic-bezier(0.2, 0.9, 0.25, 1),
+    background 0.3s;
+}
