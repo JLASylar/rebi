@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Re:Bi 比利重啟
 // @namespace    https://space.bilibili.com/5094278
-// @version      1.2.0
+// @version      1.2.1
 // @author       蘋果大王
 // @description  B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞
 // @name:zh-CN   Re:Bi 比利重启
@@ -48,7 +48,7 @@
 (function () {
   'use strict';
 
-  const BUILD = {"name": "Re:Bi", "version": "1.2.0", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
+  const BUILD = {"name": "Re:Bi", "version": "1.2.1", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript"};
 
   const STYLES = {
     base: `:root {
@@ -2880,6 +2880,9 @@
       max-width: none !important;
     }
   }
+  :root[data-bga~="page-player"] .bpx-player-top-mask {
+    transition-property: opacity, visibility !important;
+  }
   :root[data-bga~="page-player"][data-bga~="quiet"] .bpx-player-container:not([data-screen="mini"]) {
     .bpx-player-control-wrap:not(:hover) {
       :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom, .bpx-player-pbp) {
@@ -2891,10 +2894,19 @@
       }
     }
     .bpx-player-control-wrap:hover {
-      :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom, .bpx-player-pbp) {
+      :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom) {
         visibility: visible !important;
         opacity: 1 !important;
       }
+    }
+    .bpx-player-pbp {
+      opacity: 0 !important;
+      transition: none !important;
+    }
+    &:not(.bpx-state-no-cursor) .bpx-player-control-wrap:hover .bpx-player-pbp {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.2s ease-in-out !important;
     }
     .bpx-player-top-wrap:hover {
       visibility: visible !important;

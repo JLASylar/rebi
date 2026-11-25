@@ -304,6 +304,14 @@
   }
 }
 
+/* ══ 播放器顶部的渐层遮罩：别把「翻面」演出来 ══
+ * B站 用同一张由下往上的渐层图当顶部遮罩，靠 transform: scaleY(-1) 翻过来，而它又带 transition: all。
+ * 页面刚载入时样式还没到齐，遮罩先以没翻面的样子画出来（深色在下、下缘一道硬边），
+ * 样式一到就花 0.2 秒翻上去——看起来就是一块蒙版从中间扫到顶部。翻面不需要过渡，只留淡入淡出 */
+:root[data-bga~="page-player"] .bpx-player-top-mask {
+  transition-property: opacity, visibility !important;
+}
+
 /* ══ 平时隐藏控制栏：鼠标移到播放器底部才显示，其余时候只留一条细进度线 ══ */
 :root[data-bga~="page-player"][data-bga~="quiet"] .bpx-player-container:not([data-screen="mini"]) {
   .bpx-player-control-wrap:not(:hover) {
@@ -318,10 +326,26 @@
   }
 
   .bpx-player-control-wrap:hover {
-    :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom, .bpx-player-pbp) {
+    :is(.bpx-player-control-mask, .bpx-player-control-top, .bpx-player-control-bottom) {
       visibility: visible !important;
       opacity: 1 !important;
     }
+  }
+
+  /* 高能进度条自带 transition: all 但时长是 0：跟着上面的规则会瞬间冒出来，
+     而控制栏要淡入 0.2 秒，中间那一下整条曲线压在空白的栏上，看起来像一道扫描线。
+     另外 B站 在 no-cursor 状态会把它挪到最底下，那时露出来也是一条突兀的灰带。
+     所以：只在滑鼠在控制栏上、且不是 no-cursor 时显示，和控制栏一起淡入；收起时立刻消失 */
+  .bpx-player-pbp {
+    opacity: 0 !important;
+    transition: none !important;
+  }
+
+  &:not(.bpx-state-no-cursor) .bpx-player-control-wrap:hover .bpx-player-pbp {
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* 和底下的遮罩用同一条曲线（0.2s ease-in-out），曲线就不会比它的底色先冒出来 */
+    transition: opacity 0.2s ease-in-out !important;
   }
 
   .bpx-player-top-wrap:hover {
