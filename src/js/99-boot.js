@@ -4,7 +4,7 @@
 // 样式表全是静态规则，靠 <html> 上的记号生效，先后顺序无关紧要。
 // 面板的样式到第一次打开面板时才加；评论区标记的样式由评论模块加（还要注入各个 shadow root）。
 function boot() {
-  const BOOT_STYLES = ['base', 'stage', 'nav', 'pod', 'pages', 'typography', 'clean', 'player', 'live', 'cards', 'home', 'ui'];
+  const BOOT_STYLES = ['base', 'stage', 'nav', 'pod', 'pages', 'typography', 'clean', 'player', 'live', 'cards', 'home', 'download', 'ui'];
   for (const name of BOOT_STYLES) addStyle(STYLES[name], name);
   guardStyles();
 
@@ -26,6 +26,7 @@ function boot() {
   bodyReady().then(() => safe(setupHome, '首页主题'));
   bodyReady().then(() => safe(setupCards, '影片卡片'));
   safe(setupHotkeys, '快捷键');
+  if (IS_TOP) bodyReady().then(() => safe(setupDownload, '下载'));
   if (IS_TOP) bodyReady().then(() => safe(setupPanel, '设置面板'));
   log(`${VERSION} 已加载`, IS_TOP ? '' : '(iframe)');
 

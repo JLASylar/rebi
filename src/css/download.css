@@ -1,0 +1,141 @@
+/* ══ 影片下载：工具列按钮和清晰度面板（69-download.js） ══ */
+
+/* 按钮跟 B站 工具列右边那几个（举报、笔记）同样的样子，只多一个图标 */
+.bga-dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 18px;
+  color: var(--text2, #61666d);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: var(--brand_blue, #00aeec);
+  }
+}
+
+/* 面板：和脚本其他浮层一样的毛玻璃卡片，贴在按钮下方 */
+.bga-dl {
+  position: fixed;
+  z-index: 100010;
+  box-sizing: border-box;
+  width: 320px;
+  padding: 10px;
+  border-radius: 14px;
+  color: var(--bga-fg);
+  background: var(--bga-bg);
+  box-shadow: var(--bga-shadow);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  font-size: 13px;
+  animation: bga-dl-in 0.22s var(--bga-spring);
+}
+
+@keyframes bga-dl-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bga-dl {
+    animation: none;
+  }
+}
+
+.bga-dl-head {
+  padding: 4px 8px 8px;
+  font-weight: 600;
+}
+
+.bga-dl-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--bga-accent-soft);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.bga-dl-name {
+  font-weight: 500;
+}
+
+.bga-dl-detail {
+  color: var(--bga-fg2);
+  font-family: var(--bga-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.bga-dl-note {
+  padding: 8px 10px 4px;
+  color: var(--bga-fg3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* 进度 */
+.bga-dl-bar {
+  height: 6px;
+  margin: 4px 8px 8px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bga-ctl);
+
+  i {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--bga-accent);
+    transition: width 0.3s ease-out;
+  }
+}
+
+.bga-dl-status {
+  padding: 0 8px 8px;
+  color: var(--bga-fg2);
+  font-family: var(--bga-mono);
+  font-size: 12px;
+}
+
+.bga-dl-cancel {
+  margin: 0 8px 4px;
+  padding: 5px 14px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--bga-fg);
+  background: var(--bga-ctl);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: #fff;
+    background: var(--bga-danger);
+  }
+}

@@ -2,7 +2,7 @@
 """把 src/ 组装成可安装的成品。
 
     python3 tools/build.py          油猴版        → dist/rebi.user.js
-    python3 tools/build.py --ext    另外生成扩展  → dist/extension/<chrome|firefox|safari>/
+    python3 tools/build.py --ext    另外生成扩展  → dist/extension/<chrome|firefox|safari|safari-store>/（safari-store 不带下载，上架用）
 
 源码结构：
     src/product.json            名称、版本、各语言的名称和说明（油猴头部和扩展 manifest 共用）
@@ -225,9 +225,10 @@ def wrap(code: str, guard: str = '') -> str:
     return f"(function () {{\n  'use strict';\n\n{indented}\n}})();\n"
 
 
-def page_script(target: str, product: dict) -> str:
-    """页面里运行的主脚本：构建信息、样式表、平台层、各模块。"""
-    build_info = {key: product[key] for key in ('name', 'version', 'author', 'homepage')} | {'target': target}
+def page_script(target: str, product: dict, download: bool = True) -> str:
+    """页面里运行的主脚本：构建信息、样式表、平台层、各模块。
+    download=False：不带影片下载（Mac App Store 审核规则 5.2.3 不允许从第三方网站下载影音，商店版拿掉）"""
+    build_info = {key: product[key] for key in ('name', 'version', 'author', 'homepage')} | {'target': target, 'download': download}
     parts = [f'const BUILD = {json.dumps(build_info, ensure_ascii=False)};\n', css_table(), i18n_table()]
     parts.append((SRC / 'platform' / f'{target}.js').read_text(encoding='utf-8'))
     parts += read_all(SRC / 'js', '[0-9][0-9]-*.js')
@@ -281,12 +282,17 @@ def build_extension(product: dict) -> None:
     ext_src = SRC / 'extension'
     base = json.loads((ext_src / 'manifest.json').read_text(encoding='utf-8'))
     base.update(version=product['version'], default_locale=product['defaultLocale'])
-    scripts = {
-        'page.js': page_script('extension', product),
+    shared = {
         'bridge.js': strip_js_comments((ext_src / 'bridge.js').read_text(encoding='utf-8')),
         'background.js': strip_js_comments((ext_src / 'background.js').read_text(encoding='utf-8')),
     }
-    for browser in ('chrome', 'firefox', 'safari'):
+    full = page_script('extension', product)
+    # safari-store：上架 Mac App Store 用（tools/safari-store.sh），和 safari 一样但不带下载；
+    # safari 目录给本机试用版（tools/build-safari.sh），保留下载
+    variants = {'chrome': 'chrome', 'firefox': 'firefox', 'safari': 'safari', 'safari-store': 'safari'}
+    for browser, manifest_name in variants.items():
+        page = page_script('extension', product, download=False) if browser == 'safari-store' else full
+        scripts = {'page.js': page} | shared
         out = DIST / 'extension' / browser
         if out.exists():
             shutil.rmtree(out)
@@ -302,7 +308,7 @@ def build_extension(product: dict) -> None:
                 json.dumps(messages, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         if (ext_src / 'icons').is_dir():
             shutil.copytree(ext_src / 'icons', out / 'icons')
-        manifest = base | json.loads((ext_src / f'manifest.{browser}.json').read_text(encoding='utf-8'))
+        manifest = base | json.loads((ext_src / f'manifest.{manifest_name}.json').read_text(encoding='utf-8'))
         (out / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         print(f'{out.relative_to(ROOT)}/')
 
