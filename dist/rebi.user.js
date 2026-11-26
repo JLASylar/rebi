@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Re:Bi 比利重啟
 // @namespace    https://space.bilibili.com/5094278
-// @version      1.2.2
+// @version      1.2.3
 // @author       蘋果大王
 // @description  B站寬屏、大寶鑑首頁、淨化、評論區 IP 屬地與性別、用戶備註、直播淨化、彈幕查詢、自訂快捷鍵、標題屏蔽詞
 // @name:zh-CN   Re:Bi 比利重启
@@ -48,7 +48,7 @@
 (function () {
   'use strict';
 
-  const BUILD = {"name": "Re:Bi", "version": "1.2.2", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript", "download": true};
+  const BUILD = {"name": "Re:Bi", "version": "1.2.3", "author": "蘋果大王", "homepage": "https://space.bilibili.com/5094278", "target": "userscript", "download": true};
 
   const STYLES = {
     base: `:root {
@@ -6966,10 +6966,20 @@
       element.toggleAttribute('data-idle', on);
       flag('home-hero-idle', on);
     };
+
+    const busy = () => {
+      const active = document.activeElement;
+      if (active?.matches?.('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return true;
+      return !!document.querySelector('.bga-nav:is(:hover, :focus-within)');
+    };
+    const sleep = () => {
+      if (busy()) idle = setTimeout(sleep, 1000);
+      else setIdle(true);
+    };
     const wake = () => {
       setIdle(false);
       clearTimeout(idle);
-      if (preview.playing && scrollY < innerHeight * 0.6) idle = setTimeout(() => setIdle(true), 2500);
+      if (preview.playing && scrollY < innerHeight * 0.6) idle = setTimeout(sleep, 2500);
     };
     function setWatching(on) {
       disarm();
@@ -7036,6 +7046,9 @@
     document.addEventListener('visibilitychange', updatePaused, { signal: abort.signal });
     addEventListener('scroll', updatePaused, { passive: true, signal: abort.signal });
     addEventListener('scroll', wake, { passive: true, signal: abort.signal });
+
+    document.addEventListener('focusin', wake, { signal: abort.signal });
+    document.addEventListener('keydown', wake, { signal: abort.signal });
     updatePaused();
     show(0);
 

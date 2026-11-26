@@ -392,10 +392,21 @@ const buildHero = (videos, side) => {
     element.toggleAttribute('data-idle', on);
     flag('home-hero-idle', on);
   };
+  // 正在用导航栏（打字搜索、看搜索建议、滑鼠停在上面）或焦点在任何输入框里时不收：
+  // 打字不会动滑鼠，原本 2.5 秒一到就把正在输入的搜索框一起藏掉
+  const busy = () => {
+    const active = document.activeElement;
+    if (active?.matches?.('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return true;
+    return !!document.querySelector('.bga-nav:is(:hover, :focus-within)');
+  };
+  const sleep = () => {
+    if (busy()) idle = setTimeout(sleep, 1000);
+    else setIdle(true);
+  };
   const wake = () => {
     setIdle(false);
     clearTimeout(idle);
-    if (preview.playing && scrollY < innerHeight * 0.6) idle = setTimeout(() => setIdle(true), 2500);
+    if (preview.playing && scrollY < innerHeight * 0.6) idle = setTimeout(sleep, 2500);
   };
   function setWatching(on) {
     disarm();
@@ -464,6 +475,9 @@ const buildHero = (videos, side) => {
   document.addEventListener('visibilitychange', updatePaused, { signal: abort.signal });
   addEventListener('scroll', updatePaused, { passive: true, signal: abort.signal });
   addEventListener('scroll', wake, { passive: true, signal: abort.signal });
+  // 用键盘（例如快捷键把焦点跳进搜索框）也算有动作
+  document.addEventListener('focusin', wake, { signal: abort.signal });
+  document.addEventListener('keydown', wake, { signal: abort.signal });
   updatePaused();
   show(0);
 
